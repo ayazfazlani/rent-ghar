@@ -9,9 +9,7 @@ export default function Home() {
     <>
       <NavBar />
       <HeroSection />
-      {/* <PropertyCard /> */}
-      {/* <HotelCard /> */}
-      <Footer />
+       <Footer />
     </>
   );
 }
