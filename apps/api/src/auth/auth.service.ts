@@ -1,10 +1,10 @@
-import { BadGatewayException,UnauthorizedException, Injectable } from '@nestjs/common';
-import { RegisterDto } from './dtos/register.dto';
+import { BadGatewayException, UnauthorizedException, Injectable } from '@nestjs/common';
+import { RegisterDto } from '../../../../packages/dtos/register.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../../../../packages/db/src/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from './dtos/login.dto';
+import { LoginDto } from '../../../../packages/dtos/login.dto';
 
 @Injectable()
 export class AuthService {

@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Bed, Bath, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Property } from '@/lib/data';
-
+import { propertyApi } from '@/lib/api';
 interface PropertyCardProps {
   property: Property;
 }
@@ -32,7 +32,9 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
   // Navigate to detail page
   const handleCardClick = () => {
-    router.push(`/properties/${property.id}`);
+
+      router.push(`/properties/${property.id}`);
+
   };
 
   // Prevent navigation when clicking the Contact button

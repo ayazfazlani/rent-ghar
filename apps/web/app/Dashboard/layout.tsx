@@ -30,6 +30,17 @@ export default function DashboardLayout({
           <ul className="space-y-2">
             {/* Add Property */}
             <li>
+            <Link 
+                href="/Dashboard/add-city"
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  pathname === '/dashboard/add-city'
+                    ? 'bg-green-50 text-green-700'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <Plus className="w-5 h-5" />
+                <span className="font-medium">Add City</span>
+              </Link>
               <Link 
                 href="/Dashboard/add-property"
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${

@@ -12,6 +12,7 @@
   image: string;
   featured?: boolean;
   description?: string;
+  features?: string[];
 }
 
 export interface Hotel {

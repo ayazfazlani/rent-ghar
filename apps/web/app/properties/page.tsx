@@ -1,5 +1,5 @@
  'use client'
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Navbar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import PropertyCard from '@/components/PropertyCard';
-import { properties, cities, propertyTypes } from '@/lib/data';
+import { cities, propertyTypes } from '@/lib/data';
+import { propertyApi } from '@/lib/api';
+import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/property-utils';
+import { Property } from '@/lib/data';
 
 const Properties = () => {
   const searchParams = useSearchParams();
@@ -19,6 +22,33 @@ const Properties = () => {
   );
   const [city, setCity] = useState(searchParams.get('city') || 'all');
   const [type, setType] = useState(searchParams.get('type') || 'all');
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch properties from API
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await propertyApi.getAll();
+        // Map backend properties to frontend format
+        const mappedProperties = Array.isArray(data) 
+          ? data.map(mapBackendToFrontendProperty)
+          : [];
+        setProperties(mappedProperties);
+      } catch (err) {
+        console.error('Error fetching properties:', err);
+        setError('Failed to load properties. Please try again later.');
+        setProperties([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
 
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
@@ -28,7 +58,7 @@ const Properties = () => {
       const matchesType = type === 'all' || property.type === type;
       return matchesPurpose && matchesCity && matchesType;
     });
-  }, [purpose, city, type]);
+  }, [purpose, city, type, properties]);
 
   const updateFilters = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -152,7 +182,15 @@ const Properties = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
             <p className="text-muted-foreground">
-              <span className="font-semibold text-foreground">{filteredProperties.length}</span> properties found
+              {loading ? (
+                'Loading properties...'
+              ) : error ? (
+                <span className="text-destructive">{error}</span>
+              ) : (
+                <>
+                  <span className="font-semibold text-foreground">{filteredProperties.length}</span> properties found
+                </>
+              )}
             </p>
             
             {/* Clear Filters Button */}
@@ -172,7 +210,32 @@ const Properties = () => {
             )}
           </div>
 
-          {filteredProperties.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+              <p className="text-muted-foreground">Loading properties...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+                <SlidersHorizontal className="w-8 h-8 text-destructive" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                Error loading properties
+              </h3>
+              <p className="text-muted-foreground mb-6">{error}</p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  window.location.reload();
+                }}
+              >
+                Retry
+              </Button>
+            </div>
+          ) : filteredProperties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProperties.map((property) => (
                 <PropertyCard key={property.id} property={property} />

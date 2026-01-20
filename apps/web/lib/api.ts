@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',              // proxy use kar rahe hain
+  baseURL: '/api',              // Next.js proxy will rewrite to http://localhost:3001
   withCredentials: true,        // ← cookie (refresh_token) automatic bhejo
   headers: {
     'Content-Type': 'application/json',
@@ -38,5 +38,35 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Property API functions
+export const propertyApi = {
+  // Get all approved properties
+  getAll: async () => {
+    const response = await api.get('/properties');
+    return response.data;
+  },
+
+  // get property by id 
+  getPropertyById: async (params: {id: string}) => {
+    const response = await api.get(`/properties/${params.id}`);
+    return response.data;
+  },
+  // Get all properties (for dashboard - includes pending, approved, rejected)
+  getAllProperties: async () => {
+    const response = await api.get('/properties/all');
+    return response.data;
+  },
+
+  // Create a new property
+  create: async (data: FormData) => {
+    const response = await api.post('/properties', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+};
 
 export default api;

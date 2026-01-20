@@ -1,19 +1,25 @@
 'use client'
-import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { MapPin, Bed, Bath, Maximize, Share2, Heart, Phone, Mail, Calendar, CheckCircle2, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { MapPin, Bed, Bath, Maximize, Share2, Heart, Phone, Mail, Calendar, CheckCircle2, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/NavBar';
 import Footer from '@/components/Footer';
-import { properties } from '@/lib/data';
+import { propertyApi } from '@/lib/api';
+import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/property-utils';
+import { Property } from '@/lib/data';
+import { toast } from 'sonner';
 
-const PropertyDetail = () => {
-  const params = useParams();
+const PropertyDetail = ({id}: {id: string}) => {
   const router = useRouter();
+  const [property, setProperty] = useState<Property | null>(null);
+  const [backendProperty, setBackendProperty] = useState<BackendProperty | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
@@ -21,17 +27,57 @@ const PropertyDetail = () => {
     name: '',
     email: '',
     phone: '',
-    message: ''
+    message: '',
+    features: []
   });
 
-  const property = properties.find(p => p.id === params.id);
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await propertyApi.getPropertyById({ id });
+        const backendData = data as BackendProperty;
+        const mappedProperty = mapBackendToFrontendProperty(backendData);
+        setProperty(mappedProperty);
+        setBackendProperty(backendData);
+      } catch (err: any) {
+        console.error('Error fetching property:', err);
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to load property';
+        setError(errorMessage);
+        toast.error('Error', {
+          description: errorMessage,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!property) {
+    if (id) {
+      fetchProperty();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p>Loading property...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !property) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Property Not Found</h1>
+          <p className="text-muted-foreground mb-4">{error || 'The property you are looking for does not exist.'}</p>
           <Button onClick={() => router.push('/properties')}>Back to Properties</Button>
         </div>
         <Footer />
@@ -39,7 +85,40 @@ const PropertyDetail = () => {
     );
   }
 
-  const getPlaceholderImages = (type: string) => {
+  // Get images from property or use placeholders
+  const getImages = (): string[] => {
+    if (!property) return getPlaceholderImages('House');
+    
+    // Check if mainPhotoUrl exists and is a valid URL (not a mock localhost URL)
+    const isValidImageUrl = (url?: string): boolean => {
+      if (!url) return false;
+      // If it's a localhost upload URL, it's likely a mock - treat as invalid
+      if (url.includes('localhost/uploads/')) return false;
+      // Check if it's a valid HTTP/HTTPS URL
+      return url.startsWith('http://') || url.startsWith('https://');
+    };
+    
+    const validImages: string[] = [];
+    
+    // Add main photo if valid
+    if (backendProperty && isValidImageUrl(backendProperty.mainPhotoUrl)) {
+      validImages.push(backendProperty.mainPhotoUrl!);
+    }
+    
+    // Add additional photos if valid
+    if (backendProperty?.additionalPhotosUrls) {
+      backendProperty.additionalPhotosUrls.forEach(url => {
+        if (isValidImageUrl(url)) {
+          validImages.push(url);
+        }
+      });
+    }
+    
+    // Return valid images or fallback to placeholders
+    return validImages.length > 0 ? validImages : getPlaceholderImages(property.type);
+  };
+
+  const getPlaceholderImages = (type: string): string[] => {
     const imagesByType: { [key: string]: string[] } = {
       'House': [
         'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200&q=80',
@@ -78,17 +157,17 @@ const PropertyDetail = () => {
         'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=1200&q=80'
       ]
     };
-    return imagesByType[type] || imagesByType['House'];
+    return imagesByType[type] || imagesByType['House'] || [];
   };
 
-  const images = getPlaceholderImages(property.type);
+  const images = getImages();
   const formatPrice = (price: number) => price.toLocaleString('en-PK');
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert('Contact form submitted! In production, this would send to your backend.');
     setShowContactForm(false);
-    setFormData({ name: '', email: '', phone: '', message: '' });
+    setFormData({ name: '', email: '', phone: '', message: '', features: [] });
   };
 
   const handleShare = () => {
@@ -133,14 +212,30 @@ const PropertyDetail = () => {
           <div className="container mx-auto px-4 py-6">
             <div className="grid grid-cols-4 gap-2 max-h-[600px]">
               <div className="col-span-4 md:col-span-3 relative">
-                <img
-                  src={images[selectedImage]}
-                  alt={property.name}
-                  className="w-full h-[400px] md:h-[600px] object-cover rounded-lg"
-                />
-                <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                  {selectedImage + 1} / {images.length}
-                </div>
+                {images.length > 0 && images[selectedImage] ? (
+                  <img
+                    src={images[selectedImage]}
+                    alt={property.name}
+                    className="w-full h-[400px] md:h-[600px] object-cover rounded-lg"
+                    onError={(e) => {
+                      // If image fails to load, use placeholder
+                      const target = e.target as HTMLImageElement;
+                      const placeholder = getPlaceholderImages(property.type)[0];
+                      if (placeholder && target.src !== placeholder) {
+                        target.src = placeholder;
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-[400px] md:h-[600px] bg-secondary rounded-lg flex items-center justify-center">
+                    <p className="text-muted-foreground">No image available</p>
+                  </div>
+                )}
+                {images.length > 0 && (
+                  <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                    {selectedImage + 1} / {images.length}
+                  </div>
+                )}
               </div>
               <div className="hidden md:flex md:flex-col gap-2">
                 {images.slice(0, 3).map((img, idx) => (
@@ -155,6 +250,13 @@ const PropertyDetail = () => {
                       src={img}
                       alt={`View ${idx + 1}`}
                       className="w-full h-[195px] object-cover hover:opacity-75 transition-opacity"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const placeholder = getPlaceholderImages(property.type)[idx] || getPlaceholderImages(property.type)[0];
+                        if (placeholder && target.src !== placeholder) {
+                          target.src = placeholder;
+                        }
+                      }}
                     />
                   </div>
                 ))}
@@ -171,7 +273,18 @@ const PropertyDetail = () => {
                     selectedImage === idx ? 'border-primary' : 'border-transparent'
                   }`}
                 >
-                  <img src={img} alt={`View ${idx + 1}`} className="w-20 h-20 object-cover" />
+                  <img 
+                    src={img} 
+                    alt={`View ${idx + 1}`} 
+                    className="w-20 h-20 object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      const placeholder = getPlaceholderImages(property.type)[idx] || getPlaceholderImages(property.type)[0];
+                      if (placeholder && target.src !== placeholder) {
+                        target.src = placeholder;
+                      }
+                    }}
+                  />
                 </div>
               ))}
             </div>
@@ -265,14 +378,18 @@ const PropertyDetail = () => {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-4">Features & Amenities</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
+                    {backendProperty?.features && backendProperty.features.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {backendProperty.features.map((feature: string, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                          <span className="text-muted-foreground">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No features listed for this property.</p>
+                  )}
                 </CardContent>
               </Card>
 

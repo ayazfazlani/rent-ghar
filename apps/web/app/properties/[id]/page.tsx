@@ -1,13 +1,14 @@
- import PropertyDetail from '@/components/PropertyDetail';
+'use client'
+import PropertyDetail from '@/components/PropertyDetail';
+import { useParams } from 'next/navigation';
 
 export default function PropertyDetailPage() {
-  return <PropertyDetail />;
-}
-
-// Optional: Better SEO ke liye
-export async function generateStaticParams() {
-  const { properties } = await import('@/lib/data');
-  return properties.map((property) => ({
-    id: property.id,
-  }));
+  const params = useParams();
+  const id = params?.id as string;
+  
+  if (!id) {
+    return <div>Property ID not found</div>;
+  }
+  
+  return <PropertyDetail id={id} />;
 }
