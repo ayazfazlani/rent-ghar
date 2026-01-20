@@ -13,19 +13,17 @@ const Properties = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // ✅ Default filters ko 'all' set kiya
-  const [purpose, setPurpose] = useState<'rent' | 'buy' | 'all'>(
-    (searchParams.get('purpose') as 'rent' | 'buy' | 'all') || 'all'
+  const [purpose, setPurpose] = useState<'rent' | 'buy'>(
+    (searchParams.get('purpose') as 'rent' | 'buy') || 'rent'
   );
-  const [city, setCity] = useState(searchParams.get('city') || 'all');
-  const [type, setType] = useState(searchParams.get('type') || 'all');
+  const [city, setCity] = useState(searchParams.get('city') || 'Multan');
+  const [type, setType] = useState(searchParams.get('type') || '');
 
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
-      // ✅ 'all' ko handle kiya
-      const matchesPurpose = purpose === 'all' || property.purpose === purpose;
-      const matchesCity = city === 'all' || property.city === city;
-      const matchesType = type === 'all' || property.type === type;
+      const matchesPurpose = property.purpose === purpose;
+      const matchesCity = property.city === city;
+      const matchesType = !type || type === 'all' || property.type === type;
       return matchesPurpose && matchesCity && matchesType;
     });
   }, [purpose, city, type]);
@@ -44,7 +42,7 @@ const Properties = () => {
       <section className="pt-24 pb-8 md:pt-28 md:pb-12 bg-secondary">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-            Properties {city !== 'all' && <span className="text-primary">in {city}</span>}
+            Properties in <span className="text-primary">{city}</span>
           </h1>
           <p className="text-muted-foreground">
             Find your perfect property from our extensive listings
@@ -60,27 +58,10 @@ const Properties = () => {
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  setPurpose('all');
-                  updateFilters('purpose', 'all');
-                }}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  purpose === 'all' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-secondary text-foreground hover:bg-secondary/80'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => {
                   setPurpose('rent');
                   updateFilters('purpose', 'rent');
                 }}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  purpose === 'rent' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-secondary text-foreground hover:bg-secondary/80'
-                }`}
+                className={`filter-tab ${purpose === 'rent' ? 'active' : ''}`}
               >
                 For Rent
               </button>
@@ -89,11 +70,7 @@ const Properties = () => {
                   setPurpose('buy');
                   updateFilters('purpose', 'buy');
                 }}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  purpose === 'buy' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-secondary text-foreground hover:bg-secondary/80'
-                }`}
+                className={`filter-tab ${purpose === 'buy' ? 'active' : ''}`}
               >
                 For Sale
               </button>
@@ -114,7 +91,6 @@ const Properties = () => {
                   <SelectValue placeholder="City" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Cities</SelectItem>
                   {cities.map((c) => (
                     <SelectItem key={c} value={c}>
                       {c}
@@ -154,22 +130,6 @@ const Properties = () => {
             <p className="text-muted-foreground">
               <span className="font-semibold text-foreground">{filteredProperties.length}</span> properties found
             </p>
-            
-            {/* Clear Filters Button */}
-            {(purpose !== 'all' || city !== 'all' || type !== 'all') && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setPurpose('all');
-                  setCity('all');
-                  setType('all');
-                  router.push('/properties');
-                }}
-              >
-                Clear All Filters
-              </Button>
-            )}
           </div>
 
           {filteredProperties.length > 0 ? (
@@ -192,10 +152,8 @@ const Properties = () => {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setPurpose('all');
-                  setCity('all');
-                  setType('all');
-                  router.push('/properties');
+                  setType('');
+                  router.push(`/properties?purpose=${purpose}&city=${city}`);
                 }}
               >
                 Clear Filters
