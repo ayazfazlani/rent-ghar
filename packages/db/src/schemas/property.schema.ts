@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document, Types } from 'mongoose'
 import { Area } from './area.schema'
-import { City } from './city.schema'
+// import { City } from './city.schema'
 
 @Schema({ timestamps: true })
 export class Property extends Document {
@@ -26,8 +26,8 @@ export class Property extends Document {
   @Prop({ required: true })
   bathrooms: number
 
-  // @Prop({ required: true })
-  // area: number // sq ft
+  @Prop({ required: true })
+  areaSize: number // sq ft - property size
 
   @Prop({ required: true })
   price: number // PKR
@@ -42,11 +42,11 @@ export class Property extends Document {
   features: string[]
   
   // Relations 
-  @Prop({ type: Types.ObjectId, ref: 'Area', required: true, index: true, default: null })
-  area: Types.ObjectId | Area | null;
+  @Prop({ type: Types.ObjectId, ref: 'Area', required: false, index: true })
+  area?: Types.ObjectId | Area | null;
 
-  @Prop({ type: Types.ObjectId, ref: 'City', required: true, index: true, default: null })
-  city: Types.ObjectId | City | null;
+  // @Prop({ type: Types.ObjectId, ref: 'City', required: true, index: true, default: null })
+  // city: Types.ObjectId | City | null;
 
   @Prop({ type: String }) // Cloudinary/S3 URL
   mainPhotoUrl?: string

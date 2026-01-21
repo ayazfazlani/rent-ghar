@@ -15,7 +15,8 @@ async function bootstrap() {
     {
       whitelist: true,
       transform: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false, // Allow extra properties to avoid errors
+      skipMissingProperties: true, // Skip validation for missing properties
     }
   ));
   await app.listen(process.env.PORT ?? 3001);

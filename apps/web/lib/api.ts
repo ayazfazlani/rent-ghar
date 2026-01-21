@@ -42,8 +42,13 @@ api.interceptors.response.use(
 // Property API functions
 export const propertyApi = {
   // Get all approved properties
-  getAll: async () => {
-    const response = await api.get('/properties');
+  getAll: async (filters?: { cityId?: string; areaId?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.cityId) params.append('cityId', filters.cityId);
+    if (filters?.areaId) params.append('areaId', filters.areaId);
+    const queryString = params.toString();
+    const url = queryString ? `/properties?${queryString}` : '/properties';
+    const response = await api.get(url);
     return response.data;
   },
 
@@ -58,6 +63,10 @@ export const propertyApi = {
     return response.data;
   },
 
+  updateStatus: async (propertyId: string) => {
+    const response = await api.patch(`/properties/${propertyId}/update-status`);
+    return response.data;
+  },
   // Create a new property
   create: async (data: FormData) => {
     const response = await api.post('/properties', data, {
@@ -65,6 +74,22 @@ export const propertyApi = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return response.data;
+  },
+
+  // Update a property
+  update: async (propertyId: string, data: FormData) => {
+    const response = await api.put(`/properties/${propertyId}`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Delete a property
+  delete: async (propertyId: string) => {
+    const response = await api.delete(`/properties/${propertyId}`);
     return response.data;
   },
 };

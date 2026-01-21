@@ -1,10 +1,12 @@
- "use client"
+"use client"
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X, Plus } from 'lucide-react'
 import { propertyApi } from '@/lib/api'
+import cityApi from '@/lib/api/city/city.api'
+import areaApi from '@/lib/api/area/area.api'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
@@ -14,22 +16,42 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
-export default function AddProperty() {
+interface City {
+  _id: string
+  name: string
+  state: string
+  country: string
+}
+
+interface Area {
+  _id: string
+  name: string
+  city: string | City
+}
+
+export default function EditProperty() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   
   // Form state
   const [listingType, setListingType] = useState<'rent' | 'sale'>('rent')
   const [propertyType, setPropertyType] = useState('')
-  const [city, setCity] = useState('')
+  const [cityId, setCityId] = useState('')
+  const [areaId, setAreaId] = useState('')
   const [title, setTitle] = useState('')
   const [location, setLocation] = useState('')
   const [bedrooms, setBedrooms] = useState('')
   const [bathrooms, setBathrooms] = useState('')
-  const [area, setArea] = useState('')
+  const [areaSize, setAreaSize] = useState('') // Property size in sq ft
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
   const [contactNumber, setContactNumber] = useState('')
+  
+  // Cities and Areas state
+  const [cities, setCities] = useState<City[]>([])
+  const [areas, setAreas] = useState<Area[]>([])
+  const [loadingProperty, setLoadingProperty] = useState(true)
+  const [loadingAreas, setLoadingAreas] = useState(false)
   
   // Image state - store both File objects and preview URLs
   const [mainImageFile, setMainImageFile] = useState<File | null>(null)
@@ -37,6 +59,94 @@ export default function AddProperty() {
   const [additionalImageFiles, setAdditionalImageFiles] = useState<(File | null)[]>([null, null, null])
   const [additionalImagePreviews, setAdditionalImagePreviews] = useState<(string | null)[]>([null, null, null])
   const [features, setFeatures] = useState<string[]>([''])
+
+  const params = useParams()
+  const propertyId = params.id as string
+  console.log(propertyId)
+  
+  // Fetch cities on component mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const data = await cityApi.getAll()
+        setCities(data)
+      } catch (error: any) {
+        console.error('Error fetching cities:', error)
+        toast.error('Error', {
+          description: 'Failed to load cities. Please try again.',
+        })
+      }
+    }
+    fetchCities()
+  }, [])
+  
+  // Fetch property data
+  useEffect(() => {
+    const fetchProperty = async (propertyId: string) => {
+      try {
+        setLoadingProperty(true)
+        const property = await propertyApi.getPropertyById({ id: propertyId })
+        setListingType(property.listingType)
+        setPropertyType(property.propertyType)
+        setCityId(property.cityId)
+        setAreaId(property.areaId)
+        setTitle(property.title)
+        setLocation(property.location)
+        setBedrooms(property.bedrooms)
+        setBathrooms(property.bathrooms)
+        setAreaSize(property.areaSize)
+        setPrice(property.price)
+        setDescription(property.description)
+        setContactNumber(property.contactNumber)
+        setMainImagePreview(property.mainImage)
+        // Ensure additionalImagePreviews always has 3 elements
+        const additionalImages = property.additionalImages || []
+        const paddedImages = [...additionalImages, null, null, null].slice(0, 3)
+        setAdditionalImagePreviews(paddedImages)
+        setFeatures(property.features || [''])
+      } catch (error: any) {
+        console.error('Error fetching property:', error)
+        toast.error('Error', {
+          description: 'Failed to load property. Please try again.',
+        })
+      } finally {
+        setLoadingProperty(false)
+      }
+    }
+    fetchProperty(propertyId)
+  }, [])
+
+  // Fetch areas when city changes
+  useEffect(() => {
+    const fetchAreas = async () => {
+      if (!cityId) {
+        setAreas([])
+        setAreaId('') // Reset area when city is cleared
+        return
+      }
+
+      try {
+        setLoadingAreas(true)
+        const data = await areaApi.getAll(cityId)
+        setAreas(data)
+        // Only reset area if cityId changed (not on initial load)
+        // We'll preserve areaId if it's already set from property data
+        if (!areaId || !data.find((a: { _id: string }) => a._id === areaId)) {
+          setAreaId('') // Reset area selection when city changes
+        }
+      } catch (error: any) {
+        console.error('Error fetching areas:', error)
+        toast.error('Error', {
+          description: 'Failed to load areas. Please try again.',
+        })
+        setAreas([])
+      } finally {
+        setLoadingAreas(false)
+      }
+    }
+
+    fetchAreas()
+  }, [cityId])
 
   const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -111,13 +221,14 @@ export default function AddProperty() {
     e.preventDefault()
     
     // Validation
-    if (!propertyType || !city || !title || !location || !bedrooms || !bathrooms || !area || !price || !description || !contactNumber) {
+    if (!propertyType || !cityId || !areaId || !title || !location || !bedrooms || !bathrooms || !areaSize || !price || !description || !contactNumber) {
       toast.error('Please fill in all required fields')
       return
     }
 
-    if (!mainImageFile) {
-      toast.error('Please upload a main photo')
+    // Main image is optional when editing (only required if no existing preview)
+    if (!mainImageFile && !mainImagePreview) {
+      toast.error('Please upload a main photo or keep the existing one')
       return
     }
 
@@ -127,8 +238,10 @@ export default function AddProperty() {
       // Create FormData
       const formData = new FormData()
       
-      // Add main photo
-      formData.append('mainPhoto', mainImageFile)
+      // Add main photo only if a new file is selected
+      if (mainImageFile) {
+        formData.append('mainPhoto', mainImageFile)
+      }
       
       // Add additional photos (only non-null files)
       additionalImageFiles.forEach((file) => {
@@ -140,12 +253,12 @@ export default function AddProperty() {
       // Add JSON data as separate fields (backend expects these in the body)
       formData.append('listingType', listingType)
       formData.append('propertyType', mapPropertyTypeToBackend(propertyType))
-      formData.append('city', city === 'All' ? '' : city)
+      formData.append('area', areaId) // Area ID (ObjectId)
       formData.append('title', title)
       formData.append('location', location)
       formData.append('bedrooms', bedrooms)
       formData.append('bathrooms', bathrooms)
-      formData.append('area', area)
+      formData.append('areaSize', areaSize) // Property size in sq ft
       formData.append('price', price)
       formData.append('description', description)
       formData.append('contactNumber', contactNumber)
@@ -158,27 +271,27 @@ export default function AddProperty() {
         })
       }
 
-      // Submit to API
-      const response = await propertyApi.create(formData)
+      // Update property using the property ID
+      const response = await propertyApi.update(propertyId, formData)
       
-      toast.success('Property submitted successfully!', {
-        description: 'Your property is pending approval and will be visible once approved.',
+      toast.success('Property updated successfully!', {
+        description: 'Your property has been updated.',
       })
       
       // Redirect to dashboard after a short delay
       setTimeout(() => {
-        router.push('/Dashboard')
+        router.push('/dashboard/property')
         router.refresh()
       }, 1500)
       
     } catch (error: any) {
-      console.error('Error submitting property:', error)
+      console.error('Error updating property:', error)
       const errorMessage = 
         error.response?.data?.message || 
         error.message || 
-        'Failed to submit property. Please try again.'
+        'Failed to update property. Please try again.'
       
-      toast.error('Submission Failed', {
+      toast.error('Update Failed', {
         description: errorMessage,
       })
     } finally {
@@ -187,25 +300,25 @@ export default function AddProperty() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="w-full">
       <div className="max-w-5xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Add New Property</h1>
-          <p className="text-gray-600 mb-8">Fill in the details to list your property</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Update Property</h1>
+          <p className="text-gray-600 mb-8">Fill in the details to update your property</p>
           
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Listing Type */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Listing Type
+                Listing Type *
               </label>
               <div className="flex gap-4">
                 <button
                   type="button"
                   onClick={() => setListingType('rent')}
-                  className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all ${
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
                     listingType === 'rent'
-                      ? 'bg-gray-600 text-white shadow-md'
+                      ? 'bg-gray-800 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -214,9 +327,9 @@ export default function AddProperty() {
                 <button
                   type="button"
                   onClick={() => setListingType('sale')}
-                  className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all ${
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
                     listingType === 'sale'
-                      ? 'bg-gray-600 text-white shadow-md'
+                      ? 'bg-gray-800 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -225,47 +338,95 @@ export default function AddProperty() {
               </div>
             </div>
 
-            {/* Property Type and All Cities */}
+            {/* Property Type */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Property Type *
+              </label>
+              <Select value={propertyType} onValueChange={setPropertyType} disabled={isLoading}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select property type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="House">House</SelectItem>
+                  <SelectItem value="Apartment">Apartment</SelectItem>
+                  <SelectItem value="Flat">Flat</SelectItem>
+                  <SelectItem value="Plot">Plot</SelectItem>
+                  <SelectItem value="Land">Land</SelectItem>
+                  <SelectItem value="Shop">Shop</SelectItem>
+                  <SelectItem value="Office">Office</SelectItem>
+                  <SelectItem value="Warehouse">Warehouse</SelectItem>
+                  <SelectItem value="Factory">Factory</SelectItem>
+                  <SelectItem value="Hotel">Hotel</SelectItem>
+                  <SelectItem value="Restaurant">Restaurant</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="Commercial">Commercial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* City and Area Selection */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Property Type
+                  City *
                 </label>
-                <Select value={propertyType} onValueChange={setPropertyType} disabled={isLoading}>
+                <Select 
+                  value={cityId} 
+                  onValueChange={setCityId} 
+                  disabled={isLoading || loadingProperty}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select property type" />
+                    <SelectValue placeholder={loadingProperty ? "Loading property..." : "Select property"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="House">House</SelectItem>
-                    <SelectItem value="Apartment">Apartment</SelectItem>
-                    <SelectItem value="Flat">Flat</SelectItem>
-                    <SelectItem value="Commercial">Commercial</SelectItem>
+                    {cities.map((city) => (
+                      <SelectItem key={city._id} value={city._id}>
+                        {city.name}{city.state ? `, ${city.state}` : ''}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  City
+                  Area *
                 </label>
-                <Select value={city} onValueChange={setCity} disabled={isLoading}>
+                <Select 
+                  value={areaId} 
+                  onValueChange={setAreaId} 
+                  disabled={isLoading || loadingAreas || !cityId}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select city" />
+                    <SelectValue 
+                      placeholder={
+                        !cityId 
+                          ? "Select city first" 
+                          : loadingAreas 
+                            ? "Loading areas..." 
+                            : "Select area"
+                      } 
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Multan">Multan</SelectItem>
-                    <SelectItem value="Lahore">Lahore</SelectItem>
-                    <SelectItem value="Karachi">Karachi</SelectItem>
-                    <SelectItem value="Islamabad">Islamabad</SelectItem>
+                    {areas.map((area) => (
+                      <SelectItem key={area._id} value={area._id}>
+                        {area.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {!cityId && (
+                  <p className="text-xs text-gray-500 mt-1">Please select a city first</p>
+                )}
               </div>
             </div>
 
             {/* Property Title */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Property Title
+                Property Title *
               </label>
               <input
                 type="text"
@@ -273,14 +434,14 @@ export default function AddProperty() {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="E.g., Luxury 3 Bedroom Apartment in DHA"
                 disabled={isLoading}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
             {/* Location */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Location / Address
+                Location / Address *
               </label>
               <input
                 type="text"
@@ -288,7 +449,7 @@ export default function AddProperty() {
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Enter complete address"
                 disabled={isLoading}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -296,7 +457,7 @@ export default function AddProperty() {
             <div className="grid md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Bedrooms
+                  Bedrooms *
                 </label>
                 <input
                   type="number"
@@ -305,12 +466,12 @@ export default function AddProperty() {
                   onChange={(e) => setBedrooms(e.target.value)}
                   placeholder="0"
                   disabled={isLoading}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Bathrooms
+                  Bathrooms *
                 </label>
                 <input
                   type="number"
@@ -319,21 +480,21 @@ export default function AddProperty() {
                   onChange={(e) => setBathrooms(e.target.value)}
                   placeholder="0"
                   disabled={isLoading}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Area (sq ft)
+                  Property Size (sq ft) *
                 </label>
                 <input
                   type="number"
                   min="0"
-                  value={area}
-                  onChange={(e) => setArea(e.target.value)}
+                  value={areaSize}
+                  onChange={(e) => setAreaSize(e.target.value)}
                   placeholder="0"
                   disabled={isLoading}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -341,7 +502,7 @@ export default function AddProperty() {
             {/* Price */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                {listingType === 'rent' ? 'Monthly Rent (PKR)' : 'Sale Price (PKR)'}
+                {listingType === 'rent' ? 'Monthly Rent (PKR) *' : 'Sale Price (PKR) *'}
               </label>
               <input
                 type="number"
@@ -350,14 +511,14 @@ export default function AddProperty() {
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="Enter amount"
                 disabled={isLoading}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
             {/* Main Photo Upload */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Main Photo
+                Main Photo *
               </label>
               {mainImagePreview ? (
                 <div className="relative">
@@ -369,11 +530,11 @@ export default function AddProperty() {
                   <Button
                     type="button"
                     onClick={removeMainImage}
-                    className="absolute top-3 right-3 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 shadow-lg"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-3 right-3"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-4 h-4" />
                   </Button>
                 </div>
               ) : (
@@ -407,7 +568,7 @@ export default function AddProperty() {
               <div className="grid grid-cols-3 gap-4">
                 {[0, 1, 2].map((index) => (
                   <div key={index}>
-                    {additionalImagePreviews[index] ? (
+                    {additionalImagePreviews?.[index] ? (
                       <div className="relative">
                         <img 
                           src={additionalImagePreviews[index]!} 
@@ -417,11 +578,11 @@ export default function AddProperty() {
                         <Button
                           type="button"
                           onClick={() => removeAdditionalImage(index)}
-                          className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 shadow-lg"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-8 w-8"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
+                          <X className="w-4 h-4" />
                         </Button>
                       </div>
                     ) : (
@@ -452,7 +613,7 @@ export default function AddProperty() {
             {/* Description */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Property Description
+                Property Description *
               </label>
               <textarea
                 rows={5}
@@ -460,7 +621,7 @@ export default function AddProperty() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe your property in detail... Include amenities, nearby facilities, and unique features"
                 disabled={isLoading}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -478,34 +639,37 @@ export default function AddProperty() {
                       onChange={(e) => updateFeature(index, e.target.value)}
                       placeholder={`Feature ${index + 1} (e.g., Swimming Pool, Parking, Security)`}
                       disabled={isLoading}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     {features.length > 1 && (
-                      <button
+                      <Button
                         type="button"
                         onClick={() => removeFeature(index)}
-                        className="px-4 py-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                        variant="destructive"
+                        size="sm"
                       >
                         Remove
-                      </button>
+                      </Button>
                     )}
                   </div>
                 ))}
-                <button
+                <Button
                   type="button"
                   onClick={addFeature}
                   disabled={isLoading}
-                  className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-500 hover:text-gray-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  variant="outline"
+                  className="w-full border-dashed"
                 >
-                  + Add More Features
-                </button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add More Features
+                </Button>
               </div>
             </div>
 
             {/* Contact Number */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Contact Number
+                Contact Number *
               </label>
               <input
                 type="tel"
@@ -513,16 +677,16 @@ export default function AddProperty() {
                 onChange={(e) => setContactNumber(e.target.value)}
                 placeholder="03XX XXXXXXX"
                 disabled={isLoading}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
             {/* Submit Buttons */}
-            <div className="flex gap-4 pt-4">
-              <button
+            <div className="flex gap-4 pt-6">
+              <Button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold text-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="flex-1 bg-gray-800 hover:bg-gray-900"
               >
                 {isLoading ? (
                   <>
@@ -530,17 +694,17 @@ export default function AddProperty() {
                     Submitting...
                   </>
                 ) : (
-                  'Publish Property'
+                  'Update Property'
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                onClick={() => router.push('/Dashboard')}
+                variant="outline"
+                onClick={() => router.push('/dashboard')}
                 disabled={isLoading}
-                className="px-8 py-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </form>
         </div>

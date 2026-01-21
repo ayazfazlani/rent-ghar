@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { propertyApi } from '@/lib/api';
-import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/property-utils';
+import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 import { toast } from 'sonner';
 

@@ -1,16 +1,32 @@
  'use client'
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import Navbar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import PropertyCard from '@/components/PropertyCard';
-import { cities, propertyTypes } from '@/lib/data';
+import { propertyTypes } from '@/lib/data';
 import { propertyApi } from '@/lib/api';
-import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/property-utils';
+import cityApi from '@/lib/api/city/city.api';
+import areaApi from '@/lib/api/area/area.api';
+import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
+
+interface City {
+  _id: string;
+  name: string;
+  state: string;
+  country: string;
+}
+
+interface Area {
+  _id: string;
+  name: string;
+  city: string | City;
+}
 
 const Properties = () => {
   const searchParams = useSearchParams();
@@ -21,10 +37,67 @@ const Properties = () => {
     (searchParams.get('purpose') as 'rent' | 'buy' | 'all') || 'all'
   );
   const [city, setCity] = useState(searchParams.get('city') || 'all');
+  const [cityId, setCityId] = useState<string | null>(searchParams.get('cityId') || null);
+  const [areaId, setAreaId] = useState<string | null>(searchParams.get('areaId') || null);
   const [type, setType] = useState(searchParams.get('type') || 'all');
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Cities and Areas state
+  const [cities, setCities] = useState<City[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [loadingCities, setLoadingCities] = useState(true);
+  const [loadingAreas, setLoadingAreas] = useState(false);
+
+  // Fetch cities on mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        setLoadingCities(true);
+        const data = await cityApi.getAll();
+        setCities(data);
+        
+        // If city name is in URL, find the city ID
+        const cityParam = searchParams.get('city');
+        if (cityParam && cityParam !== 'all') {
+          const foundCity = data.find((c: any) => c.name.toLowerCase() === cityParam.toLowerCase());
+          if (foundCity) {
+            setCityId(foundCity._id);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching cities:', err);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+
+    fetchCities();
+  }, [searchParams]);
+
+  // Fetch areas when cityId changes
+  useEffect(() => {
+    const fetchAreas = async () => {
+      if (!cityId) {
+        setAreas([]);
+        return;
+      }
+
+      try {
+        setLoadingAreas(true);
+        const data = await areaApi.getAll(cityId);
+        setAreas(data);
+      } catch (err) {
+        console.error('Error fetching areas:', err);
+        setAreas([]);
+      } finally {
+        setLoadingAreas(false);
+      }
+    };
+
+    fetchAreas();
+  }, [cityId]);
 
   // Fetch properties from API
   useEffect(() => {
@@ -32,7 +105,11 @@ const Properties = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await propertyApi.getAll();
+        const filters: { cityId?: string; areaId?: string } = {};
+        if (cityId) filters.cityId = cityId;
+        if (areaId) filters.areaId = areaId;
+        
+        const data = await propertyApi.getAll(filters);
         // Map backend properties to frontend format
         const mappedProperties = Array.isArray(data) 
           ? data.map(mapBackendToFrontendProperty)
@@ -48,21 +125,65 @@ const Properties = () => {
     };
 
     fetchProperties();
-  }, []);
+  }, [cityId, areaId]);
 
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
       // ✅ 'all' ko handle kiya
       const matchesPurpose = purpose === 'all' || property.purpose === purpose;
-      const matchesCity = city === 'all' || property.city === city;
       const matchesType = type === 'all' || property.type === type;
-      return matchesPurpose && matchesCity && matchesType;
+      // Area filtering is handled by API, so we don't need to filter by areaId here
+      return matchesPurpose && matchesType;
     });
-  }, [purpose, city, type, properties]);
+  }, [purpose, type, properties]);
+
+  // Calculate property counts per area
+  const areaCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    properties.forEach(property => {
+      if (property.areaId) {
+        counts[property.areaId] = (counts[property.areaId] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [properties]);
 
   const updateFilters = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(key, value);
+    
+    // If updating city, find city ID and clear area
+    if (key === 'city') {
+      if (value === 'all') {
+        params.delete('cityId');
+        params.delete('areaId');
+        setCityId(null);
+        setAreaId(null);
+      } else {
+        const foundCity = cities.find(c => c.name.toLowerCase() === value.toLowerCase());
+        if (foundCity) {
+          params.set('cityId', foundCity._id);
+          params.delete('areaId');
+          setCityId(foundCity._id);
+          setAreaId(null);
+        }
+      }
+    }
+    
+    router.push(`/properties?${params.toString()}`);
+  };
+
+  const handleAreaClick = (areaIdToFilter: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('areaId', areaIdToFilter);
+    setAreaId(areaIdToFilter);
+    router.push(`/properties?${params.toString()}`);
+  };
+
+  const clearAreaFilter = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('areaId');
+    setAreaId(null);
     router.push(`/properties?${params.toString()}`);
   };
 
@@ -139,15 +260,16 @@ const Properties = () => {
                   setCity(value);
                   updateFilters('city', value);
                 }}
+                disabled={loadingCities}
               >
                 <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="City" />
+                  <SelectValue placeholder={loadingCities ? "Loading..." : "City"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Cities</SelectItem>
                   {cities.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
+                    <SelectItem key={c._id} value={c.name}>
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -194,7 +316,7 @@ const Properties = () => {
             </p>
             
             {/* Clear Filters Button */}
-            {(purpose !== 'all' || city !== 'all' || type !== 'all') && (
+            {(purpose !== 'all' || city !== 'all' || type !== 'all' || areaId) && (
               <Button
                 variant="outline"
                 size="sm"
@@ -202,6 +324,8 @@ const Properties = () => {
                   setPurpose('all');
                   setCity('all');
                   setType('all');
+                  setCityId(null);
+                  setAreaId(null);
                   router.push('/properties');
                 }}
               >
@@ -209,6 +333,46 @@ const Properties = () => {
               </Button>
             )}
           </div>
+
+          {/* Areas Section - Show when city is selected */}
+          {cityId && areas.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  Areas in {cities.find(c => c._id === cityId)?.name}
+                </h2>
+                {areaId && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearAreaFilter}
+                  >
+                    Clear Area Filter
+                  </Button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {areas.map((area) => {
+                  const count = areaCounts[area._id] || 0;
+                  const isActive = areaId === area._id;
+                  return (
+                    <Button
+                      key={area._id}
+                      variant={isActive ? "default" : "outline"}
+                      onClick={() => handleAreaClick(area._id)}
+                      className="flex items-center gap-2"
+                    >
+                      {area.name}
+                      <Badge variant={isActive ? "secondary" : "outline"} className="ml-1">
+                        {count}
+                      </Badge>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {loading ? (
             <div className="text-center py-16">
@@ -258,6 +422,8 @@ const Properties = () => {
                   setPurpose('all');
                   setCity('all');
                   setType('all');
+                  setCityId(null);
+                  setAreaId(null);
                   router.push('/properties');
                 }}
               >

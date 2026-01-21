@@ -1,15 +1,15 @@
-import { IsNotEmpty, IsString, isNotEmpty } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateCityDto {
-    @IsNotEmpty()
-    @IsNotEmpty()
+    @IsNotEmpty({ message: 'City name is required' })
+    @IsString({ message: 'City name must be a string' })
     name: string;
 
-    @IsNotEmpty()
-    state: string;
+    @IsOptional()
+    @IsString({ message: 'State must be a string' })
+    state?: string;
 
-    @IsNotEmpty()
-    country: string;
-
-    
+    @IsOptional()
+    @IsString({ message: 'Country must be a string' })
+    country?: string;
 }

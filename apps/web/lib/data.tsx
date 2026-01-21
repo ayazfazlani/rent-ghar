@@ -13,6 +13,8 @@
   featured?: boolean;
   description?: string;
   features?: string[];
+  areaId?: string; // Area ObjectId
+  areaName?: string; // Area name
 }
 
 export interface Hotel {

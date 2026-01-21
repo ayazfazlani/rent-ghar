@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PropertyModule } from './property/property.module';
+import { CityModule } from './city/city.module';
+import { AreaModule } from './area/area.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { PropertyModule } from './property/property.module';
     }),
     AuthModule,
     PropertyModule,
+    CityModule,
+    AreaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

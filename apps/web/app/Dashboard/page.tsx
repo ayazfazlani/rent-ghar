@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { propertyApi } from '@/lib/api';
-import { BackendProperty } from '@/lib/property-utils';
+import { BackendProperty } from '@/lib/types/property-utils';
 import { Loader2, Eye, Edit, Trash2 } from 'lucide-react';
 import {
   Table,
@@ -78,7 +78,7 @@ export default function DashboardHome() {
               Manage all your property listings
             </p>
           </div>
-          <Button onClick={() => window.location.href = '/Dashboard/add-property'}>
+          <Button onClick={() => window.location.href = '/dashboard/property/add-property'}>
             Add New Property
           </Button>
         </div>
@@ -101,7 +101,7 @@ export default function DashboardHome() {
         ) : properties.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">No properties found.</p>
-            <Button onClick={() => window.location.href = '/Dashboard/add-property'}>
+            <Button onClick={() => window.location.href = '/dashboard/property/add-property'}>
               Add Your First Property
             </Button>
           </div>
@@ -125,7 +125,7 @@ export default function DashboardHome() {
                     <div className="max-w-[200px]">
                       <p className="truncate">{property.title}</p>
                       <p className="text-xs text-gray-500 mt-1">
-                        {property.bedrooms} Beds • {property.bathrooms} Baths • {property.area} sq ft
+                        {property.bedrooms} Beds • {property.bathrooms} Baths • {property.areaSize || 0} sq ft
                       </p>
                     </div>
                   </TableCell>
