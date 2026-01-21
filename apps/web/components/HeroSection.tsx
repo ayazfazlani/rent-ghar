@@ -45,7 +45,7 @@ const HeroSection = () => {
               Find Your Perfect{' '}
             </span>
             <span className="inline-block animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
-              <span className="text-primary bg-primary/10 px-3 md:px-4 py-1 md:py-2 rounded-xl backdrop-blur-sm shadow-xl shadow-primary/20 inline-block">
+              <span className="text-primary bg-primary/10 px-3 md:px-4 py-1 md:py-2 rounded-xl   shadow-xl shadow-primary/20 inline-block">
                 Home
               </span>
             </span>
