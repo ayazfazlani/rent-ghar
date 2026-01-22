@@ -32,9 +32,8 @@ const Properties = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // ✅ Default filters ko 'all' set kiya
-  const [purpose, setPurpose] = useState<'rent' | 'buy' | 'all'>(
-    (searchParams.get('purpose') as 'rent' | 'buy' | 'all') || 'all'
+  const [purpose, setPurpose] = useState<'rent' | 'buy'>(
+    (searchParams.get('purpose') as 'rent' | 'buy') || 'rent'
   );
   const [city, setCity] = useState(searchParams.get('city') || 'all');
   const [cityId, setCityId] = useState<string | null>(searchParams.get('cityId') || null);
@@ -191,46 +190,33 @@ const Properties = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Hero Banner */}
-      <section className="pt-24 pb-8 md:pt-28 md:pb-12 bg-secondary">
+      {/* Hero Banner with fade-in animation */}
+      <section className="pt-24 pb-8 md:pt-28 md:pb-12 bg-secondary animate-in fade-in duration-500">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-            Properties {city !== 'all' && <span className="text-primary">in {city}</span>}
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 animate-in slide-in-from-bottom-4 duration-700">
+            Properties in <span className="text-primary">{city}</span>
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground animate-in slide-in-from-bottom-4 duration-700 delay-100">
             Find your perfect property from our extensive listings
           </p>
         </div>
       </section>
 
-      {/* Filters */}
-      <section className="py-6 border-b border-border bg-background sticky top-16 md:top-20 z-40">
+      {/* Filters with slide-in animation */}
+      <section className="py-6 border-b border-border bg-background sticky top-16 md:top-20 z-40 transition-all duration-300">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap items-center gap-4">
             {/* Purpose Tabs */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setPurpose('all');
-                  updateFilters('purpose', 'all');
-                }}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  purpose === 'all' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-secondary text-foreground hover:bg-secondary/80'
-                }`}
-              >
-                All
-              </button>
+            <div className="flex gap-2 animate-in slide-in-from-left-4 duration-500">
               <button
                 onClick={() => {
                   setPurpose('rent');
                   updateFilters('purpose', 'rent');
                 }}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 ${
                   purpose === 'rent' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-secondary text-foreground hover:bg-secondary/80'
+                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                 }`}
               >
                 For Rent
@@ -240,10 +226,10 @@ const Properties = () => {
                   setPurpose('buy');
                   updateFilters('purpose', 'buy');
                 }}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 ${
                   purpose === 'buy' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-secondary text-foreground hover:bg-secondary/80'
+                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                 }`}
               >
                 For Sale
@@ -253,7 +239,7 @@ const Properties = () => {
             <div className="flex-1" />
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 animate-in slide-in-from-right-4 duration-500">
               <Select
                 value={city}
                 onValueChange={(value) => {
@@ -266,7 +252,6 @@ const Properties = () => {
                   <SelectValue placeholder={loadingCities ? "Loading..." : "City"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Cities</SelectItem>
                   {cities.map((c) => (
                     <SelectItem key={c._id} value={c.name}>
                       {c.name}
@@ -282,7 +267,7 @@ const Properties = () => {
                   updateFilters('type', value);
                 }}
               >
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[140px] transition-all duration-200 hover:border-primary">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -299,10 +284,10 @@ const Properties = () => {
         </div>
       </section>
 
-      {/* Properties Grid */}
+      {/* Properties Grid with staggered animation */}
       <section className="py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 animate-in slide-in-from-bottom-2 duration-500">
             <p className="text-muted-foreground">
               {loading ? (
                 'Loading properties...'
@@ -401,31 +386,39 @@ const Properties = () => {
             </div>
           ) : filteredProperties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProperties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
+              {filteredProperties.map((property, index) => (
+                <div
+                  key={property.id}
+                  className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                  style={{
+                    animationDelay: `${index * 50}ms`,
+                    animationFillMode: 'backwards'
+                  }}
+                >
+                  <PropertyCard property={property} />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+            <div className="text-center py-16 animate-in fade-in zoom-in-95 duration-500">
+              <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 animate-in spin-in-180 duration-700">
                 <SlidersHorizontal className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-2 animate-in slide-in-from-bottom-2 duration-500 delay-200">
                 No properties found
               </h3>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-6 animate-in slide-in-from-bottom-2 duration-500 delay-300">
                 Try adjusting your filters to find more properties
               </p>
               <Button
                 variant="outline"
                 onClick={() => {
-                  setPurpose('all');
-                  setCity('all');
                   setType('all');
                   setCityId(null);
                   setAreaId(null);
                   router.push('/properties');
                 }}
+                className="animate-in slide-in-from-bottom-2 duration-500 delay-400 transition-all hover:scale-105"
               >
                 Clear Filters
               </Button>

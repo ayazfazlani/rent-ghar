@@ -1,17 +1,22 @@
  import NavBar from "@/components/NavBar";
 import HeroSection from "@/components/HeroSection";
-// import PropertyCard from "@/components/PropertyCard";
-// import HotelCard from "@/components/HotelCard";
-import Footer from "@/components/Footer";
-
-export default function Home() {
+ import Footer from "@/components/Footer";
+ import FeaturedSection from "@/components/FeaturedSection";
+ import TestimonialSection from "@/components/TestimonialSection";
+ import BlogSection from "@/components/BlogSection";
+ 
+export default  function Home() {
+ 
   return (
     <>
       <NavBar />
       <HeroSection />
-      {/* <PropertyCard /> */}
-      {/* <HotelCard /> */}
-      <Footer />
+      <FeaturedSection />
+      <BlogSection />
+       <TestimonialSection />
+      
+       
+       <Footer />
     </>
   );
 }

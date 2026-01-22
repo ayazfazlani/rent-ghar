@@ -367,15 +367,7 @@ Thank you for booking with us!`);
                     </div>
                   </div>
 
-                  <Button 
-                    className="w-full py-6 text-base font-semibold shadow-lg hover:shadow-xl transition-all" 
-                    size="lg"
-                    onClick={handleBooking}
-                  >
-                    Book Now
-                  </Button>
-
-                  <p className="text-xs text-muted-foreground text-center pt-2">
+                   <p className="text-xs text-muted-foreground text-center pt-2">
                     ✓ Free cancellation • ✓ Instant confirmation
                   </p>
                 </div>
