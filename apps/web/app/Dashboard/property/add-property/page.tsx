@@ -237,7 +237,7 @@ export default function AddProperty() {
       
       // Redirect to dashboard after a short delay
       setTimeout(() => {
-        router.push('/Dashboard')
+        router.push('/dashboard/property')
         router.refresh()
       }, 1500)
       

@@ -109,7 +109,7 @@ export default function DashboardHome() {
   };
 
   return (
-    <div className="p-8">
+    <div className="w-full">
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between">
           <div>
@@ -258,7 +258,7 @@ export default function DashboardHome() {
 
       {/* View Property Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full  max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Property Details</DialogTitle>
             <DialogDescription>

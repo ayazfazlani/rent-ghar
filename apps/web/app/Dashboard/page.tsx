@@ -67,7 +67,7 @@ export default function DashboardHome() {
   };
 
   return (
-    <div className="p-8">
+    <div className="w-full">
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between">
           <div>

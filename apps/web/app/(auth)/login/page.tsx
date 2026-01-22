@@ -55,7 +55,7 @@ export default function LoginPage() {
       })
 
       // Redirect karo – dashboard ya home page pe
-      router.push('/Dashboard')  // ya '/' ya jo bhi protected route hai
+      router.push('/dashboard')  // ya '/' ya jo bhi protected route hai
       router.refresh()           // optional: fresh data load karne ke liye
     } catch (err: any) {
       const errorMessage =
