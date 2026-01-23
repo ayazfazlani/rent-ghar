@@ -1,4 +1,5 @@
- import PropertyDetail from '@/components/PropertyDetail';
+import PropertyDetail from '@/components/PropertyDetail';
+
 
 export default function PropertyDetailPage() {
   return <PropertyDetail />;
@@ -11,3 +12,5 @@ export async function generateStaticParams() {
     id: property.id,
   }));
 }
+
+
