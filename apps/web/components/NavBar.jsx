@@ -1,25 +1,32 @@
  'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Menu, X, Plus, User, Heart } from 'lucide-react';
+import { Menu, Plus, User, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DialogTitle } from '@/components/ui/dialog';
 import { SignedIn, SignedOut, SignUpButton, SignInButton, UserButton } from '@clerk/nextjs';
+import Image from 'next/image';
  
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Properties', path: '/properties' },
   { name: 'Hotels', path: '/hotels' },
   { name: 'About', path: '/about' },
-    { name: 'Blog', path: '/blog' },
+  { name: 'Blog', path: '/blog' },
 ];
 
 const Navbar = () => {
   const pathname = usePathname();
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Fix hydration error by only rendering auth components on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <>
@@ -30,25 +37,20 @@ const Navbar = () => {
         
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Premium Logo with 3D effect */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative">
-                {/* Glow ring */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/40 to-primary/20 blur-md group-hover:blur-lg transition-all duration-500 opacity-0 group-hover:opacity-100" />
-                
-                {/* Logo container */}
-                <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-lg shadow-primary/25">
-                  {/* Lightning sweep */}
-                  <div className="absolute inset-0 rounded-xl overflow-hidden">
-                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12" />
-                  </div>
-                  <Home className="w-5 h-5 text-primary-foreground relative z-10 transition-transform duration-500 group-hover:scale-110" />
-                </div>
-              </div>
+            {/* Logo with Text */}
+            <Link href="/" className="flex items-center gap-2 group">
+              {/* Logo Image */}
+              <Image 
+                src="/logo.png" 
+                alt="RentGhar Logo" 
+                width={100} 
+                height={100}
+                className="transition-all duration-500 group-hover:scale-110"
+              />
               
-              <span className="text-xl font-bold tracking-tight">
-                <span className="text-primary transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]">Rent</span>
-                <span className="text-foreground transition-all duration-300 group-hover:text-primary/90">Ghr</span>
+              {/* Brand Text */}
+              <span className="text-xl font-bold tracking-tight text-foreground transition-all duration-300 group-hover:text-primary">
+                RentGhar
               </span>
             </Link>
 
@@ -120,25 +122,29 @@ const Navbar = () => {
                 </Button>
               </div>
               
-              {/* Auth Buttons - Gradient style */}
-              <SignedOut>
-                <SignUpButton mode="modal">
-                  <Button 
-                    size="icon"
-                    className="relative overflow-hidden bg-gradient-to-br from-primary to-primary/90 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-primary/40 group"
-                  >
-                    {/* Shine effect */}
-                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
-                    <User className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110" />
-                  </Button>
-                </SignUpButton>
-              </SignedOut>
-              
-              <SignedIn>
-                <div className="transition-all duration-300 hover:scale-110 hover:drop-shadow-lg">
-                  <UserButton afterSignOutUrl="/" />
-                </div>
-              </SignedIn>
+              {/* Auth Buttons - Only render after mount to prevent hydration errors */}
+              {mounted && (
+                <>
+                  <SignedOut>
+                    <SignUpButton mode="modal">
+                      <Button 
+                        size="icon"
+                        className="relative overflow-hidden bg-gradient-to-br from-primary to-primary/90 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-primary/40 group"
+                      >
+                        {/* Shine effect */}
+                        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
+                        <User className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110" />
+                      </Button>
+                    </SignUpButton>
+                  </SignedOut>
+                  
+                  <SignedIn>
+                    <div className="transition-all duration-300 hover:scale-110 hover:drop-shadow-lg">
+                      <UserButton afterSignOutUrl="/" />
+                    </div>
+                  </SignedIn>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button - Premium style */}
@@ -209,33 +215,37 @@ const Navbar = () => {
                       <span className="relative z-10">Add Property</span>
                     </Button>
                     
-                    {/* Auth buttons */}
-                    <SignedOut>
-                      <SignUpButton mode="modal">
-                        <Button 
-                          variant="outline" 
-                          className="w-full relative overflow-hidden border-primary/30 hover:border-primary transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                          <span className="relative z-10 font-medium">Sign Up</span>
-                        </Button>
-                      </SignUpButton>
-                      <SignInButton mode="modal">
-                        <Button 
-                          variant="default" 
-                          className="w-full relative overflow-hidden bg-gradient-to-r from-primary to-primary/90 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30 group"
-                        >
-                          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                          <span className="relative z-10 font-medium">Sign In</span>
-                        </Button>
-                      </SignInButton>
-                    </SignedOut>
-                    
-                    <SignedIn>
-                      <div className="flex items-center justify-center pt-4 transition-all duration-300 hover:scale-110">
-                        <UserButton afterSignOutUrl="/" />
-                      </div>
-                    </SignedIn>
+                    {/* Auth buttons - Only render after mount */}
+                    {mounted && (
+                      <>
+                        <SignedOut>
+                          <SignUpButton mode="modal">
+                            <Button 
+                              variant="outline" 
+                              className="w-full relative overflow-hidden border-primary/30 hover:border-primary transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group"
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                              <span className="relative z-10 font-medium">Sign Up</span>
+                            </Button>
+                          </SignUpButton>
+                          <SignInButton mode="modal">
+                            <Button 
+                              variant="default" 
+                              className="w-full relative overflow-hidden bg-gradient-to-r from-primary to-primary/90 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30 group"
+                            >
+                              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                              <span className="relative z-10 font-medium">Sign In</span>
+                            </Button>
+                          </SignInButton>
+                        </SignedOut>
+                        
+                        <SignedIn>
+                          <div className="flex items-center justify-center pt-4 transition-all duration-300 hover:scale-110">
+                            <UserButton afterSignOutUrl="/" />
+                          </div>
+                        </SignedIn>
+                      </>
+                    )}
                   </div>
                 </div>
               </SheetContent>

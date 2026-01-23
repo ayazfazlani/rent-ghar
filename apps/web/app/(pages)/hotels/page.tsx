@@ -2,8 +2,8 @@
 import { useState, useMemo } from 'react';
 import { Hotel as HotelIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import Navbar from '@/components/NavBar';
-import Footer from '@/components/Footer';
+ //import Navbar from '@/components/NavBar';
+//import Footer from '@/components/Footer';
 import HotelCard from '@/components/HotelCard';
 import { hotels, cities } from '@/lib/data';
 
@@ -17,8 +17,7 @@ const Hotels = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
+       
       {/* Hero Banner - Enhanced with Beautiful Animations */}
       <section className="pt-24 pb-8 md:pt-28 md:pb-12 bg-gradient-to-br from-secondary via-secondary/95 to-secondary/80 relative overflow-hidden">
         {/* Animated Background Elements */}
@@ -144,8 +143,7 @@ const Hotels = () => {
         </div>
       </section>
 
-      <Footer />
-    </div>
+     </div>
   );
 };
 

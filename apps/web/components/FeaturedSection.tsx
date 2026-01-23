@@ -1,47 +1,49 @@
  'use client'
 import { Heart, MapPin, Bed, Bath, Maximize, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
 
 const PropertyCard = ({ property }) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
-      {/* Image Container */}
-      <div className="relative h-64 overflow-hidden group">
-        <img
-          src={property.image}
-          alt={property.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        
-        {/* Favorite Button */}
-        <button
-          onClick={() => setIsFavorite(!isFavorite)}
-          className="absolute top-3 right-3 w-9 h-9 bg-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-md"
-        >
-          <Heart
-            className={`w-5 h-5 transition-colors duration-300 ${
-              isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
-            }`}
+      <Link href={`/listing-detail/${property.id}`}>
+        <div className="relative h-64 overflow-hidden group cursor-pointer">
+          <img
+            src={property.image}
+            alt={property.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-        </button>
-      </div>
+          
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setIsFavorite(!isFavorite);
+            }}
+            className="absolute top-3 right-3 w-9 h-9 bg-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-md z-10"
+          >
+            <Heart
+              className={`w-5 h-5 transition-colors duration-300 ${
+                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
+              }`}
+            />
+          </button>
+        </div>
+      </Link>
 
-      {/* Content */}
       <div className="p-5">
-        {/* Title */}
-        <h3 className="text-xl font-bold text-gray-900 mb-3">
-          {property.title}
-        </h3>
+        <Link href={`/listing-detail/${property.id}`}>
+          <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors cursor-pointer">
+            {property.title}
+          </h3>
+        </Link>
 
-        {/* Location */}
         <div className="flex items-center text-gray-600 mb-4">
           <MapPin className="w-4 h-4 mr-2" />
           <p className="text-sm">{property.location}</p>
         </div>
 
-        {/* Features */}
         <div className="flex items-center gap-4 mb-5 text-gray-600">
           <div className="flex items-center gap-1.5">
             <Bed className="w-5 h-5" />
@@ -57,23 +59,23 @@ const PropertyCard = ({ property }) => {
           </div>
         </div>
 
-        {/* Price and Contact Section */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div>
             <p className="text-xs text-gray-500 mb-1">{property.priceLabel || 'Monthly Rent'}</p>
             <p className="text-2xl font-bold text-gray-900">{property.price}</p>
           </div>
           
-          <button className="px-6 py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all duration-300 hover:shadow-lg">
-            Contact
-          </button>
+          <Link href={`/listing-detail/${property.id}`}>
+            <button className="px-6 py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all duration-300 hover:shadow-lg">
+              View Details
+            </button>
+          </Link>
         </div>
       </div>
     </div>
   );
 };
 
-// Featured Section Component with Arrow Scroll
 const FeaturedSection = () => {
   const scroll = (direction) => {
     const container = document.getElementById('properties-scroll');
@@ -144,7 +146,6 @@ const FeaturedSection = () => {
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
-        {/* Section Header */}
         <div className="mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Featured Properties
@@ -154,9 +155,7 @@ const FeaturedSection = () => {
           </p>
         </div>
 
-        {/* Cards with Arrow Navigation */}
         <div className="relative">
-          {/* Left Arrow */}
           <button
             onClick={() => scroll('left')}
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-all duration-300 hover:scale-110 active:scale-95"
@@ -165,7 +164,6 @@ const FeaturedSection = () => {
             <ChevronLeft className="w-6 h-6 text-gray-700" />
           </button>
 
-          {/* Right Arrow */}
           <button
             onClick={() => scroll('right')}
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-all duration-300 hover:scale-110 active:scale-95"
@@ -174,7 +172,6 @@ const FeaturedSection = () => {
             <ChevronRight className="w-6 h-6 text-gray-700" />
           </button>
 
-          {/* Scrollable Container */}
           <div
             id="properties-scroll"
             className="overflow-x-auto scrollbar-hide scroll-smooth"
@@ -189,10 +186,8 @@ const FeaturedSection = () => {
             </div>
           </div>
         </div>
+      </div>
 
-       </div>
-
-      {/* Hide Scrollbar CSS */}
       <style jsx>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
