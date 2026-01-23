@@ -9,7 +9,7 @@ export class Category {
   @Prop({ required: true, unique: true, trim: true })
   name: string;
 
-  @Prop({ unique: true, lowercase: true, trim: true, index: true })
+  @Prop({ required: true, unique: true, lowercase: true, trim: true, index: true })
   slug: string;
 
   @Prop({ trim: true })

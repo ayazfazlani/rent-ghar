@@ -4,8 +4,8 @@ import Footer from '@/components/Footer';
 
 export default function BlogPage() {
   return (
-    <main className="min-h-screen">
-      <Navbar />
+  <>
+      {/* <Navbar /> */}
       
       {/* Blog Page Header */}
       <div className="pt-24 pb-12 bg-secondary/20">
@@ -20,7 +20,7 @@ export default function BlogPage() {
       </div>
       
       <BlogGrid />   
-      <Footer />
-    </main>
+
+</>
   );
 }

@@ -1,13 +1,62 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Body, Param, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from '../../../../packages/dtos/blog/createblog.dto';
+import { UpdateBlogDto } from '../../../../packages/dtos/blog/updateblog.dto';
+import { BlogDocument } from '../../../../packages/db/src/schemas/blog.schema';
+
 @Controller('blog')
 export class BlogController {
     constructor(private readonly blogService: BlogService){}
-    // implement full CRUD operations API for blog
-
-    @Post('create')
-    createBlog(@Body() createBlogDto: CreateBlogDto){
+    // get published blogs for the users 
+    @Get('published')
+    async getPublishedBlogs(): Promise<BlogDocument[]> {
+        return this.blogService.findPublishedBlogs();
+    }
+    // Create a new blog
+    @Post()
+    @HttpCode(HttpStatus.CREATED)
+    async createBlog(@Body() createBlogDto: CreateBlogDto): Promise<BlogDocument> {
         return this.blogService.createBlog(createBlogDto);
+    }
+
+    // Get all blogs (optionally filtered by status)
+    @Get()
+    async getAllBlogs(@Query('status') status?: string): Promise<BlogDocument[]> {
+        return this.blogService.findAllBlogs(status);
+    }
+
+    // Get blog by slug (must come before :id route)
+    @Get('slug/:slug')
+    async getBlogBySlug(@Param('slug') slug: string): Promise<BlogDocument> {
+        return this.blogService.findBlogBySlug(slug);
+    }
+
+    // Get blog by ID
+    @Get(':id')
+    async getBlogById(@Param('id') id: string): Promise<BlogDocument> {
+        return this.blogService.findBlogById(id);
+    }
+
+    // Update blog
+    @Put(':id')
+    async updateBlog(
+        @Param('id') id: string,
+        @Body() updateBlogDto: UpdateBlogDto
+    ): Promise<BlogDocument> {
+        return this.blogService.updateBlog(id, updateBlogDto);
+    }
+
+    // Delete blog
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async deleteBlog(@Param('id') id: string): Promise<void> {
+        return this.blogService.deleteBlog(id);
+    }
+
+    // Increment views (for analytics)
+    @Post(':id/views')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async incrementViews(@Param('id') id: string): Promise<void> {
+        return this.blogService.incrementViews(id);
     }
 }

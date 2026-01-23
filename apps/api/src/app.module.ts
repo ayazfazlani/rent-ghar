@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { PropertyModule } from './property/property.module';
 import { CityModule } from './city/city.module';
 import { AreaModule } from './area/area.module';
+import { CategoryModule } from './category/category.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { AreaModule } from './area/area.module';
     PropertyModule,
     CityModule,
     AreaModule,
+    CategoryModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

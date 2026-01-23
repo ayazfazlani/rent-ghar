@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsEnum, IsMongoId } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, IsEnum, IsMongoId, MaxLength } from 'class-validator';
 
 export class CreateBlogDto {
   @IsString()
@@ -7,20 +7,24 @@ export class CreateBlogDto {
 
   @IsString()
   @IsOptional()
-  excerpt?: string;
+  slug?: string; // Auto-generated from title if not provided
 
   @IsString()
   @IsNotEmpty()
   content: string;
 
-  @IsArray()
-  @IsString({ each: true })
+  @IsString()
   @IsOptional()
-  tags?: string[];
+  excerpt?: string;
 
   @IsString()
   @IsOptional()
   featuredImage?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
 
   @IsEnum(['draft', 'published'])
   @IsOptional()
@@ -32,9 +36,23 @@ export class CreateBlogDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(160, { message: 'Meta description must be at most 160 characters' })
   metaDescription?: string;
+
+  @IsString()
+  @IsOptional()
+  canonicalUrl?: string;
 
   @IsMongoId()
   @IsOptional()
-  categoryId?: string;
+  categoryId?: string; // For backward compatibility - single category
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  categories?: string[]; // Array of category IDs
+
+  @IsMongoId()
+  @IsOptional()
+  author?: string; // User ID - typically from auth context
 }
