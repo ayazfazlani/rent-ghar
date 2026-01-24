@@ -1,11 +1,10 @@
- import Navbar from '@/components/NavBar';
+ //import Navbar from '@/components/NavBar';
 import BlogGrid from '@/components/BlogGrid';  // ← BlogSection ki jagah BlogGrid
-import Footer from '@/components/Footer';
+//import Footer from '@/components/Footer';
 
 export default function BlogPage() {
   return (
-  <>
-      {/* <Navbar /> */}
+    <main className="min-h-screen">
       
       {/* Blog Page Header */}
       <div className="pt-24 pb-12 bg-secondary/20">
@@ -20,7 +19,7 @@ export default function BlogPage() {
       </div>
       
       <BlogGrid />   
-
-</>
+      
+    </main>
   );
 }

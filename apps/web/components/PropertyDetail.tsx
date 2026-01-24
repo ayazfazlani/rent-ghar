@@ -427,11 +427,7 @@ const PropertyDetail = ({id}: {id: string}) => {
 
                     <div className="pt-6 border-t border-border">
                       <p className="text-sm text-muted-foreground mb-3">Schedule a visit</p>
-                      <Button variant="outline" className="w-full">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Book Viewing
-                      </Button>
-                    </div>
+                     </div>
                   </CardContent>
                 </Card>
 

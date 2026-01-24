@@ -1,8 +1,8 @@
  'use client'
 import React from 'react';
 import { Handshake, FileCheck, TrendingUp, Truck, Sparkles, Award, Users, Shield, CheckCircle2, Target } from 'lucide-react';
-import NavBar from '@/components/NavBar';
-import Footer from '@/components/Footer';
+//import NavBar from '@/components/NavBar';
+//import Footer from '@/components/Footer';
 
 export default function AboutPage() {
   const [mounted, setMounted] = React.useState(false);
@@ -54,8 +54,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavBar />
-      
+       
       {/* Hero Section - Compact */}
       <div className="relative pt-20 md:pt-24 pb-12 overflow-hidden bg-gradient-to-br from-secondary/40 via-background to-secondary/20">
         {/* Subtle Background Elements */}
@@ -271,7 +270,6 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <Footer />
-    </div>
+      </div>
   );
 }
