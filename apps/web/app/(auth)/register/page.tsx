@@ -23,6 +23,9 @@ import { toast } from 'sonner'
 // Shared DTO from monorepo (adjust path according to your setup)
 import { RegisterDto } from '../../../../../packages/dtos/register.dto' // ← your monorepo package
 import api from '@/lib/api'
+
+// Route segment config for Next.js type validation
+export const dynamic = 'force-dynamic'
 // Zod schema — must match your RegisterDto structure
 const registerSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),

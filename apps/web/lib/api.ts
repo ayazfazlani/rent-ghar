@@ -94,4 +94,37 @@ export const propertyApi = {
   },
 };
 
+// Blog API functions
+export const blogApi = {
+  // Get all published blogs (for public frontend)
+  getPublishedBlogs: async () => {
+    const response = await api.get('/blog/published');
+    return response.data;
+  },
+
+  // Get all blogs (for admin dashboard - can filter by status)
+  getAllBlogs: async (status?: string) => {
+    const url = status ? `/blog?status=${status}` : '/blog';
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  // Get blog by ID
+  getBlogById: async (id: string) => {
+    const response = await api.get(`/blog/${id}`);
+    return response.data;
+  },
+
+  // Get blog by slug (SEO-friendly URL)
+  getBlogBySlug: async (slug: string) => {
+    const response = await api.get(`/blog/slug/${slug}`);
+    return response.data;
+  },
+
+  // Increment blog views (for analytics)
+  incrementViews: async (id: string) => {
+    await api.post(`/blog/${id}/views`);
+  },
+};
+
 export default api;

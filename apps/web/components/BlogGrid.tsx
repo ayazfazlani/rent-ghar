@@ -1,25 +1,140 @@
- 'use client'
-import { useState } from 'react';
+'use client'
+/**
+ * BlogGrid Component - Complete Flow Explanation
+ * 
+ * FLOW:
+ * 1. Component mounts → useEffect runs → Fetches blogs from API
+ * 2. API call goes to /api/blog/published (Next.js rewrites to backend)
+ * 3. Backend returns array of blog objects
+ * 4. Transform function converts backend format to frontend format
+ * 5. Extract unique categories from blogs
+ * 6. Filter blogs by selected category
+ * 7. Display blogs in grid with pagination
+ */
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, User, ArrowRight, Grid3x3 } from 'lucide-react';
+import { Calendar, User, ArrowRight, Grid3x3, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { blogPosts, categories } from '@/data/blogData';
+import blogApi from '@/lib/api/blog/blog.api';
+import { transformBlogsToPosts } from '@/lib/utils/blog-utils';
+import type { BlogPost } from '@/lib/utils/blog-utils';
+import { Blog } from '@/lib/types/blog';
+import { toast } from 'sonner';
 
 const BlogGrid = () => {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [visiblePosts, setVisiblePosts] = useState(9);
+  // STATE MANAGEMENT
+  // ================
+  // These state variables store the component's data and UI state
+  
+  const [blogs, setBlogs] = useState<BlogPost[]>([]); // All blogs from API (transformed)
+  const [loading, setLoading] = useState(true);        // Loading state for API call
+  const [error, setError] = useState<string | null>(null); // Error message if API fails
+  const [selectedCategory, setSelectedCategory] = useState('All'); // Currently selected category filter
+  const [visiblePosts, setVisiblePosts] = useState(9); // Number of posts to show (pagination)
 
+  // FETCH BLOGS FROM API
+  // ====================
+  // This useEffect runs once when component mounts (empty dependency array [])
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true); // Show loading state
+        setError(null);   // Clear any previous errors
+
+        // STEP 1: Make API call to backend
+        // blogApi.getPublishedBlogs() → GET /api/blog/published
+        // Next.js rewrites /api/* to http://localhost:3001/* (see next.config.ts)
+        // Backend controller receives request at /blog/published
+        // Backend service queries MongoDB for blogs with status='published'
+        // Backend returns array of Blog documents (with populated author & categories)
+        const response = await blogApi.getPublishedBlogs();
+
+        // STEP 2: Transform backend data to frontend format
+        // Backend returns: { _id, title, slug, content, author: { name, email }, categories: [{ name, slug }], ... }
+        // Transform function converts to: { id, title, slug, excerpt, date, author: "Name", category: "Category Name", ... }
+        const transformedBlogs = transformBlogsToPosts(response as Blog[]);
+        
+        // STEP 3: Store in state (triggers re-render)
+        setBlogs(transformedBlogs);
+      } catch (err: any) {
+        // Handle errors gracefully
+        const errorMessage = err.response?.data?.message || 'Failed to load blogs';
+        setError(errorMessage);
+        toast.error('Error', { description: errorMessage });
+        console.error('Error fetching blogs:', err);
+      } finally {
+        setLoading(false); // Hide loading state
+      }
+    };
+
+    fetchBlogs(); // Call the async function
+  }, []); // Empty array = run only once on mount
+
+  // EXTRACT CATEGORIES FROM BLOGS
+  // =============================
+  // Get unique categories from all blogs
+  // ['All', ...uniqueCategories] creates array starting with 'All' option
+  const categories = ['All', ...Array.from(new Set(blogs.map(blog => blog.category)))];
+
+  // FILTER BLOGS BY CATEGORY
+  // ========================
+  // If 'All' selected → show all blogs
+  // Otherwise → filter blogs where category matches selectedCategory
   const filteredPosts = selectedCategory === 'All' 
-    ? blogPosts 
-    : blogPosts.filter(post => post.category === selectedCategory);
+    ? blogs 
+    : blogs.filter(post => post.category === selectedCategory);
 
+  // PAGINATION LOGIC
+  // ================
+  // Slice array to show only first N posts (visiblePosts)
   const displayedPosts = filteredPosts.slice(0, visiblePosts);
-  const hasMore = visiblePosts < filteredPosts.length;
+  const hasMore = visiblePosts < filteredPosts.length; // Check if more posts available
 
+  // LOAD MORE FUNCTION
+  // ==================
+  // Increases visiblePosts count by 9 to show more posts
   const loadMore = () => {
     setVisiblePosts(prev => prev + 9);
   };
 
+  // LOADING STATE
+  // =============
+  // Show loading spinner while fetching data
+  if (loading) {
+    return (
+      <section className="py-8 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+              <p className="text-muted-foreground">Loading blogs...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ERROR STATE
+  // ===========
+  // Show error message if API call failed
+  if (error) {
+    return (
+      <section className="py-8 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center py-20">
+            <p className="text-destructive mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // MAIN RENDER
+  // ===========
+  // Render the blog grid with all the data
   return (
     <section className="py-8 bg-background">
       <div className="container mx-auto px-4">
@@ -76,8 +191,23 @@ const BlogGrid = () => {
           {/* Blog Grid - Main Content */}
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedPosts.map((post, index) => (
-                <Link key={post.id} href={`/blog/${post.id}`}>
+              {displayedPosts.length === 0 ? (
+                <div className="col-span-full text-center py-16 bg-secondary/20 rounded-2xl">
+                  <p className="text-muted-foreground text-base mb-4">
+                    No posts found in this category.
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setSelectedCategory('All')}
+                    className="gap-2"
+                  >
+                    View All Posts
+                    <ArrowRight size={16} />
+                  </Button>
+                </div>
+              ) : (
+                displayedPosts.map((post, index) => (
+                  <Link key={post.id} href={`/blog/${post.slug}`}>
                   <article 
                     className="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer group h-full flex flex-col"
                     style={{ 
@@ -137,26 +267,10 @@ const BlogGrid = () => {
                       </div>
                     </div>
                   </article>
-                </Link>
-              ))}
+                  </Link>
+                ))
+              )}
             </div>
-
-            {/* No Results */}
-            {filteredPosts.length === 0 && (
-              <div className="text-center py-16 bg-secondary/20 rounded-2xl">
-                <p className="text-muted-foreground text-base mb-4">
-                  No posts found in this category.
-                </p>
-                <Button 
-                  variant="outline"
-                  onClick={() => setSelectedCategory('All')}
-                  className="gap-2"
-                >
-                  View All Posts
-                  <ArrowRight size={16} />
-                </Button>
-              </div>
-            )}
           </div>
 
           {/* Sidebar - Load More & Info */}

@@ -7,8 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import Navbar from '@/components/NavBar';
-import Footer from '@/components/Footer';
 import { propertyApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
@@ -61,12 +59,10 @@ const PropertyDetail = ({id}: {id: string}) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
           <p>Loading property...</p>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -74,13 +70,11 @@ const PropertyDetail = ({id}: {id: string}) => {
   if (error || !property) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Property Not Found</h1>
           <p className="text-muted-foreground mb-4">{error || 'The property you are looking for does not exist.'}</p>
           <Button onClick={() => router.push('/properties')}>Back to Properties</Button>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -204,8 +198,6 @@ const PropertyDetail = ({id}: {id: string}) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
       <div className="pt-20 md:pt-24">
         {/* Image Gallery */}
         <section className="bg-black">
@@ -511,8 +503,6 @@ const PropertyDetail = ({id}: {id: string}) => {
           </form>
         </DialogContent>
       </Dialog>
-
-      <Footer />
     </div>
   );
 };

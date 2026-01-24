@@ -22,6 +22,9 @@ import { Loader2 } from 'lucide-react'
 
 import api from '@/lib/api'  // tumhara axios client (withCredentials: true wala)
 
+// Route segment config for Next.js type validation
+export const dynamic = 'force-dynamic'
+
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),

@@ -1,21 +1,81 @@
- 'use client'
-import { useRef } from 'react';
+'use client'
+/**
+ * BlogSection Component - Homepage Blog Preview
+ * 
+ * FLOW:
+ * 1. Component mounts → Fetches latest 6 published blogs
+ * 2. Displays blogs in horizontal scrollable carousel
+ * 3. Users can scroll left/right to see more blogs
+ */
+
+import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Calendar, User, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { blogPosts } from '@/data/blogData';
+import { Calendar, User, ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { blogApi } from '@/lib/api';
+import { transformBlogsToPosts, BlogPost } from '@/lib/utils/blog-utils';
+import { Blog } from '@/lib/types/blog';
 
 const BlogSection = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  // STATE: Store blogs fetched from API
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // FETCH BLOGS ON MOUNT
+  // ====================
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        // Fetch published blogs from API
+        const response = await blogApi.getPublishedBlogs();
+        // Transform backend format to frontend format
+        const transformed = transformBlogsToPosts(response as Blog[]);
+        // Take only first 6 for homepage preview
+        setBlogPosts(transformed.slice(0, 6));
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+        // On error, set empty array (component will show nothing)
+        setBlogPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []); // Run once on mount
+
+  // SCROLL FUNCTION
+  // ===============
+  // Handles horizontal scrolling of blog carousel
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 400;
+      const scrollAmount = 400; // Pixels to scroll
       scrollContainerRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
+        behavior: 'smooth' // Smooth animation
       });
     }
   };
+
+  // LOADING STATE
+  if (loading) {
+    return (
+      <section className="py-16 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // DON'T RENDER IF NO BLOGS
+  if (blogPosts.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-16 bg-secondary/30">
@@ -32,7 +92,7 @@ const BlogSection = () => {
 
         {/* Blog Cards with Navigation */}
         <div className="relative">
-          {/* Left Arrow */}
+          {/* Left Arrow Button */}
           <button
             onClick={() => scroll('left')}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-background transition-all hover:scale-110"
@@ -41,7 +101,7 @@ const BlogSection = () => {
             <ChevronLeft size={24} className="text-foreground" />
           </button>
           
-          {/* Right Arrow */}
+          {/* Right Arrow Button */}
           <button
             onClick={() => scroll('right')}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-background transition-all hover:scale-110"
@@ -50,14 +110,15 @@ const BlogSection = () => {
             <ChevronRight size={24} className="text-foreground" />
           </button>
 
-          {/* Scrollable Container */}
+          {/* Scrollable Container - Horizontal Scroll */}
           <div 
             ref={scrollContainerRef}
             className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-12"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {blogPosts.slice(0, 6).map(post => (
-              <Link href={`/blog/${post.id}`} key={post.id}>
+            {/* Map through blog posts and render cards */}
+            {blogPosts.map(post => (
+              <Link href={`/blog/${post.slug}`} key={post.id}>
                 <article 
                   className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group flex-shrink-0 w-80"
                 >

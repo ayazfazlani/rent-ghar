@@ -66,7 +66,5 @@ BlogSchema.pre('save', async function () {
   }
 });
 // Indexes for performance + SEO-related queries
-BlogSchema.index({ slug: 1 });
 BlogSchema.index({ status: 1, createdAt: -1 });     // latest published
-BlogSchema.index({ tags: 1 });
 BlogSchema.index({ 'metaTitle': 'text', title: 'text', excerpt: 'text' }); // text search

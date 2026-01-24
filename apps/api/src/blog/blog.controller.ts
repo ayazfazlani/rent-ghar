@@ -28,7 +28,9 @@ export class BlogController {
     // Get blog by slug (must come before :id route)
     @Get('slug/:slug')
     async getBlogBySlug(@Param('slug') slug: string): Promise<BlogDocument> {
+
         return this.blogService.findBlogBySlug(slug);
+
     }
 
     // Get blog by ID

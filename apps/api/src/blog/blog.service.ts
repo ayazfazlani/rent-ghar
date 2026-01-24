@@ -108,17 +108,27 @@ export class BlogService {
     }
 
     async findBlogBySlug(slug: string): Promise<BlogDocument> {
+        // Only return published blogs for public access
+        // Note: NestJS @Param decorator automatically decodes URL-encoded slugs
+        // So slug is already decoded when it reaches this method
+        
         const blog = await this.blogModel
-            .findOne({ slug })
+            .findOne({ 
+                slug: slug, // Slug is already decoded by NestJS
+                status: 'published' // Only return published blogs for public access
+            })
             .populate('author', 'name email')
             .populate('categories', 'name slug')
             .exec();
+            
         if (!blog) {
-            throw new NotFoundException('Blog not found');
+            throw new NotFoundException(`Blog not found with slug: ${slug}`);
         }
-        // Increment views
+        
+        // Increment views for analytics
         blog.views += 1;
         await blog.save();
+        
         return blog;
     }
 

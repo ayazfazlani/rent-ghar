@@ -3,25 +3,12 @@ import { Calendar, User, ArrowLeft, Share2, Facebook, Twitter, Linkedin } from '
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
+// Import BlogPost type for type safety
+import { BlogPost } from '@/lib/utils/blog-utils';
+
 interface BlogDetailPageProps {
-  post: {
-    id: number;
-    title: string;
-    excerpt: string;
-    content: string;
-    date: string;
-    author: string;
-    image: string;
-    category?: string;
-    readTime?: string;
-  };
-  relatedPosts?: Array<{
-    id: number;
-    title: string;
-    excerpt: string;
-    date: string;
-    image: string;
-  }>;
+  post: BlogPost; // Use the BlogPost type from utils
+  relatedPosts?: BlogPost[]; // Related posts also use BlogPost type
 }
 
 const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
@@ -41,7 +28,28 @@ const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
   };
 
   return (
+    
     <div className="min-h-screen bg-background">
+      <script type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        'context': 'https://schema.org',
+        'type': 'BlogPosting',
+        'headline': post.title,
+        'datePublished': post.date,
+        'dateModified': post.date,
+        'author': {
+          'type': 'Person',
+          'name': post.author
+        },
+        'publisher': {
+          'type': 'Organization',
+          'name': 'Rent Ghar',
+          'logo': {
+            'type': 'ImageObject',
+            'url': 'https://rentghar.com/logo.png'
+          }
+        }
+      })}}/>
       {/* Back Button */}
       <div className="container mx-auto px-4 pt-24 pb-8">
         <Link href="/blog">
@@ -117,24 +125,27 @@ const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
                     Share Article
                   </h3>
                   <div className="flex gap-3">
-                    <button
+                    <Button
+                      title="Share on Facebook"
                       onClick={() => sharePost('facebook')}
                       className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3 flex items-center justify-center gap-2 transition-colors"
                     >
                       <Facebook size={18} />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      title="Share on Twitter"
                       onClick={() => sharePost('twitter')}
                       className="flex-1 bg-sky-500 hover:bg-sky-600 text-white rounded-lg py-3 flex items-center justify-center gap-2 transition-colors"
                     >
                       <Twitter size={18} />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      title="Share on LinkedIn"
                       onClick={() => sharePost('linkedin')}
                       className="flex-1 bg-blue-700 hover:bg-blue-800 text-white rounded-lg py-3 flex items-center justify-center gap-2 transition-colors"
                     >
                       <Linkedin size={18} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -168,7 +179,7 @@ const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
               <h2 className="text-3xl font-bold text-foreground mb-8">Related Articles</h2>
               <div className="grid md:grid-cols-3 gap-6">
                 {relatedPosts.slice(0, 3).map(relatedPost => (
-                  <Link href={`/blog/${relatedPost.id}`} key={relatedPost.id}>
+                  <Link href={`/blog/${relatedPost.slug}`} key={relatedPost.id}>
                     <article className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group">
                       <div className="relative overflow-hidden h-48">
                         <img 

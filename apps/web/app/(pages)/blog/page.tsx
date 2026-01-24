@@ -4,7 +4,7 @@ import BlogGrid from '@/components/BlogGrid';  // ← BlogSection ki jagah BlogG
 
 export default function BlogPage() {
   return (
-    <main className="min-h-screen">
+    <div className="min-h-screen">
       
       {/* Blog Page Header */}
       <div className="pt-24 pb-12 bg-secondary/20">
@@ -20,6 +20,6 @@ export default function BlogPage() {
       
       <BlogGrid />   
       
-    </main>
+    </div>
   );
 }
