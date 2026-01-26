@@ -1,23 +1,80 @@
  'use client'
+/**
+ * Properties Page - Dynamic API Integration
+ * 
+ * FLOW:
+ * 1. Component mounts → Fetches all approved properties from API
+ * 2. Transforms backend format to frontend format
+ * 3. Extracts unique cities and property types from fetched data
+ * 4. Filters properties based on URL params (purpose, city, type)
+ * 5. Displays filtered properties in grid layout
+ */
+
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { SlidersHorizontal, Search } from 'lucide-react';
+import { SlidersHorizontal, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-//import Navbar from '@/components/NavBar';
-//import Footer from '@/components/Footer';
 import PropertyCard from '@/components/PropertyCard';
-import { properties, cities, propertyTypes } from '@/lib/data';
+import { propertyApi } from '@/lib/api';
+import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
+import { Property } from '@/lib/data';
+
+import { toast } from 'sonner';
 
 const Properties = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   
+  // STATE: Properties and filters
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const [purpose, setPurpose] = useState<'rent' | 'buy'>(
     (searchParams.get('purpose') as 'rent' | 'buy') || 'rent'
   );
-  const [city, setCity] = useState(searchParams.get('city') || 'Multan');
+  const [city, setCity] = useState(searchParams.get('city') || '');
   const [type, setType] = useState(searchParams.get('type') || 'all');
+
+  // FETCH PROPERTIES FROM API
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch all approved properties from API
+        const response = await propertyApi.getAll();
+        const backendProperties = response as BackendProperty[];
+        
+        // Transform backend format to frontend format
+        const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
+        
+        setProperties(transformedProperties);
+        
+        // Set default city if not set and properties exist
+        if (!city && transformedProperties.length > 0) {
+          const firstCity = transformedProperties[0]?.city;
+          if (firstCity) {
+            setCity(firstCity);
+            updateFilters('city', firstCity);
+          }
+        }
+      } catch (err: any) {
+        console.error('Error fetching properties:', err);
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to load properties';
+        setError(errorMessage);
+        toast.error('Error', {
+          description: errorMessage,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []); // Fetch once on mount
 
   // Update state when URL parameters change
   useEffect(() => {
@@ -30,20 +87,61 @@ const Properties = () => {
     if (urlType) setType(urlType);
   }, [searchParams]);
 
+  // Extract unique cities and property types from fetched properties
+  const cities = useMemo(() => {
+    const uniqueCities = Array.from(new Set(properties.map((p: Property) => p.city).filter(Boolean))) as string[];
+    return uniqueCities.sort();
+  }, [properties]);
+
+  const propertyTypes = useMemo(() => {
+    const uniqueTypes = Array.from(new Set(properties.map((p: Property) => p.type).filter(Boolean))) as string[];
+    return uniqueTypes.sort();
+  }, [properties]);
+
+  // Filter properties based on selected filters
   const filteredProperties = useMemo(() => {
-    return properties.filter((property) => {
+    return properties.filter((property: Property) => {
       const matchesPurpose = property.purpose === purpose;
-      const matchesCity = property.city === city;
+      const matchesCity = !city || property.city === city;
       const matchesType = !type || type === 'all' || property.type === type;
       return matchesPurpose && matchesCity && matchesType;
     });
-  }, [purpose, city, type]);
+  }, [properties, purpose, city, type]);
 
   const updateFilters = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(key, value);
     router.push(`/properties?${params.toString()}`);
   };
+
+  // LOADING STATE
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 pt-32 pb-16">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+              <p className="text-muted-foreground">Loading properties...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 pt-32 pb-16 text-center">
+          <h1 className="text-4xl font-bold text-foreground mb-4">Error Loading Properties</h1>
+          <p className="text-muted-foreground mb-8">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,7 +150,7 @@ const Properties = () => {
       <section className="pt-24 pb-8 md:pt-28 md:pb-12 bg-secondary animate-in fade-in duration-500">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 animate-in slide-in-from-bottom-4 duration-700">
-            Properties in <span className="text-primary">{city}</span>
+            Properties {city ? `in ${city}` : ''}
           </h1>
           <p className="text-muted-foreground animate-in slide-in-from-bottom-4 duration-700 delay-100">
             Find your perfect property from our extensive listings
@@ -109,7 +207,9 @@ const Properties = () => {
                     updateFilters('city', e.target.value);
                   }}
                   className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-sm font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
+                  title="Select City"
                 >
+                  <option value="">All Cities</option>
                   {cities.map((c) => (
                     <option key={c} value={c}>
                       {c}
@@ -132,9 +232,10 @@ const Properties = () => {
                     updateFilters('type', e.target.value);
                   }}
                   className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-sm font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
+                  title="Select Property Type"
                 >
                   <option value="all">All Types</option>
-                  {propertyTypes.map((t) => (
+                  {propertyTypes.map((t: string) => (
                     <option key={t} value={t}>
                       {t}
                     </option>
@@ -186,7 +287,7 @@ const Properties = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProperties.map((property, index) => (
                 <div
-                  key={property.id}
+                  key={`${property.id}-${index}`}
                   className="animate-in fade-in slide-in-from-bottom-4 duration-500"
                   style={{
                     animationDelay: `${index * 50}ms`,

@@ -1,12 +1,17 @@
-import { Body, Controller, Get, Post, Query, UseGuards, UseInterceptors, Request , Param, Patch, Delete, Put} from '@nestjs/common'
-import { AnyFilesInterceptor } from '@nestjs/platform-express'
-// import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { PropertyService } from './property.service'
+import { Body, Controller, Get, Post, Query, UseGuards, UseInterceptors, Request, Param, Patch, Delete, Put, UploadedFile } from '@nestjs/common';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+// import { StorageService } from '../../../../packages/storage/storage.service';
+import { PropertyService } from './property.service';
 import { CreatePropertyDto } from '../../../../packages/types/src/property';
+
 
 @Controller('properties')
 export class PropertyController {
-  constructor(private readonly propertyService: PropertyService) {}
+  constructor(
+    private readonly propertyService: PropertyService,
+    // Temporarily commented out to debug DI issue
+    // private readonly storageService: StorageService
+  ) {}
 
   @Post()
 //   @UseGuards(JwtAuthGuard)
@@ -50,6 +55,12 @@ export class PropertyController {
     if (cityId) filters.cityId = cityId;
     if (areaId) filters.areaId = areaId;
     return this.propertyService.findAll(filters)
+  }
+
+  // get property by slug (must be before :id route)
+  @Get('slug/:slug')
+  async findPropertyBySlug(@Param('slug') slug: string) {
+    return await this.propertyService.findPropertyBySlug(slug)
   }
 
   // get property by id (must be after specific routes like 'all')
@@ -103,5 +114,16 @@ export class PropertyController {
       console.error('Error in delete controller:', error);
       throw error;
     }
+  }
+
+
+  @Post('upload')
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    // Temporarily disabled until StorageService DI is fixed
+    // const key = await this.storageService.upload(file, 'properties/2026');
+    // const url = this.storageService.getUrl(key);
+    // return { key, url };
+    return { message: 'Upload endpoint temporarily disabled', file: file?.originalname };
   }
 }

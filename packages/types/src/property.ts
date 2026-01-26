@@ -1,6 +1,7 @@
 export interface CreatePropertyDto {
     listingType: 'rent' | 'sale'
     propertyType: 'house' | 'apartment' | 'flat' | 'commercial' | 'land' | 'shop' | 'office' | 'warehouse' | 'factory' | 'other' | 'hotel' | 'restaurant' | 'plot'
+    slug: string
     area: string // Area ID (ObjectId) - references the Area schema
     title: string
     location: string

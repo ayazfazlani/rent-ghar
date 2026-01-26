@@ -6,6 +6,7 @@ export interface BackendProperty {
   listingType: 'rent' | 'sale';
   propertyType: 'house' | 'apartment' | 'flat' | 'commercial';
   city?: string; // Legacy field, may not be present
+  slug?: string;
   area?: {
     _id: string;
     name: string;
@@ -31,6 +32,14 @@ export interface BackendProperty {
   owner?: any;
   createdAt?: string;
   updatedAt?: string;
+}
+
+function toSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 // Map backend property to frontend property format
@@ -61,6 +70,7 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
   return {
     id: backend._id,
     name: backend.title,
+    slug: backend.slug || toSlug(backend.title),
     type: typeMap[backend.propertyType] || 'House',
     city: cityName,
     location: backend.location,

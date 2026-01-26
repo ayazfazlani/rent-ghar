@@ -9,9 +9,11 @@ import { CityModule } from './city/city.module';
 import { AreaModule } from './area/area.module';
 import { CategoryModule } from './category/category.module';
 import { BlogModule } from './blog/blog.module';
+import { StorageModule } from '../../../packages/storage/storage.module';
 
 @Module({
   imports: [
+    StorageModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

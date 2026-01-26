@@ -3,7 +3,6 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Bed, Bath, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Property } from '@/lib/data';
-import { propertyApi } from '@/lib/api';
 interface PropertyCardProps {
   property: Property;
 }
@@ -33,7 +32,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   // Navigate to detail page
   const handleCardClick = () => {
 
-      router.push(`/properties/${property.id}`);
+      router.push(`/properties/${property.slug}`);
 
   };
 
@@ -97,7 +96,9 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         {/* Location with Icon Animation */}
         <div className="flex items-center gap-1 text-muted-foreground text-sm mb-4 transition-all duration-300 group-hover:text-foreground">
           <MapPin className="w-4 h-4 text-primary transition-all duration-300 group-hover:scale-125 group-hover:animate-bounce" />
-          <span className="transition-all duration-300 group-hover:translate-x-1">{property.location}, {property.city}</span>
+          <span className="transition-all duration-300 group-hover:translate-x-1">
+            {property.location}, {property.city}
+          </span>
         </div>
 
         {/* Property Features with Hover Effects */}

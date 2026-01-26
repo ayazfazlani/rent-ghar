@@ -1,5 +1,5 @@
 {
-  "extends": "../../packages/typescript-config/nestjs.json",   
+  "extends": "../../packages/typescript-config/nestjs.json",
   "compilerOptions": {
     "esModuleInterop": true,
     "isolatedModules": true,
@@ -13,6 +13,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
+      "@nestjs/*": ["../../node_modules/@nestjs/*"],
       "@rent-ghar/db": ["../../packages/db/src"],
       "@rent-ghar/db/*": ["../../packages/db/src/*"]
     },
@@ -24,5 +25,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
 }

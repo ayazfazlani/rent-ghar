@@ -7,7 +7,7 @@ interface PageProps {
 }
 
 export default function ListingDetailPage({ params }: PageProps) {
-  return <PropertyDetail id={params.id} />;
+  return <PropertyDetail slug={params.id} />;
 }
 
 // Optional: Metadata

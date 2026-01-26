@@ -63,6 +63,12 @@ export const propertyApi = {
     return response.data;
   },
 
+  // Get property by slug
+  getPropertyBySlug: async (params: {slug: string}) => {
+    const response = await api.get(`/properties/slug/${params.slug}`);
+    return response.data;
+  },
+
   updateStatus: async (propertyId: string) => {
     const response = await api.patch(`/properties/${propertyId}/update-status`);
     return response.data;

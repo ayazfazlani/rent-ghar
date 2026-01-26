@@ -4,8 +4,16 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
-  // Enable CORS for frontend
+  // main.ts
+  if (process.env.STORAGE_DISK === 'local') {
+    const { join } = await import('path');
+    // Use 'express.static' directly since 'useStaticAssets' is not on app
+    const express = await import('express');
+    app.use(
+      '/uploads/',
+      express.static(join(__dirname, '..', '..', 'uploads'))
+    );
+  }
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
@@ -19,6 +27,9 @@ async function bootstrap() {
       skipMissingProperties: true, // Skip validation for missing properties
     }
   ));
-  await app.listen(process.env.PORT ?? 3001);
+  
+  const port = process.env.PORT || 3001;
+  await app.listen(port);
+  console.log(`🚀 API server is running on http://localhost:${port}`);
 }
 bootstrap();

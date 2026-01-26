@@ -5,6 +5,9 @@ import { Property, PropertySchema } from '../../../../packages/db/src/schemas/pr
 import { Area, AreaSchema } from '../../../../packages/db/src/schemas/area.schema';
 import { City, CitySchema } from '../../../../packages/db/src/schemas/city.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+// Temporarily commented out to debug DI issue
+// import { StorageModule } from '../../../../packages/storage/storage.module';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -12,6 +15,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       { name: Area.name, schema: AreaSchema },
       { name: City.name, schema: CitySchema }
     ])
+    // StorageModule - temporarily removed
   ],
   controllers: [PropertyController],
   providers: [PropertyService],

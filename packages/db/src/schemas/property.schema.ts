@@ -15,6 +15,9 @@ export class Property extends Document {
   // city: string
 
   @Prop({ required: true })
+  slug: string
+
+  @Prop({ required: true })
   title: string
 
   @Prop({ required: true })

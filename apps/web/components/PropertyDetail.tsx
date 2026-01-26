@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { MapPin, Bed, Bath, Maximize, Share2, Heart, Phone, Mail, Calendar, CheckCircle2, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,8 +12,10 @@ import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/prope
 import { Property } from '@/lib/data';
 import { toast } from 'sonner';
 
-const PropertyDetail = ({id}: {id: string}) => {
+const PropertyDetail = ({ slug }: { slug?: string }) => {
   const router = useRouter();
+  const params = useParams();
+  const resolvedSlug = (slug || (params?.slug as string) || (params?.id as string))?.trim();
   const [property, setProperty] = useState<Property | null>(null);
   const [backendProperty, setBackendProperty] = useState<BackendProperty | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,7 @@ const PropertyDetail = ({id}: {id: string}) => {
       try {
         setLoading(true);
         setError(null);
-        const data = await propertyApi.getPropertyById({ id });
+        const data = await propertyApi.getPropertyBySlug({ slug: resolvedSlug });
         const backendData = data as BackendProperty;
         const mappedProperty = mapBackendToFrontendProperty(backendData);
         setProperty(mappedProperty);
@@ -51,10 +53,14 @@ const PropertyDetail = ({id}: {id: string}) => {
       }
     };
 
-    if (id) {
-      fetchProperty();
+    if (!resolvedSlug) {
+      setError('Property slug is missing');
+      setLoading(false);
+      return;
     }
-  }, [id]);
+
+    fetchProperty();
+  }, [resolvedSlug]);
 
   if (loading) {
     return (

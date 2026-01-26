@@ -59,8 +59,8 @@ const HeroSection = () => {
     router.push(`/properties?${params.toString()}`);
   };
 
-  const handlePropertyClick = (propertyId: string) => {
-    router.push(`/properties/${propertyId}`);
+  const handlePropertyClick = (propertySlug: string) => {
+    router.push(`/properties/${propertySlug}`);
     setShowSuggestions(false);
     setSearchQuery('');
   };
@@ -141,7 +141,7 @@ const HeroSection = () => {
                   {filteredSuggestions.map((property) => (
                     <button
                       key={property.id}
-                      onClick={() => handlePropertyClick(property.id)}
+                      onClick={() => handlePropertyClick(property.slug)}
                       className="w-full px-3 py-2.5 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0 group"
                     >
                       <div className="flex items-start gap-2.5">
@@ -217,6 +217,7 @@ const HeroSection = () => {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
+                  title="Select city"
                 >
                   {cities.map((c) => (
                     <option key={c} value={c}>
@@ -236,6 +237,7 @@ const HeroSection = () => {
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
+                  title="Select property type"
                 >
                   <option value="">All Types</option>
                   {propertyTypes.map((t) => (

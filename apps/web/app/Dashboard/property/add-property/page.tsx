@@ -39,6 +39,8 @@ export default function AddProperty() {
   const [cityId, setCityId] = useState('')
   const [areaId, setAreaId] = useState('')
   const [title, setTitle] = useState('')
+  const [slug, setSlug] = useState('')
+  const [isSlugEdited, setIsSlugEdited] = useState(false)
   const [location, setLocation] = useState('')
   const [bedrooms, setBedrooms] = useState('')
   const [bathrooms, setBathrooms] = useState('')
@@ -177,11 +179,24 @@ export default function AddProperty() {
     return mapping[type] || 'house'
   }
 
+  const generateSlug = (value: string) =>
+    value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const computedSlug = slug?.trim() ? slug : generateSlug(title)
+    if (!slug?.trim() && computedSlug) {
+      setSlug(computedSlug)
+      setIsSlugEdited(false)
+    }
     
     // Validation
-    if (!propertyType || !cityId || !areaId || !title || !location || !bedrooms || !bathrooms || !areaSize || !price || !description || !contactNumber) {
+    if (!propertyType || !cityId || !areaId || !title || !computedSlug || !location || !bedrooms || !bathrooms || !areaSize || !price || !description || !contactNumber) {
       toast.error('Please fill in all required fields')
       return
     }
@@ -212,6 +227,7 @@ export default function AddProperty() {
       formData.append('propertyType', mapPropertyTypeToBackend(propertyType))
       formData.append('area', areaId) // Area ID (ObjectId)
       formData.append('title', title)
+      formData.append('slug', computedSlug)
       formData.append('location', location)
       formData.append('bedrooms', bedrooms)
       formData.append('bathrooms', bathrooms)
@@ -388,11 +404,42 @@ export default function AddProperty() {
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  const nextTitle = e.target.value
+                  setTitle(nextTitle)
+                  if (!isSlugEdited) {
+                    setSlug(generateSlug(nextTitle))
+                  }
+                  if (!nextTitle.trim()) {
+                    setSlug('')
+                    setIsSlugEdited(false)
+                  }
+                }}
                 placeholder="E.g., Luxury 3 Bedroom Apartment in DHA"
                 disabled={isLoading}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
+            </div>
+
+            {/* Slug */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Slug *
+              </label>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => {
+                  setSlug(generateSlug(e.target.value))
+                  setIsSlugEdited(true)
+                }}
+                placeholder="E.g., luxury-3-bedroom-apartment-in-dha"
+                disabled={isLoading || title === ''}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              {!title && (
+                <p className="text-xs text-gray-500 mt-1">Please enter a title first</p>
+              )}
             </div>
 
             {/* Location */}

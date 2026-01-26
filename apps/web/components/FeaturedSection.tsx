@@ -3,12 +3,32 @@ import { Heart, MapPin, Bed, Bath, Maximize, ChevronLeft, ChevronRight } from 'l
 import { useState } from 'react';
 import Link from 'next/link';
 
-const PropertyCard = ({ property }) => {
+const toSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+type FeaturedProperty = {
+  id: number;
+  image: string;
+  title: string;
+  location: string;
+  price: string;
+  priceLabel?: string;
+  beds: number;
+  baths: number;
+  area: string;
+  slug?: string;
+};
+
+const PropertyCard = ({ property }: { property: FeaturedProperty }) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
-      <Link href={`/listing-detail/${property.id}`}>
+      <Link href={`/properties/${property.slug || toSlug(property.title)}`}>
         <div className="relative h-64 overflow-hidden group cursor-pointer">
           <img
             src={property.image}
@@ -21,6 +41,8 @@ const PropertyCard = ({ property }) => {
               e.preventDefault();
               setIsFavorite(!isFavorite);
             }}
+            aria-label="Toggle favorite"
+            title="Toggle favorite"
             className="absolute top-3 right-3 w-9 h-9 bg-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-md z-10"
           >
             <Heart
@@ -33,7 +55,7 @@ const PropertyCard = ({ property }) => {
       </Link>
 
       <div className="p-5">
-        <Link href={`/listing-detail/${property.id}`}>
+      <Link href={`/properties/${property.slug || toSlug(property.title)}`}>
           <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors cursor-pointer">
             {property.title}
           </h3>
@@ -65,7 +87,7 @@ const PropertyCard = ({ property }) => {
             <p className="text-2xl font-bold text-gray-900">{property.price}</p>
           </div>
           
-          <Link href={`/listing-detail/${property.id}`}>
+          <Link href={`/properties/${property.slug || toSlug(property.title)}`}>
             <button className="px-6 py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all duration-300 hover:shadow-lg">
               View Details
             </button>
@@ -77,7 +99,7 @@ const PropertyCard = ({ property }) => {
 };
 
 const FeaturedSection = () => {
-  const scroll = (direction) => {
+  const scroll = (direction: 'left' | 'right') => {
     const container = document.getElementById('properties-scroll');
     if (container) {
       const scrollAmount = direction === 'left' ? -400 : 400;
