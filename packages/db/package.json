@@ -4,9 +4,11 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "node init && tsc"
   },
   "dependencies": {
+    "@nestjs/common": "^11.1.12",
+    "@nestjs/core": "^11.1.12",
     "@nestjs/mongoose": "^11.0.4",
     "mongoose": "^9.1.3"
   },
