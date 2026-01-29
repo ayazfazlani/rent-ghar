@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Image as ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
     Form,
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import blogApi from "@/lib/api/blog/blog.api";
 import blogCategoryApi from "@/lib/api/blog-category/blog-category.api";
+import { ImagePickerDialog, type GalleryImageItem } from "@/components/ImagePickerDialog";
 
 const formSchema = z.object({
     title: z.string().min(2, { message: "Title must be at least 2 characters long" }),
@@ -50,6 +51,7 @@ export default function EditBlogPage() {
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState<any[]>([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
+    const [imagePickerOpen, setImagePickerOpen] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -166,6 +168,7 @@ export default function EditBlogPage() {
     }
 
     return (
+        <>
         <div className="w-full">
             <div className="max-w-5xl mx-auto">
                 <div className="bg-white rounded-xl shadow-lg p-8">
@@ -245,9 +248,44 @@ export default function EditBlogPage() {
 
                                 <FormField control={form.control} name="featuredImage" render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Featured Image URL</FormLabel>
+                                        <FormLabel>Featured Image</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="https://example.com/image.jpg" {...field} />
+                                            <div className="space-y-2">
+                                                <div className="flex gap-2">
+                                                    <Input 
+                                                        placeholder="https://example.com/image.jpg" 
+                                                        {...field} 
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => setImagePickerOpen(true)}
+                                                        title="Choose from gallery"
+                                                    >
+                                                        <ImageIcon className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                                {field.value && (
+                                                    <div className="flex items-center gap-3 mt-2">
+                                                        <div className="w-16 h-16 rounded-md overflow-hidden bg-muted">
+                                                            <img
+                                                                src={field.value}
+                                                                alt="Featured preview"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => field.onChange("")}
+                                                        >
+                                                            Remove image
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -373,6 +411,17 @@ export default function EditBlogPage() {
                 </div>
             </div>
         </div>
+        <ImagePickerDialog
+            open={imagePickerOpen}
+            onOpenChange={setImagePickerOpen}
+            onSelect={(image: GalleryImageItem) => {
+                const url = image.url;
+                form.setValue("featuredImage", url, { shouldValidate: true });
+            }}
+            title="Select Featured Image"
+            description="Choose an existing image from the gallery to use as the featured image for this blog post."
+        />
+        </>
     )
 }
 

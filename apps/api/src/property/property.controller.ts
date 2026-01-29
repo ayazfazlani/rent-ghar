@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, UseGuards, UseInterceptors, Request, Param, Patch, Delete, Put, UploadedFile } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
-// import { StorageService } from '../../../../packages/storage/storage.service';
+import { StorageService } from '../../../../packages/storage/storage.service';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from '../../../../packages/types/src/property';
 
@@ -10,7 +10,7 @@ export class PropertyController {
   constructor(
     private readonly propertyService: PropertyService,
     // Temporarily commented out to debug DI issue
-    // private readonly storageService: StorageService
+    private readonly storageService: StorageService
   ) {}
 
   @Post()
@@ -22,13 +22,44 @@ export class PropertyController {
   ) {
     // Extract files from request
     const files = req.files as Express.Multer.File[]
+    console.log('Received files:', files?.length || 0, 'files');
     const mainPhoto = files?.find(file => file.fieldname === 'mainPhoto')
     const additionalPhotos = files?.filter(file => file.fieldname === 'additionalPhotos') || []
 
-    // Here you would upload files to Cloudinary/S3 and get URLs
-    // For now, just log or mock URLs
-    const mainPhotoUrl = mainPhoto ? `http://localhost/uploads/${mainPhoto.filename}` : undefined
-    const additionalPhotosUrls = additionalPhotos.map(file => `http://localhost/uploads/${file.filename}`)
+    // Upload files using StorageService OR use existing URLs from body (gallery)
+    let mainPhotoUrl: string | undefined;
+    if (mainPhoto) {
+      console.log('Uploading main photo:', mainPhoto.originalname);
+      const key = await this.storageService.upload(mainPhoto, 'properties');
+      mainPhotoUrl = this.storageService.getUrl(key);
+      console.log('Main photo uploaded:', mainPhotoUrl);
+    } else if (req.body.mainPhotoUrl) {
+      // If no uploaded main photo but a URL is provided (selected from gallery), use it
+      mainPhotoUrl = req.body.mainPhotoUrl;
+      console.log('Using existing main photo URL from body:', mainPhotoUrl);
+    }
+    
+    let additionalPhotosUrls: string[] = [];
+    if (additionalPhotos.length > 0) {
+      console.log('Uploading', additionalPhotos.length, 'additional photos');
+      const uploadedUrls = await Promise.all(
+        additionalPhotos.map(async (file) => {
+          const key = await this.storageService.upload(file, 'properties');
+          return this.storageService.getUrl(key);
+        })
+      );
+      additionalPhotosUrls = [...additionalPhotosUrls, ...uploadedUrls];
+      console.log('Additional photos uploaded:', uploadedUrls);
+    }
+
+    // Merge additional photo URLs coming directly from the body (selected from gallery)
+    const bodyAdditional = (req.body.additionalPhotosUrls ??
+      req.body['additionalPhotosUrls[]']) as string | string[] | undefined;
+    if (bodyAdditional) {
+      const bodyUrls = Array.isArray(bodyAdditional) ? bodyAdditional : [bodyAdditional];
+      additionalPhotosUrls = [...additionalPhotosUrls, ...bodyUrls];
+      console.log('Additional photos URLs from body:', bodyUrls);
+    }
 
     // TODO: Replace with actual user ID from JWT when auth is enabled
     const userId = req.user?.sub || 'temp-user-id'
@@ -86,11 +117,17 @@ export class PropertyController {
       const mainPhoto = files?.find(file => file.fieldname === 'mainPhoto')
       const additionalPhotos = files?.filter(file => file.fieldname === 'additionalPhotos') || []
 
-      // Here you would upload files to Cloudinary/S3 and get URLs
-      // For now, just log or mock URLs
-      const mainPhotoUrl = mainPhoto ? `http://localhost/uploads/${mainPhoto.filename}` : undefined
-      const additionalPhotosUrls = additionalPhotos.length > 0 
-        ? additionalPhotos.map(file => `http://localhost/uploads/${file.filename}`)
+      // Upload files using StorageService
+      const mainPhotoUrl = mainPhoto 
+        ? this.storageService.getUrl(await this.storageService.upload(mainPhoto, 'properties'))
+        : undefined
+      const additionalPhotosUrls = additionalPhotos.length > 0
+        ? await Promise.all(
+            additionalPhotos.map(async (file) => {
+              const key = await this.storageService.upload(file, 'properties');
+              return this.storageService.getUrl(key);
+            })
+          )
         : undefined
 
       const updated = await this.propertyService.update(id, dto, mainPhotoUrl, additionalPhotosUrls)
@@ -119,11 +156,46 @@ export class PropertyController {
 
   @Post('upload')
   @UseInterceptors(AnyFilesInterceptor())
-  async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    // Temporarily disabled until StorageService DI is fixed
-    // const key = await this.storageService.upload(file, 'properties/2026');
-    // const url = this.storageService.getUrl(key);
-    // return { key, url };
-    return { message: 'Upload endpoint temporarily disabled', file: file?.originalname };
+  async uploadImage(@Request() req) {
+    const files = req.files as Express.Multer.File[];
+    const file = files?.[0] || files?.find(f => f.fieldname === 'file');
+    
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+    
+    console.log('Uploading file:', file.originalname, 'Size:', file.size, 'bytes');
+    const key = await this.storageService.upload(file, 'properties/2026');
+    const url = this.storageService.getUrl(key);
+    console.log('File uploaded successfully:', key, 'URL:', url);
+    return { key, url };
+  }
+
+  @Get('images/list')
+  async listImages(@Query('folder') folder?: string) {
+    try {
+      const images = await this.storageService.listFiles(folder || 'properties');
+      return { images, count: images.length };
+    } catch (error) {
+      console.error('Error listing images:', error);
+      throw error;
+    }
+  }
+
+  @Delete('images/:key')
+  async deleteImage(@Param('key') key: string) {
+    try {
+      // Decode the key (it might be URL encoded)
+      const decodedKey = decodeURIComponent(key);
+      const deleted = await this.storageService.deleteFile(decodedKey);
+      if (deleted) {
+        return { message: 'Image deleted successfully', key: decodedKey };
+      } else {
+        throw new Error('Failed to delete image');
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      throw error;
+    }
   }
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Loader2, X, Plus } from 'lucide-react'
+import { Loader2, X, Plus, Image as ImageIcon } from 'lucide-react'
 import { propertyApi } from '@/lib/api'
 import cityApi from '@/lib/api/city/city.api'
 import areaApi from '@/lib/api/area/area.api'
@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { ImagePickerDialog, type GalleryImageItem } from '@/components/ImagePickerDialog'
 
 interface City {
   _id: string
@@ -61,6 +62,11 @@ export default function AddProperty() {
   const [additionalImageFiles, setAdditionalImageFiles] = useState<(File | null)[]>([null, null, null])
   const [additionalImagePreviews, setAdditionalImagePreviews] = useState<(string | null)[]>([null, null, null])
   const [features, setFeatures] = useState<string[]>([''])
+
+  // Gallery image selection state
+  const [mainImageSource, setMainImageSource] = useState<'upload' | 'gallery'>('upload')
+  const [mainImageUrl, setMainImageUrl] = useState<string | null>(null)
+  const [galleryDialogOpen, setGalleryDialogOpen] = useState(false)
 
   // Fetch cities on component mount
   useEffect(() => {
@@ -113,6 +119,8 @@ export default function AddProperty() {
   const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      setMainImageSource('upload')
+      setMainImageUrl(null)
       setMainImageFile(file)
       const reader = new FileReader()
       reader.onloadend = () => {
@@ -142,6 +150,7 @@ export default function AddProperty() {
   const removeMainImage = () => {
     setMainImageFile(null)
     setMainImagePreview(null)
+    setMainImageUrl(null)
   }
 
   const removeAdditionalImage = (index: number) => {
@@ -201,8 +210,8 @@ export default function AddProperty() {
       return
     }
 
-    if (!mainImageFile) {
-      toast.error('Please upload a main photo')
+    if (!mainImageFile && !mainImageUrl) {
+      toast.error('Please upload a main photo or select one from the gallery')
       return
     }
 
@@ -212,8 +221,12 @@ export default function AddProperty() {
       // Create FormData
       const formData = new FormData()
       
-      // Add main photo
-      formData.append('mainPhoto', mainImageFile)
+      // Add main photo (either uploaded file or existing URL from gallery)
+      if (mainImageFile) {
+        formData.append('mainPhoto', mainImageFile)
+      } else if (mainImageUrl) {
+        formData.append('mainPhotoUrl', mainImageUrl)
+      }
       
       // Add additional photos (only non-null files)
       additionalImageFiles.forEach((file) => {
@@ -519,49 +532,101 @@ export default function AddProperty() {
               />
             </div>
 
-            {/* Main Photo Upload */}
+            {/* Main Photo - Upload or Gallery */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
                 Main Photo *
               </label>
-              {mainImagePreview ? (
-                <div className="relative">
-                  <img 
-                    src={mainImagePreview} 
-                    alt="Main property" 
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
-                  <Button
-                    type="button"
-                    onClick={removeMainImage}
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-3 right-3"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-500 transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleMainImageUpload}
-                    disabled={isLoading}
-                    className="hidden"
-                    id="main-photo"
-                  />
-                  <label htmlFor="main-photo" className="cursor-pointer">
+
+              <div className="flex gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setMainImageSource('upload')}
+                  className={`text-xs px-3 py-1.5 rounded-full border ${
+                    mainImageSource === 'upload'
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-white text-gray-700 border-gray-200'
+                  }`}
+                >
+                  Upload new
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMainImageSource('gallery')
+                    setGalleryDialogOpen(true)
+                  }}
+                  className={`text-xs px-3 py-1.5 rounded-full border flex items-center gap-1 ${
+                    mainImageSource === 'gallery'
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-white text-gray-700 border-gray-200'
+                  }`}
+                >
+                  <ImageIcon className="w-3 h-3" />
+                  Choose from gallery
+                </button>
+              </div>
+
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-500 transition-colors">
+                {(mainImagePreview && mainImageSource === 'upload') || (mainImageUrl && mainImageSource === 'gallery') ? (
+                  <div className="relative">
+                    <img 
+                      src={mainImageSource === 'upload' ? mainImagePreview! : mainImageUrl!} 
+                      alt="Main property" 
+                      className="w-full h-64 object-cover rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      onClick={removeMainImage}
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-3 right-3"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
                     <div className="flex flex-col items-center">
-                      <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-sm font-medium text-gray-700">Click to upload main photo</span>
-                      <span className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</span>
+                      <ImageIcon className="w-12 h-12 text-gray-400 mb-3" />
+                      <span className="text-sm font-medium text-gray-700 mb-1">
+                        {mainImageSource === 'upload'
+                          ? 'Click below to upload main photo'
+                          : 'Choose a main photo from the gallery'}
+                      </span>
+                      <span className="text-xs text-gray-500 mb-3">PNG, JPG up to 10MB</span>
+
+                      {mainImageSource === 'upload' ? (
+                        <>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleMainImageUpload}
+                            disabled={isLoading}
+                            className="hidden"
+                            id="main-photo"
+                          />
+                          <label
+                            htmlFor="main-photo"
+                            className="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium cursor-pointer hover:bg-gray-800 transition-colors"
+                          >
+                            Select Image
+                          </label>
+                        </>
+                      ) : (
+                        <Button
+                          type="button"
+                          onClick={() => setGalleryDialogOpen(true)}
+                          className="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+                        >
+                          <ImageIcon className="w-4 h-4 mr-2" />
+                          Open Gallery
+                        </Button>
+                      )}
                     </div>
-                  </label>
-                </div>
-              )}
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Additional Photos */}
@@ -711,6 +776,19 @@ export default function AddProperty() {
               </Button>
             </div>
           </form>
+          {/* Gallery picker dialog for main image */}
+          <ImagePickerDialog
+            open={galleryDialogOpen}
+            onOpenChange={setGalleryDialogOpen}
+            onSelect={(image: GalleryImageItem) => {
+              setMainImageSource('gallery')
+              setMainImageUrl(image.url)
+              setMainImageFile(null)
+              setMainImagePreview(null)
+            }}
+            title="Select Main Property Image"
+            description="Choose an existing image from the gallery to use as the main photo for this property."
+          />
         </div>
       </div>
     </div>

@@ -98,6 +98,18 @@ export const propertyApi = {
     const response = await api.delete(`/properties/${propertyId}`);
     return response.data;
   },
+
+  // Upload image
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/properties/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
 };
 
 // Blog API functions

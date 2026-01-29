@@ -89,27 +89,37 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
   const getImages = (): string[] => {
     if (!property) return getPlaceholderImages('House');
     
-    // Check if mainPhotoUrl exists and is a valid URL (not a mock localhost URL)
-    const isValidImageUrl = (url?: string): boolean => {
-      if (!url) return false;
-      // If it's a localhost upload URL, it's likely a mock - treat as invalid
-      if (url.includes('localhost/uploads/')) return false;
-      // Check if it's a valid HTTP/HTTPS URL
-      return url.startsWith('http://') || url.startsWith('https://');
+    // Convert image URL to full URL if needed
+    const getImageUrl = (url?: string): string | null => {
+      if (!url) return null;
+      // If it's already a full URL, return as is
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      // If it's a relative path like /uploads/..., use Next.js proxy
+      if (url.startsWith('/uploads/')) {
+        // Next.js rewrite will handle /uploads/... -> http://localhost:3001/uploads/...
+        return url;
+      }
+      return null;
     };
     
     const validImages: string[] = [];
     
     // Add main photo if valid
-    if (backendProperty && isValidImageUrl(backendProperty.mainPhotoUrl)) {
-      validImages.push(backendProperty.mainPhotoUrl!);
+    if (backendProperty) {
+      const mainPhotoUrl = getImageUrl(backendProperty.mainPhotoUrl);
+      if (mainPhotoUrl) {
+        validImages.push(mainPhotoUrl);
+      }
     }
     
     // Add additional photos if valid
     if (backendProperty?.additionalPhotosUrls) {
       backendProperty.additionalPhotosUrls.forEach(url => {
-        if (isValidImageUrl(url)) {
-          validImages.push(url);
+        const imageUrl = getImageUrl(url);
+        if (imageUrl) {
+          validImages.push(imageUrl);
         }
       });
     }

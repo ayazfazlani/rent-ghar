@@ -11,6 +11,7 @@ interface BlogDetailPageProps {
   relatedPosts?: BlogPost[]; // Related posts also use BlogPost type
 }
 
+
 const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
   const sharePost = (platform: string) => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -27,29 +28,71 @@ const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
     }
   };
 
+  // Get base URL for structured data
+  const baseUrl = typeof window !== 'undefined' 
+    ? window.location.origin 
+    : 'https://rentghar.com';
+  
+  // Get full image URL
+  const fullImageUrl = post.image?.startsWith('http')
+    ? post.image
+    : `${baseUrl}${post.image?.startsWith('/') ? '' : '/'}${post.image || '/default-blog.jpg'}`;
+  
+  // Get page URL
+  const pageUrl = `${baseUrl}/blog/${post.slug}`;
+  
+  // Parse date for structured data
+  const publishedDate = post.date ? new Date(post.date).toISOString() : new Date().toISOString();
+
   return (
-    
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        'context': 'https://schema.org',
-        'type': 'BlogPosting',
-        'headline': post.title,
-        'datePublished': post.date,
-        'dateModified': post.date,
-        'author': {
-          'type': 'Person',
-          'name': post.author
-        },
-        'publisher': {
-          'type': 'Organization',
-          'name': 'Rent Ghar',
-          'logo': {
-            'type': 'ImageObject',
-            'url': 'https://rentghar.com/logo.png'
-          }
-        }
-      })}}/>
+      {/* Structured Data (JSON-LD) for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: post.title,
+            description: post.excerpt || post.title.substring(0, 160),
+            image: {
+              '@type': 'ImageObject',
+              url: fullImageUrl,
+              width: 1200,
+              height: 630,
+            },
+            datePublished: publishedDate,
+            dateModified: publishedDate,
+            author: {
+              '@type': 'Person',
+              name: post.author,
+            },
+            publisher: {
+              '@type': 'Organization',
+              name: 'RentGhar',
+              logo: {
+                '@type': 'ImageObject',
+                url: `${baseUrl}/logo.png`,
+                width: 200,
+                height: 200,
+              },
+            },
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': pageUrl,
+            },
+            url: pageUrl,
+            articleSection: post.category || 'General',
+            keywords: post.category || '',
+            wordCount: post.content?.replace(/<[^>]*>/g, '').split(/\s+/).length || 0,
+            inLanguage: 'en-US',
+            isAccessibleForFree: true,
+            ...(post.readTime && {
+              timeRequired: post.readTime,
+            }),
+          }),
+        }}
+      />
       {/* Back Button */}
       <div className="container mx-auto px-4 pt-24 pb-8">
         <Link href="/blog">

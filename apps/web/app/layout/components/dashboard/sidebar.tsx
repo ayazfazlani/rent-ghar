@@ -18,6 +18,7 @@ import {
     MapPin,
     User,
     ChevronDown,
+    Image,
   } from "lucide-react";
   import Link from "next/link";
   import { usePathname } from "next/navigation";
@@ -77,6 +78,12 @@ import {
         { title: "Add New Area", href: "/dashboard/area/add-area" },
       ],
     };
+
+    const imagesGallerySection = {
+      title: "Images Gallery",
+      icon: Image,
+      basePath: "/dashboard/images-gallery",
+    }
   
     const accountSection = {
       title: "Account",
@@ -266,6 +273,34 @@ import {
                 </SidebarGroupContent>
               </CollapsibleContent>
             </SidebarGroup>
+
+          {/* Images Gallery */}
+          <Collapsible defaultOpen={isSectionActive(imagesGallerySection.basePath)}>
+            <SidebarGroup>
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                  <div className="flex items-center gap-3">
+                    <imagesGallerySection.icon className="h-5 w-5" />
+                    <span>{imagesGallerySection.title}</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu className="pl-3">
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/dashboard/images-gallery")}>
+                        <Link href="/dashboard/images-gallery">
+                          <span>All Images</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
           </Collapsible>
   
           {/* Account (bottom) */}

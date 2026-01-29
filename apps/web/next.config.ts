@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         destination: 'http://localhost:3001/:path*', // ← yahan apna NestJS port daal dena (development mein)
         // production mein: process.env.NEXT_PUBLIC_API_URL + '/:path*'
       },
+      {
+        source: '/uploads/:path*',
+        destination: 'http://localhost:3001/uploads/:path*', // Proxy uploads to API server
+      },
     ];
   },
 };

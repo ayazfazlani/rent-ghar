@@ -1,173 +1,149 @@
-'use client'
-/**
- * Blog Detail Page by Slug - Complete Flow Explanation
- * 
- * FLOW:
- * 1. User visits /blog/[slug] → Next.js extracts slug from URL (e.g., "it-sector-growth-continues-pakistan")
- * 2. Component mounts → useEffect runs → Fetches blog by slug from API
- * 3. API call: GET /api/blog/slug/:slug → Backend queries MongoDB by slug
- * 4. Backend: findOne({ slug, status: 'published' }) → Only returns published blogs
- * 5. Backend returns blog document with populated author & categories
- * 6. Transform backend format to frontend format
- * 7. Fetch all published blogs for "related posts" section
- * 8. Filter related posts (exclude current, take first 3)
- * 9. Display blog content and related posts
- * 10. Backend automatically increments view count
- */
-
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import BlogDetailPage from '@/components/BlogDetailPage';
-import blogApi from '@/lib/api/blog/blog.api';
-import { transformBlogToPost, transformBlogsToPosts } from '@/lib/utils/blog-utils';
-import type { BlogPost } from '@/lib/utils/blog-utils';
+import type { Metadata } from 'next';
+import BlogPostClient from './BlogPostClient';
 import { Blog } from '@/lib/types/blog';
-import { Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import Link from 'next/link';
 
-export default function BlogPostPage() {
-  const params = useParams();
-  const slug = params.slug as string; // Get slug from URL params (e.g., "it-sector-growth-continues-pakistan")
-  
-  // STATE MANAGEMENT
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface PageProps {
+  params: Promise<{
+    slug: string;
+  }>;
+}
 
-  // FETCH BLOG AND RELATED POSTS
-  useEffect(() => {
-    const fetchBlogData = async () => {
-      if (!slug) {
-        setError('Slug is missing');
-        setLoading(false);
-        return;
-      }
+// SEO Metadata Generation - Server Component
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  // Next.js 15: params is now a Promise, must await it
+  const { slug } = await params;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rentghar.com';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-      try {
-        setLoading(true);
-        setError(null);
+  try {
+    // Fetch blog data for SEO
+    const response = await fetch(`${apiUrl}/blog/slug/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 3600 }, // Revalidate every hour
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-        // STEP 1: Fetch the specific blog by slug
-        // API call: GET /api/blog/slug/:slug
-        // Backend: blogService.findBlogBySlug(slug) → MongoDB findOne({ slug, status: 'published' })
-        // Returns: Blog document with populated author and categories
-        // Note: Backend automatically increments views when fetching by slug
-        // Note: Next.js automatically decodes URL params, so slug is already decoded
-        console.log('Page: Fetching blog with slug:', slug);
-        console.log('Page: Slug type:', typeof slug);
-        
-        // Next.js already decodes the slug from the URL, so we pass it as-is
-        // The API function will handle any necessary encoding
-        const blogResponse = await blogApi.getBlogBySlug(slug);
-        console.log('Page: Blog response received:', blogResponse);
-        
-        if (!blogResponse) {
-          throw new Error('Blog not found');
-        }
+    if (!response.ok) {
+      return {
+        title: 'Blog Post Not Found | RentGhar',
+        description: 'The blog post you are looking for does not exist.',
+        robots: {
+          index: false,
+          follow: false,
+        },
+      };
+    }
 
-        // STEP 2: Transform backend format to frontend format
-        // Backend returns: { _id, title, slug, content, author: { name, email }, categories: [{ name, slug }], ... }
-        // Transform to: { id, title, slug, excerpt, date, author: "Name", category: "Category Name", ... }
-        const transformedPost = transformBlogToPost(blogResponse as Blog);
-        console.log('Transformed post:', transformedPost);
-        setPost(transformedPost);
+    const blog: Blog = await response.json();
 
-        // STEP 3: Fetch all published blogs for related posts
-        const allBlogsResponse = await blogApi.getPublishedBlogs();
-        const allBlogs = transformBlogsToPosts(allBlogsResponse as Blog[]);
-        
-        // STEP 4: Filter related posts (exclude current, take first 3)
-        const related = allBlogs
-          .filter(blog => blog.slug !== slug && blog.id !== transformedPost.id) // Exclude current blog by slug and id
-          .slice(0, 3); // Take first 3
-        
-        setRelatedPosts(related);
+    // Get author name
+    const authorName = typeof blog.author === 'object' && blog.author !== null && 'name' in blog.author
+      ? blog.author.name
+      : 'RentGhar Team';
 
-      } catch (err: any) {
-        // Enhanced error handling with detailed logging
-        const status = err.response?.status;
-        const errorData = err.response?.data;
-        
-        console.error('❌ Error fetching blog:', {
-          slug: slug,
-          status: status,
-          statusText: err.response?.statusText,
-          message: err.message,
-          errorData: errorData,
-          url: err.config?.url,
-          fullError: err
-        });
-        
-        // Provide helpful error messages based on status code
-        let errorMessage = `Failed to load blog post`;
-        
-        if (status === 404) {
-          errorMessage = `Blog post with slug "${slug}" not found. It may not exist or may not be published.`;
-        } else if (status === 500) {
-          errorMessage = `Server error while loading blog post. Please try again later.`;
-        } else if (errorData?.message) {
-          errorMessage = errorData.message;
-        } else if (err.message) {
-          errorMessage = err.message;
-        }
-        
-        setError(errorMessage);
-        toast.error('Error Loading Blog', { 
-          description: errorMessage,
-          duration: 5000 
-        });
-      } finally {
-        setLoading(false);
-      }
+    // Get category names
+    const categories = Array.isArray(blog.categories) && blog.categories.length > 0
+      ? blog.categories.map(cat => typeof cat === 'object' && 'name' in cat ? cat.name : 'Uncategorized')
+      : ['Uncategorized'];
+
+    // Get featured image or default
+    const imageUrl = blog.featuredImage
+      ? (blog.featuredImage.startsWith('http') 
+          ? blog.featuredImage 
+          : `${baseUrl}${blog.featuredImage.startsWith('/') ? '' : '/'}${blog.featuredImage}`)
+      : `${baseUrl}/default-blog.jpg`;
+
+    // Get canonical URL
+    const canonicalUrl = blog.canonicalUrl || `${baseUrl}/blog/${blog.slug}`;
+    const pageUrl = `${baseUrl}/blog/${blog.slug}`;
+
+    // Meta title and description
+    const metaTitle = blog.metaTitle || blog.title;
+    const metaDescription = blog.metaDescription || blog.excerpt || blog.title.substring(0, 160);
+
+    // Format date
+    const publishedDate = blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString();
+    const modifiedDate = blog.updatedAt ? new Date(blog.updatedAt).toISOString() : publishedDate;
+
+    return {
+      title: `${metaTitle} | RentGhar Blog`,
+      description: metaDescription,
+      keywords: blog.tags?.join(', ') || categories.join(', '),
+      authors: [{ name: authorName }],
+      creator: authorName,
+      publisher: 'RentGhar',
+      formatDetection: {
+        email: false,
+        address: false,
+        telephone: false,
+      },
+      metadataBase: new URL(baseUrl),
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        type: 'article',
+        title: metaTitle,
+        description: metaDescription,
+        url: pageUrl,
+        siteName: 'RentGhar',
+        images: [
+          {
+            url: imageUrl,
+            width: 1200,
+            height: 630,
+            alt: blog.title,
+          },
+        ],
+        locale: 'en_US',
+        publishedTime: publishedDate,
+        modifiedTime: modifiedDate,
+        authors: [authorName],
+        section: categories[0] || 'General',
+        tags: blog.tags || categories,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: metaTitle,
+        description: metaDescription,
+        images: [imageUrl],
+        creator: '@rentghar',
+        site: '@rentghar',
+      },
+      robots: {
+        index: blog.status === 'published',
+        follow: true,
+        googleBot: {
+          index: blog.status === 'published',
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
+      other: {
+        'article:published_time': publishedDate,
+        'article:modified_time': modifiedDate,
+        'article:author': authorName,
+        'article:section': categories[0] || 'General',
+        ...(blog.tags && blog.tags.length > 0 && {
+          'article:tag': blog.tags.join(', '),
+        }),
+      },
     };
-
-    fetchBlogData();
-  }, [slug]); // Re-fetch if slug changes
-
-  // LOADING STATE
-  if (loading) {
-    return (
-      <main className="min-h-screen">
-        <div className="container mx-auto px-4 pt-32 pb-16">
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-              <p className="text-muted-foreground">Loading blog post...</p>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    return {
+      title: 'Blog Post | RentGhar',
+      description: 'Read the latest blog posts about real estate in Pakistan.',
+    };
   }
+}
 
-  // ERROR STATE
-  if (error || !post) {
-    return (
-      <main className="min-h-screen">
-        <div className="container mx-auto px-4 pt-32 pb-16 text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            Post Not Found
-          </h1>
-          <p className="text-muted-foreground mb-8">
-            {error || 'The blog post you\'re looking for doesn\'t exist.'}
-          </p>
-          <Link 
-            href="/blog" 
-            className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
-          >
-            Back to Blog
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
-  // SUCCESS STATE - Render blog detail
-  return (
-    <main className="min-h-screen">
-      <BlogDetailPage post={post} relatedPosts={relatedPosts} />
-    </main>
-  );
+// Server Component - passes params to client component
+export default async function BlogPostPage({ params }: PageProps) {
+  // Next.js 15: params is now a Promise, must await it
+  const { slug } = await params;
+  return <BlogPostClient slug={slug} />;
 }

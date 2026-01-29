@@ -67,6 +67,21 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
   // Extract area name
   const areaName = backend.area && typeof backend.area === 'object' ? backend.area.name : '';
 
+  // Convert image URL to full URL if it's a relative path
+  const getImageUrl = (url?: string): string => {
+    if (!url) return 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80';
+    // If it's already a full URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // If it's a relative path like /uploads/..., use Next.js proxy (works in dev and prod)
+    if (url.startsWith('/uploads/')) {
+      // Use the proxy path which Next.js will rewrite to the API server
+      return url; // Next.js rewrite will handle /uploads/... -> http://localhost:3001/uploads/...
+    }
+    return url;
+  };
+
   return {
     id: backend._id,
     name: backend.title,
@@ -79,7 +94,7 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
     bathrooms: backend.bathrooms,
     area: backend.areaSize || 0, // Property size in sq ft
     purpose: purposeMap[backend.listingType] || 'rent',
-    image: backend.mainPhotoUrl || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
+    image: getImageUrl(backend.mainPhotoUrl),
     description: backend.description,
     features: backend.features || [],
     areaId: backend.area && typeof backend.area === 'object' ? backend.area._id : (typeof backend.area === 'string' ? backend.area : undefined),
