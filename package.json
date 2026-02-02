@@ -2,10 +2,10 @@
   "name": "rent-ghar",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev:api": "npm run start:dev --workspace=apps/api",
-    "dev:web": "npm run dev --workspace=apps/web",
-    "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
+    "build": "node init && turbo run build",
+    "dev:api": "node init && npm run start:dev --workspace=apps/api",
+    "dev:web": "node init && npm run dev --workspace=apps/web",
+    "dev": "node init && concurrently \"npm:dev:api\" \"npm:dev:web\"",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

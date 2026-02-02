@@ -1,4 +1,4 @@
-'use client'
+ 'use client'
 /**
  * BlogSection Component - Homepage Blog Preview
  * 
@@ -51,7 +51,7 @@ const BlogSection = () => {
   // Handles horizontal scrolling of blog carousel
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 400; // Pixels to scroll
+      const scrollAmount = 300; // Pixels to scroll
       scrollContainerRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth' // Smooth animation
@@ -62,10 +62,10 @@ const BlogSection = () => {
   // LOADING STATE
   if (loading) {
     return (
-      <section className="py-16 bg-secondary/30">
-        <div className="container mx-auto px-4">
+      <section className="py-10 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <Loader2 className="w-6 h-6 animate-spin text-black" />
           </div>
         </div>
       </section>
@@ -78,99 +78,116 @@ const BlogSection = () => {
   }
 
   return (
-    <section className="py-16 bg-secondary/30">
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
-        <div className="mb-12">
-          <h2 className="text-4xl font-bold text-foreground mb-3">
+    <section className="py-10 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header - Compact */}
+        <div className="mb-6">
+          <h2 className="text-2xl md:text-4xl font-bold text-black mb-2">
             Latest Property News
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-sm md:text-base text-gray-600">
             Stay updated with the latest trends and insights from Pakistan's property market
           </p>
         </div>
 
         {/* Blog Cards with Navigation */}
         <div className="relative">
-          {/* Left Arrow Button */}
+          {/* Left Arrow Button - Hidden on mobile, visible on desktop */}
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-background transition-all hover:scale-110"
+            className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-black text-white p-3 rounded-full shadow-xl hover:bg-gray-800 transition-all duration-300 hover:scale-110"
             aria-label="Scroll left"
           >
-            <ChevronLeft size={24} className="text-foreground" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
           
-          {/* Right Arrow Button */}
+          {/* Right Arrow Button - Hidden on mobile, visible on desktop */}
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-background transition-all hover:scale-110"
+            className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-black text-white p-3 rounded-full shadow-xl hover:bg-gray-800 transition-all duration-300 hover:scale-110"
             aria-label="Scroll right"
           >
-            <ChevronRight size={24} className="text-foreground" />
+            <ChevronRight className="w-5 h-5" />
           </button>
 
           {/* Scrollable Container - Horizontal Scroll */}
           <div 
             ref={scrollContainerRef}
-            className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-12"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-1"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {/* Map through blog posts and render cards */}
             {blogPosts.map(post => (
               <Link href={`/blog/${post.slug}`} key={post.id}>
                 <article 
-                  className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group flex-shrink-0 w-80"
+                  className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-black hover:shadow-xl transition-all duration-300 cursor-pointer group flex-shrink-0 w-64 md:w-72 hover:scale-[1.02]"
                 >
-                  {/* Image */}
-                  <div className="relative overflow-hidden h-44">
+                  {/* Image - Compact */}
+                  <div className="relative overflow-hidden h-36">
                     <img 
                       src={post.image} 
                       alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                    
                     {/* Category Badge */}
-                    <span className="absolute top-3 left-3 bg-primary/90 text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
+                    <span className="absolute top-2 left-2 bg-black text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
                       {post.category}
                     </span>
                   </div>
                   
-                  {/* Content */}
-                  <div className="p-5">
+                  {/* Content - Compact */}
+                  <div className="p-3">
                     {/* Meta Info */}
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                      <span className="flex items-center gap-1">
-                        <Calendar size={14} />
+                    <div className="flex items-center gap-2 text-[10px] text-gray-500 mb-2">
+                      <span className="flex items-center gap-0.5">
+                        <Calendar className="w-2.5 h-2.5" />
                         {post.date}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <User size={14} />
+                      <span className="flex items-center gap-0.5">
+                        <User className="w-2.5 h-2.5" />
                         {post.author}
                       </span>
                     </div>
                     
                     {/* Title */}
-                    <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                    <h3 className="text-sm font-bold text-black mb-1 group-hover:text-gray-700 transition-colors line-clamp-2">
                       {post.title}
                     </h3>
                     
                     {/* Excerpt */}
-                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                    <p className="text-[10px] text-gray-600 mb-2 line-clamp-2">
                       {post.excerpt}
                     </p>
                     
-                    {/* Read More */}
-                    <div className="flex items-center gap-2 text-primary text-sm font-semibold group-hover:gap-3 transition-all">
-                      Read More
-                      <ArrowRight size={16} />
+                    {/* Read More Button */}
+                    <div className="flex items-center gap-1 text-black text-[10px] font-semibold group-hover:gap-2 transition-all pt-2 border-t border-gray-200">
+                      <span>Read More</span>
+                      <ArrowRight className="w-3 h-3" />
                     </div>
                   </div>
                 </article>
               </Link>
             ))}
           </div>
+
+          {/* Scroll Indicator for Mobile */}
+          <div className="lg:hidden flex justify-center gap-1 mt-3">
+            {Array.from({ length: Math.ceil(blogPosts.length / 2) }).map((_, i) => (
+              <div key={i} className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* Custom Scrollbar Hide */}
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 };

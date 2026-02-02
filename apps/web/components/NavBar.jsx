@@ -12,7 +12,6 @@ import Image from 'next/image';
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Properties', path: '/properties' },
-  { name: 'Hotels', path: '/hotels' },
   { name: 'About', path: '/about' },
   { name: 'Blog', path: '/blog' },
 ];
@@ -164,92 +163,75 @@ const Navbar = () => {
                   <Menu className="w-6 h-6 relative z-10 transition-all duration-500 group-hover:rotate-180" />
                 </Button>
               </SheetTrigger>
-              
-              <SheetContent side="right" className="w-80 bg-background/95 backdrop-blur-xl border-l border-border/50">
-                <DialogTitle className="sr-only">Navigation Menu</DialogTitle>
-                
-                {/* Mobile menu content */}
-                <div className="flex flex-col gap-6 mt-12">
-                  {/* Navigation links */}
-                  <div className="space-y-2">
-                    {navLinks.map((link, index) => (
-                      <Link
-                        key={link.path}
-                        href={link.path}
-                        onClick={() => setMobileOpen(false)}
-                        className="block group"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <div className={`relative px-4 py-3 rounded-xl transition-all duration-300 ${
-                          pathname === link.path
-                            ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
-                            : 'hover:bg-secondary/80 group-hover:translate-x-2'
-                        }`}>
-                          {/* Lightning effect */}
-                          <div className="absolute inset-0 rounded-xl overflow-hidden opacity-0 group-hover:opacity-100">
-                            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-                          </div>
-                          
-                          <span className="relative z-10 text-base font-medium">
-                            {link.name}
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                  
-                  <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-                  
-                  {/* Action buttons */}
-                  <div className="space-y-3">
-                    <Button
-                      className="w-full gap-2 relative overflow-hidden bg-gradient-to-r from-primary to-primary/90 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30 group"
-                      onClick={() => {
-                        setMobileOpen(false);
-                        setShowAddProperty(true);
-                      }}
-                    >
-                      {/* Shine effect */}
-                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                      <Plus className="w-4 h-4 relative z-10 transition-transform duration-500 group-hover:rotate-180" />
-                      <span className="relative z-10">Add Property</span>
-                    </Button>
-                    
-                    {/* Auth buttons - Only render after mount */}
-                    {mounted && (
-                      <>
-                        <SignedOut>
-                          <SignUpButton mode="modal">
-                            <Button 
-                              variant="outline" 
-                              className="w-full relative overflow-hidden border-primary/30 hover:border-primary transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group"
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                              <span className="relative z-10 font-medium">Sign Up</span>
-                            </Button>
-                          </SignUpButton>
-                          <SignInButton mode="modal">
-                            <Button 
-                              variant="default" 
-                              className="w-full relative overflow-hidden bg-gradient-to-r from-primary to-primary/90 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30 group"
-                            >
-                              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                              <span className="relative z-10 font-medium">Sign In</span>
-                            </Button>
-                          </SignInButton>
-                        </SignedOut>
-                        
-                        <SignedIn>
-                          <div className="flex items-center justify-center pt-4 transition-all duration-300 hover:scale-110">
-                            <UserButton afterSignOutUrl="/" />
-                          </div>
-                        </SignedIn>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+ <SheetContent side="right" className="w-80 bg-background/95 backdrop-blur-xl border-l border-border/50">
+  <DialogTitle className="sr-only">Navigation Menu</DialogTitle>
+  
+  {/* Mobile menu content */}
+  <div className="flex flex-col gap-6 mt-8 px-4">
+    {/* Navigation links - EXACT match with buttons */}
+    <div className="space-y-3">
+      {navLinks.map((link, index) => (
+        <Link
+          key={link.path}
+          href={link.path}
+          onClick={() => setMobileOpen(false)}
+          className="block group"
+          style={{ animationDelay: `${index * 50}ms` }}
+        >
+          <button
+            className={`w-full text-left px-4 py-2.5 rounded-lg font-medium text-base transition-all duration-300 ${
+              pathname === link.path
+                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                : 'bg-transparent hover:bg-secondary/80'
+            }`}
+          >
+            {link.name}
+          </button>
+        </Link>
+      ))}
+    </div>
+    
+    <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+    
+    {/* Action buttons */}
+    <div className="space-y-3">
+      <button
+        className="w-full px-4 py-2.5 rounded-lg font-medium text-base bg-black text-white transition-all duration-300 hover:scale-[1.02] hover:shadow-xl flex items-center justify-center gap-2"
+        onClick={() => {
+          setMobileOpen(false);
+          setShowAddProperty(true);
+        }}
+      >
+        <Plus className="w-4 h-4" />
+        Add Property
+      </button>
+      
+      {mounted && (
+        <>
+          <SignedOut>
+            <SignUpButton mode="modal">
+              <button className="w-full px-4 py-2.5 rounded-lg font-medium text-base border-2 border-gray-300 bg-white text-black transition-all duration-300 hover:border-black">
+                Sign Up
+              </button>
+            </SignUpButton>
+            <SignInButton mode="modal">
+              <button className="w-full px-4 py-2.5 rounded-lg font-medium text-base bg-black text-white transition-all duration-300 hover:shadow-xl">
+                Sign In
+              </button>
+            </SignInButton>
+          </SignedOut>
+          
+          <SignedIn>
+            <div className="flex items-center justify-center pt-4">
+              <UserButton afterSignOutUrl="/" />
+            </div>
+          </SignedIn>
+        </>
+      )}
+    </div>
+  </div>
+</SheetContent>
+             </Sheet>
           </div>
         </div>
       </nav>

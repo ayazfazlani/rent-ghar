@@ -54,31 +54,31 @@ const tools = [
 
 const ExploreTools = () => {
   return (
-    <section className="py-20 bg-background relative overflow-hidden">
+    <section className="py-10 sm:py-12 md:py-16 lg:py-20 bg-background relative overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-20" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-20" />
+      <div className="absolute top-0 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-primary/10 rounded-full blur-3xl opacity-20" />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-primary/10 rounded-full blur-3xl opacity-20" />
       
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+        {/* Section Header - Responsive */}
+        <div className="text-center mb-8 sm:mb-10 md:mb-12 lg:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-2 sm:mb-3 md:mb-4">
             Make Informed Property Decisions
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-             The smarter way to find your perfect home.
+          <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4">
+            The smarter way to find your perfect home.
           </p>
         </div>
 
-        {/* Tools Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        {/* Tools Grid - 2 columns mobile, 2 tablet, 3 desktop */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6 max-w-6xl mx-auto">
           {tools.map((tool, index) => {
             const Icon = tool.icon;
             return (
               <div 
                 key={tool.id}
-                className="group relative bg-card border border-border/50 rounded-2xl p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 overflow-hidden"
+                className="group relative bg-card border border-border/50 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 sm:hover:-translate-y-2 overflow-hidden"
                 style={{ 
                   animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both` 
                 }}
@@ -90,36 +90,36 @@ const ExploreTools = () => {
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 
                 {/* Border Glow */}
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/20 to-transparent blur-xl" />
+                <div className="absolute inset-0 rounded-lg sm:rounded-xl md:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/20 to-transparent blur-xl" />
                 
                 {/* Content */}
                 <div className="relative z-10">
-                  {/* Icon Container */}
-                  <div className="mb-6 relative">
-                    <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-500 relative overflow-hidden`}>
+                  {/* Icon Container - Responsive */}
+                  <div className="mb-3 sm:mb-4 md:mb-6 relative">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-lg sm:rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-500 relative overflow-hidden`}>
                       {/* Icon Glow */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${tool.gradient} blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                       
-                      <Icon className={`w-8 h-8 ${tool.iconColor} relative z-10 transition-all duration-500 group-hover:rotate-12`} />
+                      <Icon className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 ${tool.iconColor} relative z-10 transition-all duration-500 group-hover:rotate-12`} />
                     </div>
                     
                     {/* Floating Dot */}
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
+                    <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-2 h-2 sm:w-3 sm:h-3 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
                   </div>
                   
-                  {/* Title */}
-                  <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
+                  {/* Title - Responsive */}
+                  <h3 className="text-xs sm:text-sm md:text-base lg:text-xl font-bold text-foreground mb-1.5 sm:mb-2 md:mb-3 group-hover:text-primary transition-colors duration-300 line-clamp-2">
                     {tool.title}
                   </h3>
                   
-                  {/* Description */}
-                  <p className="text-muted-foreground text-sm leading-relaxed group-hover:text-foreground transition-colors duration-300">
+                  {/* Description - Responsive */}
+                  <p className="text-muted-foreground text-[10px] sm:text-xs md:text-sm leading-relaxed group-hover:text-foreground transition-colors duration-300 line-clamp-2 sm:line-clamp-3">
                     {tool.description}
                   </p>
                 </div>
                 
                 {/* Corner Accent */}
-                <div className="absolute bottom-0 right-0 w-24 h-24 opacity-0 group-hover:opacity-10 transition-opacity duration-500">
+                <div className="absolute bottom-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 opacity-0 group-hover:opacity-10 transition-opacity duration-500">
                   <div className={`absolute inset-0 bg-gradient-to-tl ${tool.gradient} rounded-tl-full`} />
                 </div>
               </div>
