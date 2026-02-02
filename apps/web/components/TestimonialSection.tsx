@@ -1,7 +1,7 @@
  "use client";
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Quote, Star, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Quote, Star } from 'lucide-react';
 
 interface Testimonial {
   id: number;
@@ -73,8 +73,10 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
   const getVisibleTestimonials = () => {
     if (testimonials.length === 0) return [];
     
+    // Show 1 card on mobile, 2 on desktop
     const visible = [];
-    const itemsToShow = Math.min(2, testimonials.length);
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const itemsToShow = isMobile ? 1 : Math.min(2, testimonials.length);
     
     for (let i = 0; i < itemsToShow; i++) {
       visible.push(testimonials[(currentIndex + i) % testimonials.length]);
@@ -96,13 +98,13 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
   }
 
   return (
-    <section className="bg-white py-12 px-4 sm:py-16 lg:py-20">
+    <section className="bg-white py-8 px-4 sm:py-12 lg:py-16">
       <div className="max-w-6xl mx-auto">
         <style jsx>{`
           @keyframes fadeInUp {
             from {
               opacity: 0;
-              transform: translateY(30px);
+              transform: translateY(20px);
             }
             to {
               opacity: 1;
@@ -113,7 +115,7 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
           @keyframes slideInLeft {
             from {
               opacity: 0;
-              transform: translateX(-30px);
+              transform: translateX(-20px);
             }
             to {
               opacity: 1;
@@ -121,15 +123,16 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
             }
           }
         `}</style>
-        {/* Header Section */}
-        <div className="mb-10 lg:mb-12" style={{ animation: 'slideInLeft 0.8s ease-out' }}>
-          <p className="text-gray-500 text-xs font-semibold mb-2 uppercase tracking-wider">
+        
+        {/* Header Section - More Compact */}
+        <div className="mb-6 sm:mb-8 lg:mb-10" style={{ animation: 'slideInLeft 0.8s ease-out' }}>
+          <p className="text-gray-500 text-xs font-semibold mb-1.5 uppercase tracking-wider">
             {subheading}
           </p>
           
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-3 hover:text-gray-700 transition-colors duration-300">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-2 hover:text-gray-700 transition-colors duration-300">
                 {heading}
               </h2>
               <p className="text-gray-600 text-sm md:text-base max-w-xl">
@@ -138,48 +141,48 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
             </div>
             
             {/* Navigation Buttons - Desktop */}
-            {testimonials.length > 2 && (
+            {testimonials.length > 1 && (
               <div className="hidden sm:flex gap-2 flex-shrink-0">
                 <button
                   onClick={prevTestimonial}
-                  className="w-11 h-11 rounded-lg border border-gray-300 hover:border-black hover:bg-black hover:text-white hover:scale-110 hover:rotate-12 transition-all duration-300 flex items-center justify-center text-black active:scale-95"
+                  className="w-10 h-10 rounded-lg border border-gray-300 hover:border-black hover:bg-black hover:text-white hover:scale-110 transition-all duration-300 flex items-center justify-center text-black active:scale-95"
                   aria-label="Previous testimonial"
                 >
-                  <ChevronLeft size={20} strokeWidth={2.5} />
+                  <ChevronLeft size={18} strokeWidth={2.5} />
                 </button>
                 <button
                   onClick={nextTestimonial}
-                  className="w-11 h-11 rounded-lg bg-black hover:bg-gray-800 hover:scale-110 hover:-rotate-12 transition-all duration-300 flex items-center justify-center text-white active:scale-95"
+                  className="w-10 h-10 rounded-lg bg-black hover:bg-gray-800 hover:scale-110 transition-all duration-300 flex items-center justify-center text-white active:scale-95"
                   aria-label="Next testimonial"
                 >
-                  <ChevronRight size={20} strokeWidth={2.5} />
+                  <ChevronRight size={18} strokeWidth={2.5} />
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Testimonial Cards Grid */}
-        <div className="grid md:grid-cols-2 gap-5 lg:gap-6">
+        {/* Testimonial Cards Grid - 1 card on mobile, 2 on desktop */}
+        <div className="grid md:grid-cols-2 gap-4 lg:gap-5">
           {getVisibleTestimonials().map((testimonial, index) => (
             <article
               key={testimonial.id}
-              className="bg-white rounded-xl p-6 border border-gray-200 hover:border-black transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group"
+              className="bg-white rounded-xl p-5 sm:p-6 border border-gray-200 hover:border-black transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group"
               style={{
                 animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
               }}
             >
-              {/* Title */}
-              <h3 className="text-lg sm:text-xl font-bold text-black mb-3 leading-tight group-hover:text-gray-700 transition-colors duration-300">
+              {/* Title - More Compact */}
+              <h3 className="text-base sm:text-lg font-bold text-black mb-2 leading-tight group-hover:text-gray-700 transition-colors duration-300">
                 {testimonial.title}
               </h3>
 
-              {/* Rating Stars */}
-              <div className="flex gap-0.5 mb-5" aria-label={`${testimonial.rating} out of 5 stars`}>
+              {/* Rating Stars - Smaller */}
+              <div className="flex gap-0.5 mb-3" aria-label={`${testimonial.rating} out of 5 stars`}>
                 {[...Array(5)].map((_, starIndex) => (
                   <Star
                     key={starIndex}
-                    size={16}
+                    size={14}
                     className={`${
                       starIndex < testimonial.rating 
                         ? 'fill-black stroke-black group-hover:scale-110' 
@@ -192,16 +195,16 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
                 ))}
               </div>
 
-              {/* Testimonial Text */}
-              <p className="text-gray-600 leading-relaxed mb-6 text-sm group-hover:text-gray-700 transition-colors duration-300">
+              {/* Testimonial Text - More Compact */}
+              <p className="text-gray-600 leading-relaxed mb-4 text-sm group-hover:text-gray-700 transition-colors duration-300">
                 {testimonial.text}
               </p>
 
-              {/* Author Information */}
-              <div className="flex items-center justify-between pt-5 border-t border-gray-100 group-hover:border-gray-200 transition-colors duration-300">
-                <div className="flex items-center gap-3">
-                  {/* Avatar with Initials */}
-                  <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm group-hover:scale-110 group-hover:bg-gray-800 transition-all duration-300">
+              {/* Author Information - More Compact */}
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100 group-hover:border-gray-200 transition-colors duration-300">
+                <div className="flex items-center gap-2.5">
+                  {/* Avatar with Initials - Smaller */}
+                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs group-hover:scale-110 group-hover:bg-gray-800 transition-all duration-300">
                     {getInitials(testimonial.name)}
                   </div>
                   <div>
@@ -214,10 +217,10 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
                   </div>
                 </div>
 
-                {/* Quote Icon */}
+                {/* Quote Icon - Smaller */}
                 <Quote 
                   className="text-gray-300 flex-shrink-0 group-hover:text-black group-hover:scale-110 group-hover:rotate-6 transition-all duration-300" 
-                  size={36} 
+                  size={30} 
                   strokeWidth={1.5}
                   aria-hidden="true"
                 />
@@ -227,35 +230,35 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
         </div>
 
         {/* Navigation Buttons - Mobile */}
-        {testimonials.length > 2 && (
-          <div className="flex sm:hidden justify-center gap-2 mt-6">
+        {testimonials.length > 1 && (
+          <div className="flex sm:hidden justify-center gap-2 mt-5">
             <button
               onClick={prevTestimonial}
-              className="w-11 h-11 rounded-lg border border-gray-300 hover:border-black hover:bg-black hover:text-white hover:scale-110 transition-all duration-300 flex items-center justify-center text-black active:scale-95"
+              className="w-10 h-10 rounded-lg border border-gray-300 hover:border-black hover:bg-black hover:text-white hover:scale-110 transition-all duration-300 flex items-center justify-center text-black active:scale-95"
               aria-label="Previous testimonial"
             >
-              <ChevronLeft size={20} strokeWidth={2.5} />
+              <ChevronLeft size={18} strokeWidth={2.5} />
             </button>
             <button
               onClick={nextTestimonial}
-              className="w-11 h-11 rounded-lg bg-black hover:bg-gray-800 hover:scale-110 transition-all duration-300 flex items-center justify-center text-white active:scale-95"
+              className="w-10 h-10 rounded-lg bg-black hover:bg-gray-800 hover:scale-110 transition-all duration-300 flex items-center justify-center text-white active:scale-95"
               aria-label="Next testimonial"
             >
-              <ChevronRight size={20} strokeWidth={2.5} />
+              <ChevronRight size={18} strokeWidth={2.5} />
             </button>
           </div>
         )}
 
-        {/* Pagination Dots */}
-        {testimonials.length > 2 && (
-          <div className="flex justify-center gap-1.5 mt-6" role="tablist" aria-label="Testimonial navigation">
+        {/* Pagination Dots - More Compact */}
+        {testimonials.length > 1 && (
+          <div className="flex justify-center gap-1.5 mt-4 sm:mt-5" role="tablist" aria-label="Testimonial navigation">
             {testimonials.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={`h-1.5 rounded-full transition-all duration-300 hover:scale-125 ${
                   index === currentIndex 
-                    ? 'w-6 bg-black' 
+                    ? 'w-5 bg-black' 
                     : 'w-1.5 bg-gray-300 hover:bg-gray-400'
                 }`}
                 aria-label={`Go to testimonial ${index + 1}`}

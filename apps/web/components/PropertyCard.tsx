@@ -43,12 +43,11 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
     alert(`Contact for ${property.name}`);
   };
 
-  return (
-    <div 
-      className="property-card group cursor-pointer bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 active:scale-[0.98]"
+  return (<div 
+      className="property-card group cursor-pointer bg-card rounded-lg sm:rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 active:scale-[0.98] w-full"
       onClick={handleCardClick}
     >
-      {/* Image Container with Enhanced Animations */}
+      {/* Image Container - Responsive Height */}
       <div className="relative overflow-hidden aspect-[4/3] bg-gradient-to-br from-secondary to-secondary/50">
         <img
           src={imageUrl}
@@ -65,76 +64,76 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         {/* Gradient Overlay on Hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
-        {/* Purpose Badge with Animation */}
-        <div className="absolute top-3 left-3 flex gap-2">
-          <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 animate-in fade-in slide-in-from-left duration-500">
+        {/* Purpose Badge - Responsive */}
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex gap-1 sm:gap-2">
+          <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-primary text-primary-foreground text-[10px] sm:text-xs font-semibold rounded-full shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 animate-in fade-in slide-in-from-left duration-500">
             {property.purpose === 'buy' ? 'For Sale' : 'For Rent'}
           </span>
         </div>
         
-        {/* Type Badge with Animation */}
-        <div className="absolute top-3 right-3">
-          <span className="px-3 py-1 bg-background/90 backdrop-blur-md text-foreground text-xs font-medium rounded-full shadow-md transition-all duration-300 group-hover:bg-background group-hover:scale-110 group-hover:shadow-lg animate-in fade-in slide-in-from-right duration-500">
+        {/* Type Badge - Responsive */}
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+          <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-background/90 backdrop-blur-md text-foreground text-[10px] sm:text-xs font-medium rounded-full shadow-md transition-all duration-300 group-hover:bg-background group-hover:scale-110 group-hover:shadow-lg animate-in fade-in slide-in-from-right duration-500">
             {property.type}
           </span>
         </div>
 
         {/* Animated Corner Accent */}
-        <div className="absolute bottom-0 right-0 w-20 h-20 bg-primary/20 rounded-tl-full transform translate-x-10 translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
+        <div className="absolute bottom-0 right-0 w-12 h-12 sm:w-20 sm:h-20 bg-primary/20 rounded-tl-full transform translate-x-6 translate-y-6 sm:translate-x-10 sm:translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
       </div>
 
-      {/* Content Section with Staggered Animations */}
-      <div className="p-5 bg-card relative">
+      {/* Content Section - Responsive Padding */}
+      <div className="p-3 sm:p-4 md:p-5 bg-card relative">
         {/* Subtle Top Border Animation */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
         
-        {/* Property Name */}
-        <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-all duration-300 transform group-hover:translate-x-1">
+        {/* Property Name - Responsive Text */}
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground mb-1.5 sm:mb-2 line-clamp-1 group-hover:text-primary transition-all duration-300 transform group-hover:translate-x-1">
           {property.name}
         </h3>
 
-        {/* Location with Icon Animation */}
-        <div className="flex items-center gap-1 text-muted-foreground text-sm mb-4 transition-all duration-300 group-hover:text-foreground">
-          <MapPin className="w-4 h-4 text-primary transition-all duration-300 group-hover:scale-125 group-hover:animate-bounce" />
-          <span className="transition-all duration-300 group-hover:translate-x-1">
+        {/* Location - Responsive */}
+        <div className="flex items-center gap-1 text-muted-foreground text-[11px] sm:text-xs md:text-sm mb-2 sm:mb-3 md:mb-4 transition-all duration-300 group-hover:text-foreground">
+          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0 transition-all duration-300 group-hover:scale-125 group-hover:animate-bounce" />
+          <span className="transition-all duration-300 group-hover:translate-x-1 truncate">
             {property.location}, {property.city}
           </span>
         </div>
 
-        {/* Property Features with Hover Effects */}
+        {/* Property Features - Responsive & Compact on Mobile */}
         {property.bedrooms > 0 && (
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default">
-              <Bed className="w-4 h-4 transition-transform duration-300" />
-              <span>{property.bedrooms} Beds</span>
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-2 sm:mb-3 md:mb-4">
+            <div className="flex items-center gap-0.5 sm:gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default">
+              <Bed className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 transition-transform duration-300" />
+              <span className="whitespace-nowrap">{property.bedrooms}</span>
             </div>
-            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default">
-              <Bath className="w-4 h-4 transition-transform duration-300" />
-              <span>{property.bathrooms} Baths</span>
+            <div className="flex items-center gap-0.5 sm:gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default">
+              <Bath className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 transition-transform duration-300" />
+              <span className="whitespace-nowrap">{property.bathrooms}</span>
             </div>
-            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default">
-              <Maximize className="w-4 h-4 transition-transform duration-300" />
-              <span>{property.area} sq ft</span>
+            <div className="flex items-center gap-0.5 sm:gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default">
+              <Maximize className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 transition-transform duration-300" />
+              <span className="whitespace-nowrap text-[9px] sm:text-[10px] md:text-xs">{property.area}</span>
             </div>
           </div>
         )}
 
-        {/* Price and Contact Section with Enhanced Styling */}
-        <div className="flex items-center justify-between pt-4 border-t border-border group-hover:border-primary/30 transition-colors duration-500">
-          <div className="transition-all duration-300 group-hover:translate-x-1">
-            <p className="text-xs text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
+        {/* Price and Contact Section - Responsive */}
+        <div className="flex items-center justify-between pt-2 sm:pt-3 md:pt-4 border-t border-border group-hover:border-primary/30 transition-colors duration-500 gap-2">
+          <div className="transition-all duration-300 group-hover:translate-x-1 min-w-0 flex-1">
+            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
               {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
             </p>
-            <p className="text-lg font-bold text-primary transition-all duration-300 group-hover:scale-110 origin-left bg-primary/5 px-2 py-0.5 rounded-md inline-block group-hover:bg-primary/10">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-primary transition-all duration-300 group-hover:scale-105 origin-left bg-primary/5 px-1.5 py-0.5 sm:px-2 rounded-md inline-block group-hover:bg-primary/10 truncate max-w-full">
               Rs. {formatPrice(property.price)}
             </p>
           </div>
           
-          {/* Enhanced Contact Button */}
+          {/* Enhanced Contact Button - Responsive */}
           <Button 
             size="sm" 
             onClick={handleContactClick}
-            className="transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-primary/30 active:scale-95 relative overflow-hidden group/btn"
+            className="transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-primary/30 active:scale-95 relative overflow-hidden group/btn text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-2 h-auto flex-shrink-0"
           >
             <span className="relative z-10">Contact</span>
             {/* Button Shimmer Effect */}
@@ -142,11 +141,11 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           </Button>
         </div>
 
-        {/* Decorative Bottom Corner */}
-        <div className="absolute bottom-0 left-0 w-16 h-16 bg-primary/5 rounded-tr-full transform -translate-x-8 translate-y-8 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
+        {/* Decorative Bottom Corner - Responsive */}
+        <div className="absolute bottom-0 left-0 w-10 h-10 sm:w-16 sm:h-16 bg-primary/5 rounded-tr-full transform -translate-x-5 translate-y-5 sm:-translate-x-8 sm:translate-y-8 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
       </div>
     </div>
-  );
+   );
 };
 
 export default PropertyCard;

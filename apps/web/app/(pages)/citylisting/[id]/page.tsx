@@ -1,4 +1,4 @@
-import PropertyDetail from '@/components/PropertyDetail';
+ import PropertyDetail from '@/components/PropertyDetail';
 
 interface PageProps {
   params: {
@@ -7,7 +7,7 @@ interface PageProps {
 }
 
 export default function ListingDetailPage({ params }: PageProps) {
-  return <PropertyDetail slug={params.id} />;
+  return <PropertyDetail id={params.id} />;
 }
 
 // Optional: Metadata

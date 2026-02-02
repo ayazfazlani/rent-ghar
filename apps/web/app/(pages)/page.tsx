@@ -3,6 +3,8 @@ import HeroSection from "@/components/HeroSection";
  import TestimonialSection from "@/components/TestimonialSection";
  import BlogSection from "@/components/BlogSection";
  import ExploreTools from "@/components/ExploreTools";
+import CityProperties from "@/components/CityProperties";
+import AnimatedCTABar from "@/components/Animatedctabar";
  
 export default  function Home() {
  
@@ -11,9 +13,12 @@ export default  function Home() {
    
        <HeroSection />
       <FeaturedSection />
-      <BlogSection />
-      <ExploreTools />
+       <CityProperties />
+       <ExploreTools />
        <TestimonialSection />
+             <BlogSection />
+             <AnimatedCTABar />
+
       
     </>
   );
