@@ -220,8 +220,43 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
     'Other Nearby Places'
   ];
 
+  const jsonLd = property ? {
+    '@context': 'https://schema.org',
+    '@type': property.type === 'House' ? 'SingleFamilyResidence' : (property.type === 'Apartment' || property.type === 'Flat' ? 'Apartment' : 'Accommodation'),
+    'name': property.name,
+    'description': property.description || `${property.name} in ${property.location}, ${property.city}`,
+    'image': images,
+    'address': {
+      '@type': 'PostalAddress',
+      'addressLocality': property.city,
+      'addressRegion': property.location,
+      'addressCountry': 'PK'
+    },
+    'numberOfBedrooms': property.bedrooms,
+    'numberOfBathrooms': property.bathrooms,
+    'floorSize': {
+      '@type': 'QuantitativeValue',
+      'value': property.area,
+      'unitCode': 'SQF'
+    },
+    'offers': {
+      '@type': 'Offer',
+      'price': property.price,
+      'priceCurrency': 'PKR',
+      'businessFunction': property.purpose === 'buy' ? 'http://purl.org/goodrelations/v1#Sell' : 'http://purl.org/goodrelations/v1#LeaseOut',
+      'availability': 'https://schema.org/InStock',
+      'url': typeof window !== 'undefined' ? window.location.href : ''
+    }
+  } : null;
+
   return (
     <div className="min-h-screen bg-background">
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       <div className="pt-20 md:pt-24">
         <div className="container mx-auto px-4 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -362,8 +397,8 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                             key={idx}
                             onClick={() => setSelectedImage(idx)}
                             className={`w-2 h-2 rounded-full transition-all ${selectedImage === idx
-                                ? 'bg-white w-8'
-                                : 'bg-white/50 hover:bg-white/75'
+                              ? 'bg-white w-8'
+                              : 'bg-white/50 hover:bg-white/75'
                               }`}
                             aria-label={`Go to image ${idx + 1}`}
                           />
@@ -380,8 +415,8 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                           key={idx}
                           onClick={() => setSelectedImage(idx)}
                           className={`shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${selectedImage === idx
-                              ? 'border-primary ring-2 ring-primary ring-offset-2'
-                              : 'border-transparent opacity-60 hover:opacity-100'
+                            ? 'border-primary ring-2 ring-primary ring-offset-2'
+                            : 'border-transparent opacity-60 hover:opacity-100'
                             }`}
                         >
                           <img

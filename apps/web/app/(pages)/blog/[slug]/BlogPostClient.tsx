@@ -34,12 +34,12 @@ export default function BlogPostClient({ slug: slugProp }: BlogPostClientProps) 
   // Fallback to useParams if slug prop is not provided
   const urlParams = useParams();
   const slug = slugProp || (urlParams?.slug as string) || '';
-  
+
   // Debug logging
   if (typeof window !== 'undefined') {
     console.log('BlogPostClient - Slug resolved:', { slugProp, urlParams, finalSlug: slug });
   }
-  
+
   // STATE MANAGEMENT
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
@@ -69,12 +69,12 @@ export default function BlogPostClient({ slug: slugProp }: BlogPostClientProps) 
         // Note: Next.js automatically decodes URL params, so slug is already decoded
         console.log('Page: Fetching blog with slug:', slug);
         console.log('Page: Slug type:', typeof slug);
-        
+
         // Next.js already decodes the slug from the URL, so we pass it as-is
         // The API function will handle any necessary encoding
         const blogResponse = await blogApi.getBlogBySlug(slug);
         console.log('Page: Blog response received:', blogResponse);
-        
+
         if (!blogResponse) {
           throw new Error('Blog not found');
         }
@@ -89,19 +89,19 @@ export default function BlogPostClient({ slug: slugProp }: BlogPostClientProps) 
         // STEP 3: Fetch all published blogs for related posts
         const allBlogsResponse = await blogApi.getPublishedBlogs();
         const allBlogs = transformBlogsToPosts(allBlogsResponse as Blog[]);
-        
+
         // STEP 4: Filter related posts (exclude current, take first 3)
         const related = allBlogs
           .filter(blog => blog.slug !== slug && blog.id !== transformedPost.id) // Exclude current blog by slug and id
           .slice(0, 3); // Take first 3
-        
+
         setRelatedPosts(related);
 
       } catch (err: any) {
         // Enhanced error handling with detailed logging
         const status = err.response?.status;
         const errorData = err.response?.data;
-        
+
         console.error('❌ Error fetching blog:', {
           slug: slug,
           status: status,
@@ -111,10 +111,10 @@ export default function BlogPostClient({ slug: slugProp }: BlogPostClientProps) 
           url: err.config?.url,
           fullError: err
         });
-        
+
         // Provide helpful error messages based on status code
         let errorMessage = `Failed to load blog post`;
-        
+
         if (status === 404) {
           errorMessage = `Blog post with slug "${slug}" not found. It may not exist or may not be published.`;
         } else if (status === 500) {
@@ -124,11 +124,11 @@ export default function BlogPostClient({ slug: slugProp }: BlogPostClientProps) 
         } else if (err.message) {
           errorMessage = err.message;
         }
-        
+
         setError(errorMessage);
-        toast.error('Error Loading Blog', { 
+        toast.error('Error Loading Blog', {
           description: errorMessage,
-          duration: 5000 
+          duration: 5000
         });
       } finally {
         setLoading(false);
@@ -165,8 +165,8 @@ export default function BlogPostClient({ slug: slugProp }: BlogPostClientProps) 
           <p className="text-muted-foreground mb-8">
             {error || 'The blog post you\'re looking for doesn\'t exist.'}
           </p>
-          <Link 
-            href="/blog" 
+          <Link
+            href="/blog"
             className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
           >
             Back to Blog
@@ -176,9 +176,36 @@ export default function BlogPostClient({ slug: slugProp }: BlogPostClientProps) 
     );
   }
 
+  const jsonLd = post ? {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    'headline': post.title,
+    'description': post.excerpt,
+    'image': post.image,
+    'datePublished': post.date,
+    'author': {
+      '@type': 'Person',
+      'name': post.author
+    },
+    'publisher': {
+      '@type': 'Organization',
+      'name': 'RentGhar',
+      'logo': {
+        '@type': 'ImageObject',
+        'url': `${typeof window !== 'undefined' ? window.location.origin : 'https://rentghar.com'}/logo.png`
+      }
+    }
+  } : null;
+
   // SUCCESS STATE - Render blog detail
   return (
     <main className="min-h-screen">
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       <BlogDetailPage post={post} relatedPosts={relatedPosts} />
     </main>
   );
