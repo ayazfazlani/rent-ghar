@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface RegisterModalProps {
   open: boolean;
@@ -13,7 +13,6 @@ interface RegisterModalProps {
 }
 
 const RegisterModal = ({ open, onClose, onSwitchToLogin }: RegisterModalProps) => {
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,8 +22,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }: RegisterModalProps) =
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: 'Registration Successful',
+    toast.success('Registration Successful', {
       description: 'Welcome to RentGhr! You can now login.',
     });
     onClose();

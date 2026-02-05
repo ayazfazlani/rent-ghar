@@ -4,6 +4,7 @@ import { CityModule } from './city/city.module';
 import { AreaModule } from './area/area.module';
 import { BlogModule } from './blog/blog.module';
 import { CategoryModule } from './category/category.module';
+import { PageModule } from './page/page.module';
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);

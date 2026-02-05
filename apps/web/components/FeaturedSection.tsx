@@ -1,7 +1,17 @@
- 'use client'
-import { Heart, MapPin, Bed, Bath, Maximize, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+'use client'
+import { Heart, MapPin, Bed, Bath, Maximize, Loader2 } from 'lucide-react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { propertyApi } from '@/lib/api';
+import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
+import { Property } from '@/lib/data';
 
 const toSlug = (value: string) =>
   value
@@ -11,7 +21,7 @@ const toSlug = (value: string) =>
     .replace(/^-+|-+$/g, '');
 
 type FeaturedProperty = {
-  id: number;
+  id: string | number;
   image: string;
   title: string;
   location: string;
@@ -35,7 +45,7 @@ const PropertyCard = ({ property }: { property: FeaturedProperty }) => {
             alt={property.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-          
+
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -46,16 +56,15 @@ const PropertyCard = ({ property }: { property: FeaturedProperty }) => {
             className="absolute top-3 right-3 w-9 h-9 bg-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-md z-10"
           >
             <Heart
-              className={`w-5 h-5 transition-colors duration-300 ${
-                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
-              }`}
+              className={`w-5 h-5 transition-colors duration-300 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
+                }`}
             />
           </button>
         </div>
       </Link>
 
       <div className="p-5">
-      <Link href={`/properties/${property.slug || toSlug(property.title)}`}>
+        <Link href={`/properties/${property.slug || toSlug(property.title)}`}>
           <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors cursor-pointer">
             {property.title}
           </h3>
@@ -86,7 +95,7 @@ const PropertyCard = ({ property }: { property: FeaturedProperty }) => {
             <p className="text-xs text-gray-500 mb-1">{property.priceLabel || 'Monthly Rent'}</p>
             <p className="text-2xl font-bold text-gray-900">{property.price}</p>
           </div>
-          
+
           <Link href={`/properties/${property.slug || toSlug(property.title)}`}>
             <button className="px-6 py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all duration-300 hover:shadow-lg">
               View Details
@@ -99,71 +108,50 @@ const PropertyCard = ({ property }: { property: FeaturedProperty }) => {
 };
 
 const FeaturedSection = () => {
-  const scroll = (direction: 'left' | 'right') => {
-    const container = document.getElementById('properties-scroll');
-    if (container) {
-      const scrollAmount = direction === 'left' ? -400 : 400;
-      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
+  const [featuredProperties, setFeaturedProperties] = useState<FeaturedProperty[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const featuredProperties = [
-    {
-      id: 1,
-      image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
-      title: 'Modern Villa with Garden',
-      location: 'Bosan Road, Multan',
-      price: 'Rs. 45,000',
-      priceLabel: 'Monthly Rent',
-      beds: 4,
-      baths: 3,
-      area: '2500 sq ft'
-    },
-    {
-      id: 2,
-      image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
-      title: 'Studio Flat',
-      location: 'Gulgasht Colony, Multan',
-      price: 'Rs. 18,000',
-      priceLabel: 'Monthly Rent',
-      beds: 1,
-      baths: 1,
-      area: '600 sq ft'
-    },
-    {
-      id: 3,
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
-      title: 'Luxury Apartment',
-      location: 'Cantt Area, Multan',
-      price: 'Rs. 55,000',
-      priceLabel: 'Monthly Rent',
-      beds: 3,
-      baths: 2,
-      area: '1800 sq ft'
-    },
-    {
-      id: 4,
-      image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80',
-      title: 'Beautiful House',
-      location: 'Shah Rukn-e-Alam Colony, Multan',
-      price: 'Rs. 65,000',
-      priceLabel: 'Monthly Rent',
-      beds: 5,
-      baths: 4,
-      area: '3000 sq ft'
-    },
-    {
-      id: 5,
-      image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&q=80',
-      title: 'Family Home',
-      location: 'Model Town, Multan',
-      price: 'Rs. 40,000',
-      priceLabel: 'Monthly Rent',
-      beds: 3,
-      baths: 2,
-      area: '1500 sq ft'
-    }
-  ];
+  // Fetch properties from backend
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await propertyApi.getAll();
+        const backendProperties = response as BackendProperty[];
+        const allProperties = backendProperties.map(mapBackendToFrontendProperty);
+
+        // Get approved properties only and limit to 8 for featured section
+        const approvedProperties = allProperties
+          .filter(p => p) // Filter out any invalid properties
+          .slice(0, 8); // Limit to 8 properties
+
+        // Map to FeaturedProperty format
+        const mappedProperties: FeaturedProperty[] = approvedProperties.map((property, index) => ({
+          id: property.id || `property-${index}-${Date.now()}`,
+          image: property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
+          title: property.name,
+          location: `${property.location}, ${property.city}`,
+          price: `Rs. ${property.price.toLocaleString('en-PK')}`,
+          priceLabel: property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent',
+          beds: property.bedrooms,
+          baths: property.bathrooms,
+          area: `${property.area} sq ft`,
+          slug: property.slug,
+        }));
+
+        setFeaturedProperties(mappedProperties);
+      } catch (err) {
+        console.error('Error fetching featured properties:', err);
+        setError('Failed to load properties');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
 
   return (
     <section className="py-16 bg-gray-50">
@@ -173,48 +161,54 @@ const FeaturedSection = () => {
             Featured Properties
           </h2>
           <p className="text-gray-600">
-            Discover the best properties for rent in Multan
+            Discover the best properties for rent and sale
           </p>
         </div>
 
-        <div className="relative">
-          <button
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-all duration-300 hover:scale-110 active:scale-95"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-6 h-6 text-gray-700" />
-          </button>
-
-          <button
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-all duration-300 hover:scale-110 active:scale-95"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-6 h-6 text-gray-700" />
-          </button>
-
-          <div
-            id="properties-scroll"
-            className="overflow-x-auto scrollbar-hide scroll-smooth"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            <div className="flex gap-6 pb-4">
-              {featuredProperties.map((property) => (
-                <div key={property.id} className="flex-shrink-0 w-[85vw] sm:w-[380px] md:w-[420px]">
-                  <PropertyCard property={property} />
-                </div>
-              ))}
-            </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-3 text-gray-600">Loading properties...</span>
           </div>
-        </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => typeof window !== 'undefined' && window.location.reload()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        ) : featuredProperties.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-gray-600">No properties available at the moment.</p>
+          </div>
+        ) : (
+          <div className="relative sm:px-12">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {featuredProperties.map((property, index) => (
+                  <CarouselItem
+                    key={property.slug || property.id || `property-${index}`}
+                    className="pl-2 md:pl-4 sm:basis-1/2 lg:basis-1/3"
+                  >
+                    <PropertyCard property={property} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden sm:flex" />
+              <CarouselNext className="hidden sm:flex" />
+            </Carousel>
+          </div>
+        )}
       </div>
-
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </section>
   );
 };

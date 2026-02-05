@@ -47,7 +47,7 @@ const PropertyDetail = () => {
     );
   }
 
-  const getPlaceholderImages = (type: string) => {
+  const getPlaceholderImages = (type: string): string[] => {
     const imagesByType: { [key: string]: string[] } = {
       'House': [
         'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200&q=80',
@@ -86,7 +86,7 @@ const PropertyDetail = () => {
         'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=1200&q=80'
       ]
     };
-    return imagesByType[type] || imagesByType['House'];
+    return imagesByType[type] || imagesByType['House'] || [];
   };
 
   const images = getPlaceholderImages(property.type);

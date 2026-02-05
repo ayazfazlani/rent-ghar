@@ -1,10 +1,10 @@
- import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Providers } from "./providers";
-import { ClerkProvider } from '@clerk/nextjs';
+import { AuthProvider } from "@/context/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,17 +27,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider dynamic>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <Providers>
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Providers>
+          <AuthProvider>
             <TooltipProvider>
               {children}
               <Sonner />
             </TooltipProvider>
-          </Providers>
-        </body>
-      </html>
-    </ClerkProvider>
+          </AuthProvider>
+        </Providers>
+      </body>
+    </html>
   );
 }

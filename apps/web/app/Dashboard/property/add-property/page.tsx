@@ -1,4 +1,4 @@
- "use client"
+"use client"
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -33,7 +33,7 @@ interface Area {
 export default function AddProperty() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  
+
   // Form state
   const [listingType, setListingType] = useState<'rent' | 'sale'>('rent')
   const [propertyType, setPropertyType] = useState('')
@@ -49,13 +49,13 @@ export default function AddProperty() {
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
   const [contactNumber, setContactNumber] = useState('')
-  
+
   // Cities and Areas state
   const [cities, setCities] = useState<City[]>([])
   const [areas, setAreas] = useState<Area[]>([])
   const [loadingCities, setLoadingCities] = useState(true)
   const [loadingAreas, setLoadingAreas] = useState(false)
-  
+
   // Image state - store both File objects and preview URLs
   const [mainImageFile, setMainImageFile] = useState<File | null>(null)
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null)
@@ -136,7 +136,7 @@ export default function AddProperty() {
       const newFiles = [...additionalImageFiles]
       newFiles[index] = file
       setAdditionalImageFiles(newFiles)
-      
+
       const reader = new FileReader()
       reader.onloadend = () => {
         const newPreviews = [...additionalImagePreviews]
@@ -157,7 +157,7 @@ export default function AddProperty() {
     const newFiles = [...additionalImageFiles]
     newFiles[index] = null
     setAdditionalImageFiles(newFiles)
-    
+
     const newPreviews = [...additionalImagePreviews]
     newPreviews[index] = null
     setAdditionalImagePreviews(newPreviews)
@@ -203,7 +203,7 @@ export default function AddProperty() {
       setSlug(computedSlug)
       setIsSlugEdited(false)
     }
-    
+
     // Validation
     if (!propertyType || !cityId || !areaId || !title || !computedSlug || !location || !bedrooms || !bathrooms || !areaSize || !price || !description || !contactNumber) {
       toast.error('Please fill in all required fields')
@@ -220,21 +220,21 @@ export default function AddProperty() {
     try {
       // Create FormData
       const formData = new FormData()
-      
+
       // Add main photo (either uploaded file or existing URL from gallery)
       if (mainImageFile) {
         formData.append('mainPhoto', mainImageFile)
       } else if (mainImageUrl) {
         formData.append('mainPhotoUrl', mainImageUrl)
       }
-      
+
       // Add additional photos (only non-null files)
       additionalImageFiles.forEach((file) => {
         if (file) {
           formData.append('additionalPhotos', file)
         }
       })
-      
+
       // Add JSON data as separate fields (backend expects these in the body)
       formData.append('listingType', listingType)
       formData.append('propertyType', mapPropertyTypeToBackend(propertyType))
@@ -248,7 +248,7 @@ export default function AddProperty() {
       formData.append('price', price)
       formData.append('description', description)
       formData.append('contactNumber', contactNumber)
-      
+
       // Add features (filter out empty strings)
       const validFeatures = features.filter(f => f.trim() !== '')
       if (validFeatures.length > 0) {
@@ -259,24 +259,24 @@ export default function AddProperty() {
 
       // Submit to API
       const response = await propertyApi.create(formData)
-      
+
       toast.success('Property submitted successfully!', {
         description: 'Your property is pending approval and will be visible once approved.',
       })
-      
+
       // Redirect to dashboard after a short delay
       setTimeout(() => {
         router.push('/dashboard/property')
         router.refresh()
       }, 1500)
-      
+
     } catch (error: any) {
       console.error('Error submitting property:', error)
-      const errorMessage = 
-        error.response?.data?.message || 
-        error.message || 
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
         'Failed to submit property. Please try again.'
-      
+
       toast.error('Submission Failed', {
         description: errorMessage,
       })
@@ -291,7 +291,7 @@ export default function AddProperty() {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Add New Property</h1>
           <p className="text-gray-600 mb-8">Fill in the details to list your property</p>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Listing Type */}
             <div>
@@ -302,22 +302,20 @@ export default function AddProperty() {
                 <button
                   type="button"
                   onClick={() => setListingType('rent')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
-                    listingType === 'rent'
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${listingType === 'rent'
                       ? 'bg-gray-800 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   For Rent
                 </button>
                 <button
                   type="button"
                   onClick={() => setListingType('sale')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
-                    listingType === 'sale'
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${listingType === 'sale'
                       ? 'bg-gray-800 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   For Sale
                 </button>
@@ -337,7 +335,7 @@ export default function AddProperty() {
                   <SelectItem value="House">House</SelectItem>
                   <SelectItem value="Apartment">Apartment</SelectItem>
                   <SelectItem value="Flat">Flat</SelectItem>
-                  <SelectItem value="Flat">Plot</SelectItem>
+                  <SelectItem value="Plot">Plot</SelectItem>
                   <SelectItem value="Land">Land</SelectItem>
                   <SelectItem value="Shop">Shop</SelectItem>
                   <SelectItem value="Office">Office</SelectItem>
@@ -357,9 +355,9 @@ export default function AddProperty() {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   City *
                 </label>
-                <Select 
-                  value={cityId} 
-                  onValueChange={setCityId} 
+                <Select
+                  value={cityId}
+                  onValueChange={setCityId}
                   disabled={isLoading || loadingCities}
                 >
                   <SelectTrigger>
@@ -379,20 +377,20 @@ export default function AddProperty() {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Area *
                 </label>
-                <Select 
-                  value={areaId} 
-                  onValueChange={setAreaId} 
+                <Select
+                  value={areaId}
+                  onValueChange={setAreaId}
                   disabled={isLoading || loadingAreas || !cityId}
                 >
                   <SelectTrigger>
-                    <SelectValue 
+                    <SelectValue
                       placeholder={
-                        !cityId 
-                          ? "Select city first" 
-                          : loadingAreas 
-                            ? "Loading areas..." 
+                        !cityId
+                          ? "Select city first"
+                          : loadingAreas
+                            ? "Loading areas..."
                             : "Select area"
-                      } 
+                      }
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -542,11 +540,10 @@ export default function AddProperty() {
                 <button
                   type="button"
                   onClick={() => setMainImageSource('upload')}
-                  className={`text-xs px-3 py-1.5 rounded-full border ${
-                    mainImageSource === 'upload'
+                  className={`text-xs px-3 py-1.5 rounded-full border ${mainImageSource === 'upload'
                       ? 'bg-gray-900 text-white border-gray-900'
                       : 'bg-white text-gray-700 border-gray-200'
-                  }`}
+                    }`}
                 >
                   Upload new
                 </button>
@@ -556,11 +553,10 @@ export default function AddProperty() {
                     setMainImageSource('gallery')
                     setGalleryDialogOpen(true)
                   }}
-                  className={`text-xs px-3 py-1.5 rounded-full border flex items-center gap-1 ${
-                    mainImageSource === 'gallery'
+                  className={`text-xs px-3 py-1.5 rounded-full border flex items-center gap-1 ${mainImageSource === 'gallery'
                       ? 'bg-gray-900 text-white border-gray-900'
                       : 'bg-white text-gray-700 border-gray-200'
-                  }`}
+                    }`}
                 >
                   <ImageIcon className="w-3 h-3" />
                   Choose from gallery
@@ -570,9 +566,9 @@ export default function AddProperty() {
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-500 transition-colors">
                 {(mainImagePreview && mainImageSource === 'upload') || (mainImageUrl && mainImageSource === 'gallery') ? (
                   <div className="relative">
-                    <img 
-                      src={mainImageSource === 'upload' ? mainImagePreview! : mainImageUrl!} 
-                      alt="Main property" 
+                    <img
+                      src={mainImageSource === 'upload' ? mainImagePreview! : mainImageUrl!}
+                      alt="Main property"
                       className="w-full h-64 object-cover rounded-lg"
                     />
                     <Button
@@ -639,9 +635,9 @@ export default function AddProperty() {
                   <div key={index}>
                     {additionalImagePreviews[index] ? (
                       <div className="relative">
-                        <img 
-                          src={additionalImagePreviews[index]!} 
-                          alt={`Additional ${index + 1}`} 
+                        <img
+                          src={additionalImagePreviews[index]!}
+                          alt={`Additional ${index + 1}`}
                           className="w-full h-32 object-cover rounded-lg"
                         />
                         <Button

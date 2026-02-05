@@ -30,7 +30,9 @@ api.interceptors.response.use(
         // Refresh bhi fail → logout
         console.error('Refresh token expired → logout');
         // Yahan logout logic daal sakte ho (localStorage clear + redirect /login)
-        window.location.href = '/login?sessionExpired=true';
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login?sessionExpired=true';
+        }
         return Promise.reject(refreshError);
       }
     }

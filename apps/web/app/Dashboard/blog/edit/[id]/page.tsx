@@ -30,13 +30,23 @@ import blogApi from "@/lib/api/blog/blog.api";
 import blogCategoryApi from "@/lib/api/blog-category/blog-category.api";
 import { ImagePickerDialog, type GalleryImageItem } from "@/components/ImagePickerDialog";
 
+// Custom validation for image URLs - accepts full URLs or relative paths starting with /uploads/
+const imageUrlSchema = z.string().refine(
+    (val) => {
+        if (!val || val === "") return true; // Empty is allowed
+        // Accept full URLs (http/https) or relative paths starting with /uploads/
+        return z.string().url().safeParse(val).success || val.startsWith("/uploads/");
+    },
+    { message: "Must be a valid URL or a path starting with /uploads/" }
+).optional().or(z.literal(""));
+
 const formSchema = z.object({
     title: z.string().min(2, { message: "Title must be at least 2 characters long" }),
     content: z.string().min(10, { message: "Content must be at least 10 characters long" }),
     excerpt: z.string().optional(),
     slug: z.string().optional(),
     tags: z.string().optional(),
-    featuredImage: z.string().url().optional().or(z.literal("")),
+    featuredImage: imageUrlSchema,
     status: z.enum(['draft', 'published']).optional(),
     metaTitle: z.string().optional(),
     metaDescription: z.string().max(160, { message: "Meta description must be at most 160 characters" }).optional(),

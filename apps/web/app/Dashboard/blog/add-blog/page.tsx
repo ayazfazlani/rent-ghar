@@ -29,13 +29,22 @@ import blogApi from "@/lib/api/blog/blog.api";
 import blogCategoryApi from "@/lib/api/blog-category/blog-category.api";
 import { ImagePickerDialog, type GalleryImageItem } from "@/components/ImagePickerDialog";
 
+// Custom validation for image URLs - accepts full URLs or relative paths starting with /uploads/
+const imageUrlSchema = z.string().refine(
+    (val) => {
+        if (!val || val === "") return true; // Empty is allowed
+        // Accept full URLs (http/https) or relative paths starting with /uploads/
+        return z.string().url().safeParse(val).success || val.startsWith("/uploads/");
+    },
+    { message: "Must be a valid URL or a path starting with /uploads/" }
+).optional().or(z.literal(""));
+
 const formSchema = z.object({
     title: z.string().min(2, { message: "Title must be at least 2 characters long" }),
     content: z.string().min(10, { message: "Content must be at least 10 characters long" }),
     excerpt: z.string().optional(),
-    slug: z.string().optional(),
     tags: z.string().optional(),
-    featuredImage: z.string().url().optional().or(z.literal("")),
+    featuredImage: imageUrlSchema,
     status: z.enum(['draft', 'published']).optional(),
     metaTitle: z.string().optional(),
     metaDescription: z.string().max(160, { message: "Meta description must be at most 160 characters" }).optional(),
@@ -56,7 +65,6 @@ export default function AddBlogPage() {
             content: "",
             excerpt: "",
             tags: "",
-            slug: "",
             featuredImage: "",
             status: "draft",
             metaTitle: "",
@@ -83,23 +91,21 @@ export default function AddBlogPage() {
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         try {
             const payload: any = {
-                title: data.title,
-                content: data.content,
-                excerpt: data.excerpt || undefined,
+                title: data.title.trim(),
+                content: data.content.trim(),
+                excerpt: data.excerpt?.trim() || undefined,
                 status: data.status || 'draft',
-                metaTitle: data.metaTitle || undefined,
-                metaDescription: data.metaDescription || undefined,
-                featuredImage: data.featuredImage || undefined,
-                canonicalUrl: data.canonicalUrl || undefined,
+                metaTitle: data.metaTitle?.trim() || undefined,
+                metaDescription: data.metaDescription?.trim() || undefined,
+                featuredImage: data.featuredImage?.trim() || undefined,
+                canonicalUrl: data.canonicalUrl?.trim() || undefined,
             };
 
-            // Handle slug - optional, will be auto-generated from title if not provided
-            if (data.slug && data.slug.trim()) {
-                payload.slug = data.slug.trim().toLowerCase();
-            }
+            // Slug will be auto-generated from title by the backend schema pre-save hook
+            // Don't send slug - let backend handle it
 
             // Parse tags from comma-separated string
-            if (data.tags) {
+            if (data.tags && data.tags.trim()) {
                 payload.tags = data.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
             }
 
@@ -107,24 +113,32 @@ export default function AddBlogPage() {
                 payload.categoryId = data.categoryId;
             }
 
+            console.log('Creating blog with payload:', payload);
+
             const response = await blogApi.createBlog(payload);
 
-            if (response.status === 201) {
+            if (response.status === 201 || response.status === 200) {
                 toast.success("Blog created successfully");
                 form.reset();
                 router.push("/dashboard/blog");
             } else {
-                toast.error("Failed to create blog");
+                toast.error("Failed to create blog", {
+                    description: `Status: ${response.status}`,
+                });
             }
         } catch (error: any) {
             console.error("Error creating blog:", error);
-            toast.error("Error", {
-                description: error?.response?.data?.message || "Failed to create blog",
+            const errorMessage = error?.response?.data?.message || 
+                                error?.message || 
+                                "Failed to create blog. Please check all required fields.";
+            toast.error("Error creating blog", {
+                description: errorMessage,
             });
         }
     };
 
     return (
+        <>
         <div className="w-full">
             <div className="max-w-5xl mx-auto">
                 <div className="bg-white rounded-xl shadow-lg p-8">
@@ -172,16 +186,6 @@ export default function AddBlogPage() {
                                 </FormItem>
                             )} />
 
-{/* slug is auto generated from the title */}
-                            <FormField control={form.control} name="slug" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Slug</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g how-to-buy-your-first-home" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
                             <div className="grid grid-cols-2 gap-4">
                                 <FormField control={form.control} name="status" render={({ field }) => (
                                     <FormItem>
@@ -356,6 +360,7 @@ export default function AddBlogPage() {
             title="Select Featured Image"
             description="Choose an existing image from the gallery to use as the featured image for this blog post."
         />
+    </>
     )
 }
 

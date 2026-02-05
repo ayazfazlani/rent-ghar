@@ -1,21 +1,70 @@
  'use client'
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, MapPin, Home } from 'lucide-react';
+import { Search, X, MapPin, Home, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { properties } from '@/lib/data';
+import { propertyApi } from '@/lib/api';
+import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
+import { Property } from '@/lib/data';
 
 const HeroSection = () => {
   const router = useRouter();
   const [purpose, setPurpose] = useState<'rent' | 'buy'>('rent');
-  const [city, setCity] = useState('Multan');
+  const [city, setCity] = useState('');
   const [type, setType] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<typeof properties>([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<Property[]>([]);
+  const [allProperties, setAllProperties] = useState<Property[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const cities = ['Multan', 'Lahore', 'Karachi', 'Islamabad'];
-  const propertyTypes = ['House', 'Apartment', 'Plot', 'Commercial', 'Farmhouse', 'Guest House'];
+  // Helper function to convert city name to slug
+  const cityToSlug = (cityName: string): string => {
+    return cityName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  // Helper function to convert property type to slug
+  const typeToSlug = (typeName: string): string => {
+    return typeName.toLowerCase().trim();
+  };
+
+  // Fetch properties from backend
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
+        const response = await propertyApi.getAll();
+        const backendProperties = response as BackendProperty[];
+        const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
+        
+        setAllProperties(transformedProperties);
+        
+        // Extract unique cities and property types
+        const uniqueCities = Array.from(new Set(transformedProperties.map(p => p.city).filter(Boolean))) as string[];
+        const uniqueTypes = Array.from(new Set(transformedProperties.map(p => p.type).filter(Boolean))) as string[];
+        
+        setCities(uniqueCities.sort());
+        setPropertyTypes(uniqueTypes.sort());
+        
+        // Set default city if available
+        if (uniqueCities.length > 0 && !city && uniqueCities[0]) {
+          setCity(uniqueCities[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
 
   // Handle click outside to close suggestions
   useEffect(() => {
@@ -31,36 +80,45 @@ const HeroSection = () => {
 
   // Filter suggestions based on search query
   useEffect(() => {
-    if (searchQuery.trim().length > 0) {
-      const filtered = properties.filter(property => 
-        property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property.location.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    if (searchQuery.trim().length >= 2) {
+      const searchTerm = searchQuery.toLowerCase().trim();
+      const filtered = allProperties.filter(property => 
+        property.name?.toLowerCase().includes(searchTerm) ||
+        property.city?.toLowerCase().includes(searchTerm) ||
+        property.type?.toLowerCase().includes(searchTerm) ||
+        property.location?.toLowerCase().includes(searchTerm)
+      ).slice(0, 8); // Limit to 8 suggestions
+      
       setFilteredSuggestions(filtered);
-      setShowSuggestions(true);
+      setShowSuggestions(filtered.length > 0);
     } else {
       setFilteredSuggestions([]);
       setShowSuggestions(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, allProperties]);
 
   const handleSearch = () => {
-    const params = new URLSearchParams();
-    params.append('purpose', purpose);
-    params.append('city', city);
-    if (type) {
-      params.append('type', type);
-    } else {
-      params.append('type', 'all');
+    if (!city) {
+      // If no city selected, go to general properties page
+      router.push('/properties');
+      return;
     }
-    
-    router.push(`/properties?${params.toString()}`);
+
+    const purposeSlug = purpose === 'buy' ? 'sale' : 'rent';
+    const citySlug = cityToSlug(city);
+    const typeSlug = type ? typeToSlug(type) : 'all';
+
+    // Navigate to clean URL: /properties/rent/[city]/[type]
+    if (typeSlug === 'all') {
+      router.push(`/properties/${purposeSlug}/${citySlug}`);
+    } else {
+      router.push(`/properties/${purposeSlug}/${citySlug}/${typeSlug}`);
+    }
   };
 
-  const handlePropertyClick = (propertySlug: string) => {
-    router.push(`/properties/${propertySlug}`);
+  const handlePropertyClick = (property: Property) => {
+    // Navigate to property detail page using slug
+    router.push(`/properties/${property.slug}`);
     setShowSuggestions(false);
     setSearchQuery('');
   };
@@ -128,6 +186,8 @@ const HeroSection = () => {
                 {searchQuery && (
                   <button
                     onClick={clearSearch}
+                    title="Clear search"
+                    aria-label="Clear search"
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
                   >
                     <X className="w-3 h-3 text-gray-500" />
@@ -141,11 +201,11 @@ const HeroSection = () => {
                   {filteredSuggestions.map((property) => (
                     <button
                       key={property.id}
-                      onClick={() => handlePropertyClick(property.slug)}
+                      onClick={() => handlePropertyClick(property)}
                       className="w-full px-3 py-2.5 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0 group"
                     >
                       <div className="flex items-start gap-2.5">
-                        <div className="w-8 h-8 bg-black/5 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-black/10 transition-colors">
+                        <div className="w-8 h-8 bg-black/5 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-black/10 transition-colors">
                           <Home className="w-4 h-4 text-gray-600" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -213,52 +273,74 @@ const HeroSection = () => {
             {/* Filters */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 max-w-2xl mx-auto">
               <div className="relative">
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
-                  title="Select city"
-                >
-                  {cities.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+                {loading ? (
+                  <div className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 flex items-center justify-center">
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  </div>
+                ) : (
+                  <>
+                    <select
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
+                      title="Select city"
+                    >
+                      <option value="">All Cities</option>
+                      {cities.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="relative">
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
-                  title="Select property type"
-                >
-                  <option value="">All Types</option>
-                  {propertyTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+                {loading ? (
+                  <div className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 flex items-center justify-center">
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  </div>
+                ) : (
+                  <>
+                    <select
+                      value={type}
+                      onChange={(e) => setType(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
+                      title="Select property type"
+                    >
+                      <option value="">All Types</option>
+                      {propertyTypes.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </>
+                )}
               </div>
 
               <button
                 onClick={handleSearch}
-                className="relative bg-black text-white px-4 py-2 rounded-lg font-semibold text-xs transform hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1.5 shadow-lg hover:shadow-2xl overflow-hidden group"
+                disabled={loading}
+                className="relative bg-black text-white px-4 py-2 rounded-lg font-semibold text-xs transform hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1.5 shadow-lg hover:shadow-2xl overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="relative z-10 flex items-center gap-1.5">
-                  <Search className="w-3 h-3" />
+                  {loading ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Search className="w-3 h-3" />
+                  )}
                   Search
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-all duration-1000"></div>

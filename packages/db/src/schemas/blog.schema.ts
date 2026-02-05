@@ -61,8 +61,13 @@ export const BlogSchema = SchemaFactory.createForClass(Blog);
 
 // Auto-generate slug from title (before save)
 BlogSchema.pre('save', async function () {
-  if (this.isModified('title')) {
-    this.slug = slugify(this.title, { lower: true });
+  // Generate slug if:
+  // 1. Title is modified, OR
+  // 2. Slug is not set (for new documents)
+  if (this.isModified('title') || !this.slug) {
+    if (this.title) {
+      this.slug = slugify(this.title, { lower: true });
+    }
   }
 });
 // Indexes for performance + SEO-related queries

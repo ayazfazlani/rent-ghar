@@ -28,11 +28,9 @@ function formatDate(dateString?: string): string {
     if (isNaN(date.getTime())) {
       return 'Invalid date';
     }
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    // SSR safe date formatting: YYYY-MM-DD
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
   } catch (error) {
     console.warn('Error formatting date:', dateString, error);
     return 'Date not available';
@@ -81,11 +79,25 @@ function getImage(blog: Blog): string {
  */
 export function transformBlogToPost(blog: Blog | null | undefined): BlogPost {
   if (!blog) {
-    throw new Error('Blog data is null or undefined');
+    console.error('Blog data is null or undefined');
+    return {} as BlogPost; // Fallback instead of throwing
   }
 
   if (!blog._id || !blog.title || !blog.slug) {
-    throw new Error('Blog data is missing required fields');
+    console.error('Blog data is missing required fields', blog);
+    // Return a minimal valid BlogPost object instead of throwing
+    return {
+      id: blog._id || 'unknown',
+      slug: blog.slug || 'unknown',
+      title: blog.title || 'Untitled',
+      excerpt: '',
+      content: '',
+      date: 'Date not available',
+      author: 'RentGhr Team',
+      image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=500&fit=crop',
+      category: 'Uncategorized',
+      readTime: '0 min read',
+    };
   }
 
   return {

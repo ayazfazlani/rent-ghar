@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { MapPin, Bed, Bath, Maximize, Share2, Heart, Phone, Mail, Calendar, CheckCircle2, X, Loader2 } from 'lucide-react';
+import { MapPin, Bed, Bath, Maximize, Share2, Heart, Phone, Mail, Calendar, CheckCircle2, X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -88,7 +88,7 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
   // Get images from property or use placeholders
   const getImages = (): string[] => {
     if (!property) return getPlaceholderImages('House');
-    
+
     // Convert image URL to full URL if needed
     const getImageUrl = (url?: string): string | null => {
       if (!url) return null;
@@ -103,9 +103,9 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
       }
       return null;
     };
-    
+
     const validImages: string[] = [];
-    
+
     // Add main photo if valid
     if (backendProperty) {
       const mainPhotoUrl = getImageUrl(backendProperty.mainPhotoUrl);
@@ -113,7 +113,7 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
         validImages.push(mainPhotoUrl);
       }
     }
-    
+
     // Add additional photos if valid
     if (backendProperty?.additionalPhotosUrls) {
       backendProperty.additionalPhotosUrls.forEach(url => {
@@ -123,7 +123,7 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
         }
       });
     }
-    
+
     // Return valid images or fallback to placeholders
     return validImages.length > 0 ? validImages : getPlaceholderImages(property.type);
   };
@@ -173,6 +173,14 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
   const images = getImages();
   const formatPrice = (price: number) => price.toLocaleString('en-PK');
 
+  const nextImage = () => {
+    setSelectedImage((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setSelectedImage((prev) => (prev - 1 + images.length) % images.length);
+  };
+
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert('Contact form submitted! In production, this would send to your backend.');
@@ -215,99 +223,15 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
   return (
     <div className="min-h-screen bg-background">
       <div className="pt-20 md:pt-24">
-        {/* Image Gallery */}
-        <section className="bg-black">
-          <div className="container mx-auto px-4 py-6">
-            <div className="grid grid-cols-4 gap-2 max-h-[600px]">
-              <div className="col-span-4 md:col-span-3 relative">
-                {images.length > 0 && images[selectedImage] ? (
-                  <img
-                    src={images[selectedImage]}
-                    alt={property.name}
-                    className="w-full h-[400px] md:h-[600px] object-cover rounded-lg"
-                    onError={(e) => {
-                      // If image fails to load, use placeholder
-                      const target = e.target as HTMLImageElement;
-                      const placeholder = getPlaceholderImages(property.type)[0];
-                      if (placeholder && target.src !== placeholder) {
-                        target.src = placeholder;
-                      }
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-[400px] md:h-[600px] bg-secondary rounded-lg flex items-center justify-center">
-                    <p className="text-muted-foreground">No image available</p>
-                  </div>
-                )}
-                {images.length > 0 && (
-                  <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                    {selectedImage + 1} / {images.length}
-                  </div>
-                )}
-              </div>
-              <div className="hidden md:flex md:flex-col gap-2">
-                {images.slice(0, 3).map((img, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => setSelectedImage(idx)}
-                    className={`cursor-pointer rounded-lg overflow-hidden border-2 ${
-                      selectedImage === idx ? 'border-primary' : 'border-transparent'
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt={`View ${idx + 1}`}
-                      className="w-full h-[195px] object-cover hover:opacity-75 transition-opacity"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        const placeholder = getPlaceholderImages(property.type)[idx] || getPlaceholderImages(property.type)[0];
-                        if (placeholder && target.src !== placeholder) {
-                          target.src = placeholder;
-                        }
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Mobile Thumbnail Strip */}
-            <div className="flex md:hidden gap-2 mt-2 overflow-x-auto">
-              {images.map((img, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => setSelectedImage(idx)}
-                  className={`flex-shrink-0 cursor-pointer rounded overflow-hidden border-2 ${
-                    selectedImage === idx ? 'border-primary' : 'border-transparent'
-                  }`}
-                >
-                  <img 
-                    src={img} 
-                    alt={`View ${idx + 1}`} 
-                    className="w-20 h-20 object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      const placeholder = getPlaceholderImages(property.type)[idx] || getPlaceholderImages(property.type)[0];
-                      if (placeholder && target.src !== placeholder) {
-                        target.src = placeholder;
-                      }
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
+            {/* Main Content - Left Side */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Header */}
+              {/* Title and Excerpt Section */}
               <div>
                 <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-3">
                       <span className="px-3 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-full">
                         {property.purpose === 'buy' ? 'For Sale' : 'For Rent'}
                       </span>
@@ -315,13 +239,22 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                         {property.type}
                       </span>
                     </div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">{property.name}</h1>
-                    <div className="flex items-center gap-2 text-muted-foreground">
+                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">{property.name}</h1>
+                    <div className="flex items-center gap-2 text-muted-foreground mb-4">
                       <MapPin className="w-5 h-5 text-primary" />
                       <span className="text-lg">{property.location}, {property.city}</span>
                     </div>
+                    {/* Short Excerpt */}
+                    <p className="text-muted-foreground text-lg leading-relaxed">
+                      {(backendProperty as any)?.excerpt ||
+                        (property.description && property.description.length > 150
+                          ? property.description.substring(0, 150) + '...'
+                          : property.description) ||
+                        `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${property.location}, ${property.city}. 
+                        Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort.`}
+                    </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 ml-4">
                     <Button
                       variant="outline"
                       size="icon"
@@ -336,7 +269,8 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-6 bg-secondary rounded-lg">
+                {/* Price and Stats */}
+                <div className="flex items-center justify-between p-6 bg-secondary rounded-lg mb-6">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
                       {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
@@ -348,17 +282,17 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                   {property.bedrooms > 0 && (
                     <div className="flex gap-6">
                       <div className="text-center">
-                        <Bed className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />
+                        <Bed className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
                         <p className="text-sm font-semibold">{property.bedrooms}</p>
                         <p className="text-xs text-muted-foreground">Beds</p>
                       </div>
                       <div className="text-center">
-                        <Bath className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />
+                        <Bath className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
                         <p className="text-sm font-semibold">{property.bathrooms}</p>
                         <p className="text-xs text-muted-foreground">Baths</p>
                       </div>
                       <div className="text-center">
-                        <Maximize className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />
+                        <Maximize className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
                         <p className="text-sm font-semibold">{property.area}</p>
                         <p className="text-xs text-muted-foreground">sq ft</p>
                       </div>
@@ -366,6 +300,108 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                   )}
                 </div>
               </div>
+
+              {/* Image Slider Section */}
+              <section>
+                <div className="relative w-full group">
+                  {/* Main Image */}
+                  <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden bg-secondary">
+                    {images.length > 0 && images[selectedImage] ? (
+                      <img
+                        src={images[selectedImage]}
+                        alt={`${property.name} - Image ${selectedImage + 1}`}
+                        className="w-full h-full object-cover transition-opacity duration-300"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          const placeholder = getPlaceholderImages(property.type)[selectedImage] || getPlaceholderImages(property.type)[0];
+                          if (placeholder && target.src !== placeholder) {
+                            target.src = placeholder;
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <p className="text-muted-foreground">No image available</p>
+                      </div>
+                    )}
+
+                    {/* Navigation Buttons */}
+                    {images.length > 1 && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          onClick={prevImage}
+                        >
+                          <ChevronLeft className="w-6 h-6" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          onClick={nextImage}
+                        >
+                          <ChevronRight className="w-6 h-6" />
+                        </Button>
+                      </>
+                    )}
+
+                    {/* Image Counter */}
+                    {images.length > 1 && (
+                      <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm z-10">
+                        {selectedImage + 1} / {images.length}
+                      </div>
+                    )}
+
+                    {/* Thumbnail Indicators */}
+                    {images.length > 1 && (
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                        {images.map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setSelectedImage(idx)}
+                            className={`w-2 h-2 rounded-full transition-all ${selectedImage === idx
+                                ? 'bg-white w-8'
+                                : 'bg-white/50 hover:bg-white/75'
+                              }`}
+                            aria-label={`Go to image ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Thumbnail Strip - Visible on all devices now */}
+                  {images.length > 1 && (
+                    <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
+                      {images.map((img, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => setSelectedImage(idx)}
+                          className={`shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${selectedImage === idx
+                              ? 'border-primary ring-2 ring-primary ring-offset-2'
+                              : 'border-transparent opacity-60 hover:opacity-100'
+                            }`}
+                        >
+                          <img
+                            src={img}
+                            alt={`Thumbnail ${idx + 1}`}
+                            className="w-20 h-20 object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              const placeholder = getPlaceholderImages(property.type)[idx] || getPlaceholderImages(property.type)[0];
+                              if (placeholder && target.src !== placeholder) {
+                                target.src = placeholder;
+                              }
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </section>
 
               {/* Description */}
               <Card>
@@ -386,11 +422,11 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-4">Features & Amenities</h2>
-                    {backendProperty?.features && backendProperty.features.length > 0 ? (
+                  {backendProperty?.features && backendProperty.features.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {backendProperty.features.map((feature: string, idx: number) => (
                         <div key={idx} className="flex items-center gap-2">
-                          <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
                           <span className="text-muted-foreground">{feature}</span>
                         </div>
                       ))}
@@ -414,14 +450,14 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
               </Card>
             </div>
 
-            {/* Sidebar */}
+            {/* Sidebar - Right Side */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
                 {/* Contact Card */}
                 <Card>
                   <CardContent className="p-6">
                     <h3 className="text-lg font-bold mb-4">Contact Agent</h3>
-                    
+
                     <div className="space-y-3 mb-6">
                       <Button className="w-full" size="lg" onClick={() => setShowContactForm(true)}>
                         <Mail className="w-4 h-4 mr-2" />
@@ -435,11 +471,11 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
 
                     <div className="pt-6 border-t border-border">
                       <p className="text-sm text-muted-foreground mb-3">Schedule a visit</p>
-                     </div>
+                    </div>
                   </CardContent>
                 </Card>
 
-                {/* Property ID */}
+                {/* Property Details */}
                 <Card>
                   <CardContent className="p-6">
                     <h3 className="text-lg font-bold mb-3">Property Details</h3>
@@ -465,6 +501,8 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                     </div>
                   </CardContent>
                 </Card>
+
+
               </div>
             </div>
           </div>

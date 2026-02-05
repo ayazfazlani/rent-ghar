@@ -9,6 +9,7 @@ import { CityModule } from './city/city.module';
 import { AreaModule } from './area/area.module';
 import { CategoryModule } from './category/category.module';
 import { BlogModule } from './blog/blog.module';
+import { PageModule } from './page/page.module';
 import { StorageModule } from '../../../packages/storage/storage.module';
 
 @Module({
@@ -29,8 +30,10 @@ import { StorageModule } from '../../../packages/storage/storage.module';
     AreaModule,
     CategoryModule,
     BlogModule,
+    PageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

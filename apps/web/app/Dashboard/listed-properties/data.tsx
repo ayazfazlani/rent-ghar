@@ -1,4 +1,4 @@
- import { Property } from "./columns"
+//  import { Property } from "./columns"
 
 export type Property = {
   title: string

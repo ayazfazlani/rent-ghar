@@ -24,19 +24,19 @@ interface PropertiesListingProps {
   useCleanUrls?: boolean; // If true, navigate using /properties/rent/city/type format
 }
 
-export default function PropertiesListing({ 
-  purpose, 
-  city: initialCity = '', 
+export default function PropertiesListing({
+  purpose,
+  city: initialCity = '',
   type: initialType = 'all',
-  useCleanUrls = false 
+  useCleanUrls = false
 }: PropertiesListingProps) {
   const router = useRouter();
-  
+
   // STATE: Properties and filters
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [city, setCity] = useState(initialCity);
   const [type, setType] = useState(initialType);
   // Local state for filters before applying
@@ -49,13 +49,13 @@ export default function PropertiesListing({
       try {
         setLoading(true);
         setError(null);
-        
+
         // Fetch all approved properties from API
         const response = await propertyApi.getAll();
         const backendProperties = response as BackendProperty[];
         // Transform backend format to frontend format
         const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
-        
+
         setProperties(transformedProperties);
       } catch (err: any) {
         console.error('Error fetching properties:', err);
@@ -82,12 +82,21 @@ export default function PropertiesListing({
 
   // Extract unique cities and property types from fetched properties
   const cities = useMemo(() => {
-    const uniqueCities = Array.from(new Set(properties.map((p: Property) => p.city).filter(Boolean))) as string[];
+    const uniqueCities = Array.from(new Set(
+      properties
+        .map((p: Property) => p.city)
+        .filter((c): c is string => typeof c === 'string' && c.length > 0)
+    ));
     return uniqueCities.sort();
   }, [properties]);
 
   const propertyTypes = useMemo(() => {
-    const uniqueTypes = Array.from(new Set(properties.map((p: Property) => p.type).filter(Boolean))) as string[];
+    const validTypes: Property['type'][] = ['House', 'Apartment', 'Flat', 'Commercial'];
+    const uniqueTypes = Array.from(new Set(
+      properties
+        .map((p: Property) => p.type)
+        .filter((t): t is Property['type'] => validTypes.includes(t))
+    ));
     return uniqueTypes.sort();
   }, [properties]);
 
@@ -103,11 +112,11 @@ export default function PropertiesListing({
   // Helper function to find city name from slug (handles both full slugs and abbreviations)
   const slugToCity = (slug: string): string | null => {
     const normalizedSlug = slug.toLowerCase().trim();
-    
+
     // First try exact slug match
     const exactMatch = cities.find(c => cityToSlug(c) === normalizedSlug);
     if (exactMatch) return exactMatch;
-    
+
     // Try to match by first letters (e.g., "dgk" matches "Dera Ghazi Khan")
     const words = normalizedSlug.split('-');
     if (words.length > 0) {
@@ -119,14 +128,14 @@ export default function PropertiesListing({
       });
       if (abbreviationMatch) return abbreviationMatch;
     }
-    
+
     // Try partial match (e.g., "dgk" might match cities starting with "dera")
-    const partialMatch = cities.find(c => 
-      cityToSlug(c).startsWith(normalizedSlug) || 
+    const partialMatch = cities.find(c =>
+      cityToSlug(c).startsWith(normalizedSlug) ||
       normalizedSlug.startsWith(cityToSlug(c).substring(0, 3))
     );
     if (partialMatch) return partialMatch;
-    
+
     return null;
   };
 
@@ -175,11 +184,11 @@ export default function PropertiesListing({
       const matchesPurpose = property.purpose === purpose || purpose === 'all';
       const matchesCity = !matchedCity || property.city === matchedCity;
       // Case-insensitive type matching
-      const matchesType = !normalizedType || 
+      const matchesType = !normalizedType ||
         property.type.toLowerCase() === normalizedType.toLowerCase();
       return matchesPurpose && matchesCity && matchesType;
     });
-    
+
     // Debug logging in development
     if (process.env.NODE_ENV === 'development' && (matchedCity || normalizedType)) {
       console.log('[PropertiesListing] Filter debug:', {
@@ -197,25 +206,25 @@ export default function PropertiesListing({
         } : null,
       });
     }
-    
+
     return filtered;
   }, [properties, purpose, matchedCity, normalizedType]);
 
   const updateFilters = (newCity: string, newType: string, newPurpose?: 'rent' | 'buy' | 'all', forceCleanUrl = false) => {
     const currentPurpose = newPurpose || purpose;
-    
+
     // Always use clean URLs when forceCleanUrl is true (from Apply button) or when useCleanUrls is true
     const shouldUseCleanUrl = forceCleanUrl || useCleanUrls;
-    
+
     if (shouldUseCleanUrl && currentPurpose !== 'all') {
       // Use clean URL format: /properties/rent/city/type
       const purposePath = currentPurpose; // rent or buy
       const citySlug = newCity ? cityToSlug(newCity) : '';
       // Convert type to lowercase for URL (e.g., "House" -> "house")
-      const typeSlug = newType && newType !== 'all' 
-        ? `/${newType.toLowerCase()}` 
+      const typeSlug = newType && newType !== 'all'
+        ? `/${newType.toLowerCase()}`
         : '';
-      
+
       if (citySlug) {
         router.push(`/properties/${purposePath}/${citySlug}${typeSlug}`);
       } else {
@@ -255,7 +264,7 @@ export default function PropertiesListing({
         <div className="container mx-auto px-4 pt-32 pb-16 text-center">
           <h1 className="text-4xl font-bold text-foreground mb-4">Error Loading Properties</h1>
           <p className="text-muted-foreground mb-8">{error}</p>
-          <Button onClick={() => window.location.reload()}>Retry</Button>
+          <Button onClick={() => typeof window !== 'undefined' && window.location.reload()}>Retry</Button>
         </div>
       </div>
     );
@@ -263,12 +272,12 @@ export default function PropertiesListing({
 
   return (
     <div className="min-h-screen bg-background">
-       
+
       {/* Hero Banner with fade-in animation */}
-      <section className="pt-8 pb-8 md:pt-12 md:pb-12 bg-secondary animate-in fade-in duration-500">
+      <section className="pt-20 pb-8 md:pt-24 md:pb-12 bg-secondary animate-in fade-in duration-500">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 animate-in slide-in-from-bottom-4 duration-700">
-            {purpose === 'rent' ? 'Properties for Rent' : purpose === 'buy' ? 'Properties for Sale' : 'Properties'} 
+            {purpose === 'rent' ? 'Properties for Rent' : purpose === 'buy' ? 'Properties for Sale' : 'Properties'}
             {matchedCity ? ` in ${matchedCity}` : ''}
             {type && type !== 'all' ? ` - ${type}` : ''}
           </h1>
@@ -328,7 +337,7 @@ export default function PropertiesListing({
         </div>
       </section>
 
-     </div>
+    </div>
   );
 }
 

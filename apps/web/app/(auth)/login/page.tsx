@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useAuth } from '@/context/auth-context'
 import * as z from 'zod'
 
 import { Button } from '@/components/ui/button'
@@ -33,14 +34,15 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>
 
 export default function LoginPage() {
+  const { login } = useAuth()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   })
 
@@ -48,19 +50,24 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await api.post('/auth/login', values)
-
-      // NestJS se jo response aa raha hai (accessToken + user)
-      console.log('Login success:', response.data)
+      await login(values)
 
       toast.success("Login Successful", {
         description: "Welcome back! Redirecting...",
       })
 
-      // Redirect karo – dashboard ya home page pe
-      router.push('/dashboard')  // ya '/' ya jo bhi protected route hai
-      router.refresh()           // optional: fresh data load karne ke liye
+      // Redirect is handled by the component or we can do it here if login doesn't redirect
+      // AuthContext login implementation:
+      // const login = async (data: any) => {
+      //   const response = await api.post('/auth/login', data);
+      //   if (response.data.user) setUser(response.data.user); else await fetchUser();
+      //   router.refresh();
+      // };
+      // It doesn't redirect. We should redirect here.
+      router.push('/dashboard')
+
     } catch (err: any) {
+      console.error(err)
       const errorMessage =
         err.response?.data?.message ||
         'Invalid credentials or server error. Please try again.'

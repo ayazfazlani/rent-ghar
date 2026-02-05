@@ -19,6 +19,7 @@ import {
     User,
     ChevronDown,
     Image,
+    FileTextIcon,
   } from "lucide-react";
   import Link from "next/link";
   import { usePathname } from "next/navigation";
@@ -302,6 +303,35 @@ import {
             </SidebarGroup>
           </Collapsible>
           </Collapsible>
+
+          {/* pages */}
+          
+          <Collapsible defaultOpen={isSectionActive("/dashboard/pages")}>
+            <SidebarGroup>
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                  <div className="flex items-center gap-3">
+                    <FileTextIcon className="h-5 w-5" />
+                    <span>Pages</span>
+                  </div>
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu className="pl-3">
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/dashboard/pages")}>
+                        <Link href="/dashboard/pages">
+                          <span>All Pages</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
   
           {/* Account (bottom) */}
           <SidebarGroup className="mt-auto">

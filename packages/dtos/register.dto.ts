@@ -3,14 +3,14 @@ import { IsEmail, IsNotEmpty, MinLength , IsEnum, IsString } from "class-validat
 export class RegisterDto{
     @IsNotEmpty()
     @IsString()
-    name: string;
+    name!: string;
 
     @IsEmail()
-    email: string;
+    email!: string;
 
     @IsNotEmpty()
     @MinLength(8)
-    password: string;
+    password!: string;
 
     @IsEnum(['USER' ,'AGENT'])
     role?: string;

@@ -60,12 +60,12 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
 
   // Extract city name from area.city or fallback to legacy city field
   let cityName = backend.city || '';
-  if (backend.area && typeof backend.area === 'object' && backend.area.city) {
-    cityName = backend.area.city.name;
+  if (backend.area && typeof backend.area === 'object') {
+    cityName = backend.area.city?.name || cityName;
   }
 
   // Extract area name
-  const areaName = backend.area && typeof backend.area === 'object' ? backend.area.name : '';
+  const areaName = (backend.area && typeof backend.area === 'object') ? backend.area.name : '';
 
   // Convert image URL to full URL if it's a relative path
   const getImageUrl = (url?: string): string => {

@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { cities, propertyTypes } from '@/lib/data';
 
 interface AddPropertyModalProps {
@@ -17,7 +17,6 @@ interface AddPropertyModalProps {
 }
 
 const AddPropertyModal = ({ open, onClose }: AddPropertyModalProps) => {
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     title: '',
     type: '',
@@ -32,8 +31,7 @@ const AddPropertyModal = ({ open, onClose }: AddPropertyModalProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: 'Property Submitted',
+    toast.success('Property Submitted', {
       description: 'Your property listing has been submitted for review.',
     });
     onClose();
