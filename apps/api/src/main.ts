@@ -20,7 +20,7 @@ async function bootstrap() {
     console.log(`📁 Serving static files from: ${uploadsPath}`);
   }
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.APP_URL || 'http://localhost:3000',
     credentials: true,
   });
   

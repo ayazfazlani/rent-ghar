@@ -1,8 +1,14 @@
 // lib/api.ts
 import axios from 'axios';
 
+const getBaseURL = () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) return '/api';
+  return apiUrl.endsWith('/') ? `${apiUrl}api` : `${apiUrl}/api`;
+};
+
 const api = axios.create({
-  baseURL: '/api',              // Next.js proxy will rewrite to http://localhost:3001
+  baseURL: getBaseURL(),
   withCredentials: true,        // ← cookie (refresh_token) automatic bhejo
   headers: {
     'Content-Type': 'application/json',

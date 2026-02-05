@@ -21,7 +21,7 @@ import { StorageModule } from '../../../packages/storage/storage.module';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get('MONGODB_URI') || 'mongodb://localhost:27017/rent-ghar',
+        uri:  configService.get('MONGODB_URI') || 'mongodb+srv://admin:admin1234@cluster0.lmunqjj.mongodb.net/?appName=Cluster0',
       }),
     }),
     AuthModule,
