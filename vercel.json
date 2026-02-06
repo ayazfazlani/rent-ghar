@@ -1,9 +1,24 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "outputDirectory": "apps/web/.next",
+  "framework": "nextjs",
   "builds": [
     {
+      "src": "apps/web",
+      "use": "@vercel/next",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    },
+    {
       "src": "apps/api/src/main.ts",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
     }
   ],
   "routes": [
@@ -30,6 +45,17 @@
         "PATCH",
         "OPTIONS"
       ]
+    },
+    {
+      "src": "/(.*)",
+      "dest": "apps/web/$1"
     }
+  ],
+  "env": [
+    "MONGODB_URI",
+    "JWT_SECRET",
+    "JWT_REFRESH_SECRET",
+    "JWT_EXPIRES_IN",
+    "JWT_REFRESH_EXPIRES_IN"
   ]
 }

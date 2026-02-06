@@ -11,39 +11,50 @@ async function bootstrap() {
     const { join } = await import('path');
     const express = await import('express');
     const cwd = process.cwd();
-    const isInAppsApi = cwd.includes(join('apps', 'api')) || cwd.endsWith('apps\\api');
-    const uploadsPath = isInAppsApi 
+    const isInAppsApi =
+      cwd.includes(join('apps', 'api')) || cwd.endsWith('apps\\api');
+    const uploadsPath = isInAppsApi
       ? join(cwd, '..', '..', 'uploads') // Go up to monorepo root
       : join(cwd, 'uploads'); // Use current directory
-    app.use(
-      '/uploads/',
-      express.static(uploadsPath)
-    );
+    app.use('/uploads/', express.static(uploadsPath));
     console.log(`📁 Serving static files from: ${uploadsPath}`);
   }
+  const allowedOrigins = [
+    process.env.APP_URL || 'http://localhost:3000',
+    'http://localhost:3002',
+    'http://localhost:3005',
+  ];
+
+  // Add Vercel deployment URL for production
+  if (process.env.VERCEL_URL) {
+    allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
+  }
+
+  // Add other production domains if specified
+  if (
+    process.env.FRONTEND_URL &&
+    !allowedOrigins.includes(process.env.FRONTEND_URL)
+  ) {
+    allowedOrigins.push(process.env.FRONTEND_URL);
+  }
+
   app.enableCors({
-    origin: [
-      process.env.APP_URL || 'http://localhost:3000',
-      'http://localhost:3002',
-      'http://localhost:3005'
-    ],
+    origin: allowedOrigins,
     credentials: true,
   });
-  
+
   app.setGlobalPrefix('api');
-  app.useGlobalPipes(new ValidationPipe(
-    {
+  app.useGlobalPipes(
+    new ValidationPipe({
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: false, // Allow extra properties to avoid errors
       skipMissingProperties: true, // Skip validation for missing properties
-    }
-  ));
-  
+    }),
+  );
+
   const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`🚀 API server is running on http://localhost:${port}`);
 }
 bootstrap();
-
-
