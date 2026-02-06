@@ -6,6 +6,9 @@
       "dependsOn": [
         "^build"
       ],
+      "env": [
+        "MONGODB_URI"
+      ],
       "inputs": [
         "$TURBO_DEFAULT$",
         ".env*"
