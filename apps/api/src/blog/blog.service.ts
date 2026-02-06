@@ -1,11 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { Blog } from '../../../../packages/db/src/schemas/blog.schema';
+import { Blog, BlogDocument } from '@rent-ghar/db/schemas/blog.schema';
 import { Model, isValidObjectId } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { BlogDocument } from '../../../../packages/db/src/schemas/blog.schema';
-import { Category } from '../../../../packages/db/src/schemas/category.schema';
-import { CreateBlogDto } from '../../../../packages/dtos/blog/createblog.dto';
-import { UpdateBlogDto } from '../../../../packages/dtos/blog/updateblog.dto';
+import { Category } from '@rent-ghar/db/schemas/category.schema';
+import { CreateBlogDto } from '@rent-ghar/dtos/blog/createblog.dto';
+import { UpdateBlogDto } from '@rent-ghar/dtos/blog/updateblog.dto';
 
 @Injectable()
 export class BlogService {

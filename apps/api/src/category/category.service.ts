@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
-import { Category, CategoryDocument } from '../../../../packages/db/src/schemas/category.schema';
-import { CreateCategoryDto } from '../../../../packages/dtos/blog-category/create-category.dto';
-import { UpdateCategoryDto } from '../../../../packages/dtos/blog-category/update-category.dto';
+import { Category, CategoryDocument } from '@rent-ghar/db/schemas/category.schema';
+import { CreateCategoryDto } from '@rent-ghar/dtos/blog-category/create-category.dto';
+import { UpdateCategoryDto } from '@rent-ghar/dtos/blog-category/update-category.dto';
 import slug from 'slug';
 
 @Injectable()

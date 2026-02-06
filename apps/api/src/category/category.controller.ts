@@ -1,8 +1,8 @@
 import { Controller, Post, Get, Put, Delete, Body, Param, HttpCode, HttpStatus, Query } from '@nestjs/common';
-import { CreateCategoryDto } from '../../../../packages/dtos/blog-category/create-category.dto';
-import { UpdateCategoryDto } from '../../../../packages/dtos/blog-category/update-category.dto';
+import { CreateCategoryDto } from '@rent-ghar/dtos/blog-category/create-category.dto';
+import { UpdateCategoryDto } from '@rent-ghar/dtos/blog-category/update-category.dto';
+import { CategoryDocument } from '@rent-ghar/db/schemas/category.schema';
 import { CategoryService } from './category.service';
-import { CategoryDocument } from '../../../../packages/db/src/schemas/category.schema';
 
 @Controller('category')
 export class CategoryController {

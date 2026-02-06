@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
-import { Page, PageDocument } from '../../../../packages/db/src/schemas/page.schema';
-import { CreatePageDto } from '../../../../packages/dtos/page/createpage.dto';
-import { UpdatePageDto } from '../../../../packages/dtos/page/updatepage.dto';
+import { Page, PageDocument } from '@rent-ghar/db/schemas/page.schema';
+import { CreatePageDto } from '@rent-ghar/dtos/page/createpage.dto';
+import { UpdatePageDto } from '@rent-ghar/dtos/page/updatepage.dto';
 
 // Helper function to generate slug from text
 function generateSlug(text: string): string {

@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body , Param, Put, Delete, UsePipes, ValidationPipe} from '@nestjs/common';
 import { CityService } from './city.service';
-import { CreateCityDto } from '../../../../packages/dtos/city/createcity.dto';
-import { CityDocument } from '../../../../packages/db/src/schemas/city.schema';
-import { UpdateCityDto } from '../../../../packages/dtos/city/updatecity.dto';
+import { CreateCityDto } from '@rent-ghar/dtos/city/createcity.dto';
+import { CityDocument } from '@rent-ghar/db/schemas/city.schema';
+import { UpdateCityDto } from '@rent-ghar/dtos/city/updatecity.dto';
 
 @Controller('cities')
 export class CityController {

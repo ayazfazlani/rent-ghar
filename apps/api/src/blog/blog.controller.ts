@@ -1,8 +1,8 @@
 import { Controller, Post, Get, Put, Delete, Body, Param, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import { CreateBlogDto } from '../../../../packages/dtos/blog/createblog.dto';
-import { UpdateBlogDto } from '../../../../packages/dtos/blog/updateblog.dto';
-import { BlogDocument } from '../../../../packages/db/src/schemas/blog.schema';
+import { CreateBlogDto } from '@rent-ghar/dtos/blog/createblog.dto';
+import { UpdateBlogDto } from '@rent-ghar/dtos/blog/updateblog.dto';
+import { BlogDocument } from '@rent-ghar/db/schemas/blog.schema';
 
 @Controller('blog')
 export class BlogController {

@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PropertyController } from './property.controller';
 import { PropertyService } from './property.service';
-import { Property, PropertySchema } from '../../../../packages/db/src/schemas/property.schema';
-import { Area, AreaSchema } from '../../../../packages/db/src/schemas/area.schema';
-import { City, CitySchema } from '../../../../packages/db/src/schemas/city.schema';
+import { Property, PropertySchema } from '@rent-ghar/db/schemas/property.schema';
+import { Area, AreaSchema } from '@rent-ghar/db/schemas/area.schema';
+import { City, CitySchema } from '@rent-ghar/db/schemas/city.schema';
 import { MongooseModule } from '@nestjs/mongoose';
-// Temporarily commented out to debug DI issue
-// import { StorageModule } from '../../../../packages/storage/storage.module';
+import { StorageModule } from '@rent-ghar/storage';
 
 @Module({
   imports: [

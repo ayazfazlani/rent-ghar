@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Property } from '../../../../packages/db/src/schemas/property.schema';
+import { Property } from '@rent-ghar/db/schemas/property.schema';
 import { InjectModel} from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { CreatePropertyDto } from '../../../../packages/types/src/property';
-import { Area } from '../../../../packages/db/src/schemas/area.schema';
+import { CreatePropertyDto } from '@rent-ghar/types/property';
+import { Area } from '@rent-ghar/db/schemas/area.schema';
 
 @Injectable()
 export class PropertyService {

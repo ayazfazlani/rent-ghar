@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
-import { Area, AreaDocument } from '../../../../packages/db/src/schemas/area.schema';
-import { CreateAreaDto } from '../../../../packages/dtos/area/createarea.dto';
-import { UpdateAreaDto } from '../../../../packages/dtos/area/updatearea.dto';
+import { Area, AreaDocument } from '@rent-ghar/db/schemas/area.schema';
+import { CreateAreaDto } from '@rent-ghar/dtos/area/createarea.dto';
+import { UpdateAreaDto } from '@rent-ghar/dtos/area/updatearea.dto';
 
 @Injectable()
 export class AreaService {

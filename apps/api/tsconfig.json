@@ -22,6 +22,18 @@
       ],
       "@rent-ghar/db/*": [
         "../../packages/db/src/*"
+      ],
+      "@rent-ghar/dtos/*": [
+        "../../packages/dtos/*"
+      ],
+      "@rent-ghar/types/*": [
+        "../../packages/types/src/*"
+      ],
+      "@rent-ghar/storage": [
+        "../../packages/storage/storage.module"
+      ],
+      "@rent-ghar/storage/*": [
+        "../../packages/storage/*"
       ]
     },
     "incremental": true,
@@ -34,7 +46,11 @@
     "noFallthroughCasesInSwitch": false
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "../../packages/db/src/**/*",
+    "../../packages/types/src/**/*",
+    "../../packages/storage/src/**/*",
+    "../../packages/storage/*.ts"
   ],
   "exclude": [
     "node_modules",

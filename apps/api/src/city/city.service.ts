@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { City, CityDocument } from '../../../../packages/db/src/schemas/city.schema';
-import { CreateCityDto } from '../../../../packages/dtos/city/createcity.dto';
-import { UpdateCityDto } from '../../../../packages/dtos/city/updatecity.dto';
+import { City, CityDocument } from '@rent-ghar/db/schemas/city.schema';
+import { CreateCityDto } from '@rent-ghar/dtos/city/createcity.dto';
+import { UpdateCityDto } from '@rent-ghar/dtos/city/updatecity.dto';
 
 @Injectable()
 export class CityService {

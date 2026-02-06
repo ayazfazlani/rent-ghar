@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Post, Query, UseGuards, UseInterceptors, Request, Param, Patch, Delete, Put, UploadedFile } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
-import { StorageService } from '../../../../packages/storage/storage.service';
+import { StorageService } from '@rent-ghar/storage/storage.service';
 import { PropertyService } from './property.service';
-import { CreatePropertyDto } from '../../../../packages/types/src/property';
+import { CreatePropertyDto } from '@rent-ghar/types/property';
 
 
 @Controller('properties')

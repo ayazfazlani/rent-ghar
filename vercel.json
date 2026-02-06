@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "outputDirectory": "apps/api/dist",
   "builds": [
     {
       "src": "apps/api/src/main.ts",

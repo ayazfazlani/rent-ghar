@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PageController } from './page.controller';
 import { PageService } from './page.service';
-import { Page, PageSchema } from '../../../../packages/db/src/schemas/page.schema';
+import { Page, PageSchema } from '@rent-ghar/db/schemas/page.schema';
 
 @Module({
   imports: [

@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, Param, Delete, Put, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PageService } from './page.service';
-import { CreatePageDto } from '../../../../packages/dtos/page/createpage.dto';
-import { UpdatePageDto } from '../../../../packages/dtos/page/updatepage.dto';
+import { CreatePageDto } from '@rent-ghar/dtos/page/createpage.dto';
+import { UpdatePageDto } from '@rent-ghar/dtos/page/updatepage.dto';
 
 @Controller('page')
 export class PageController {

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AreaController } from './area.controller';
 import { AreaService } from './area.service';
-import { Area, AreaSchema } from '../../../../packages/db/src/schemas/area.schema';
+import { Area, AreaSchema } from '@rent-ghar/db/schemas/area.schema';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: Area.name, schema: AreaSchema }])],

@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, UsePipes, ValidationPipe, Query } from '@nestjs/common';
 import { AreaService } from './area.service';
-import { CreateAreaDto } from '../../../../packages/dtos/area/createarea.dto';
-import { AreaDocument } from '../../../../packages/db/src/schemas/area.schema';
-import { UpdateAreaDto } from '../../../../packages/dtos/area/updatearea.dto';
+import { CreateAreaDto } from '@rent-ghar/dtos/area/createarea.dto';
+import { AreaDocument } from '@rent-ghar/db/schemas/area.schema';
+import { UpdateAreaDto } from '@rent-ghar/dtos/area/updatearea.dto';
 
 @Controller('areas')
 @UsePipes(new ValidationPipe())
