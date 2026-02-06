@@ -22,6 +22,8 @@ import { StorageModule } from '../../../packages/storage/storage.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const uri = configService.get<string>('MONGODB_URI') || 'mongodb+srv://admin:admin1234@cluster0.lmunqjj.mongodb.net/rent-ghar';
+        
+        console.log('database connected to ', uri)
         if (!uri) {
           console.error('❌ MONGODB_URI is not defined in environment variables');
         }
