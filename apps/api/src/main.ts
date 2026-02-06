@@ -8,7 +8,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // Serve static files for local storage
   if (process.env.STORAGE_DISK === 'local' || !process.env.STORAGE_DISK) {
-    const { join } = await import('path');
+    const path = await import('path');
+    const join = path.join;
     const express = await import('express');
     const cwd = process.cwd();
     const isInAppsApi =
