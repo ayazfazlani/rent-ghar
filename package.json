@@ -11,6 +11,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/slug": "^5.0.9",
     "concurrently": "^9.0.0",
     "prettier": "^3.7.4",
@@ -29,10 +30,13 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.975.0",
     "@aws-sdk/lib-storage": "^3.975.0",
+    "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/passport": "^11.0.5",
+    "@nestjs/platform-express": "^11.0.1",
     "@squareboat/nest-storage": "^0.1.7",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
@@ -41,10 +45,7 @@
     "mongoose": "^8.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "slug": "^11.0.1",
-    "@nestjs/common": "^11.0.1",
-    "@nestjs/core": "^11.0.1",
-    "@nestjs/platform-express": "^11.0.1"
+    "slug": "^11.0.1"
   },
   "overrides": {
     "@nestjs/core": "$@nestjs/core",
