@@ -21,12 +21,12 @@ import { StorageModule } from '../../../packages/storage/storage.module';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const uri = configService.get<string>('MONGODB_URI');
+        const uri = configService.get<string>('MONGODB_URI') || 'mongodb+srv://admin:admin1234@cluster0.lmunqjj.mongodb.net/?appName=Cluster0';
         if (!uri) {
           console.error('❌ MONGODB_URI is not defined in environment variables');
         }
         return {
-          uri: uri || 'mongodb://localhost:27017/rent-ghar',
+          uri: uri,
         };
       },
     }),
