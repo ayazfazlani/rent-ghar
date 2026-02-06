@@ -21,7 +21,7 @@ import { StorageModule } from '../../../packages/storage/storage.module';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const uri = configService.get<string>('MONGODB_URI') || 'mongodb+srv://admin:admin1234@cluster0.lmunqjj.mongodb.net/?appName=Cluster0';
+        const uri = configService.get<string>('MONGODB_URI') || 'mongodb+srv://admin:admin1234@cluster0.lmunqjj.mongodb.net/rent-ghar';
         if (!uri) {
           console.error('❌ MONGODB_URI is not defined in environment variables');
         }
