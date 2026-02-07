@@ -24,6 +24,7 @@ api.interceptors.response.use(
 
     // Skip refresh logic for the refresh endpoint itself or if we're already on the login page
     const isRefreshRequest = originalRequest.url?.includes('/auth/refresh');
+    const isProfileRequest = originalRequest.url?.includes('/auth/profile');
     const isOnLoginPage = typeof window !== 'undefined' && window.location.pathname === '/login';
 
     if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest && !isOnLoginPage) {
@@ -35,7 +36,8 @@ api.interceptors.response.use(
       } catch (refreshError) {
         console.warn('Refresh token expired or missing → session ended');
         
-        if (typeof window !== 'undefined') {
+        // Redirect to login ONLY if it's not a profile check (where we just want to know if logged in or not)
+        if (typeof window !== 'undefined' && !isProfileRequest) {
           window.location.href = '/login?sessionExpired=true';
         }
         return Promise.reject(refreshError);
