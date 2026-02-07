@@ -22,21 +22,19 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Agar 401 aaya aur yeh refresh request nahi hai
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // infinite loop se bachne ke liye
+    // Skip refresh logic for the refresh endpoint itself or if we're already on the login page
+    const isRefreshRequest = originalRequest.url?.includes('/auth/refresh');
+    const isOnLoginPage = typeof window !== 'undefined' && window.location.pathname === '/login';
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest && !isOnLoginPage) {
+      originalRequest._retry = true;
 
       try {
-        // Refresh token call (cookie apne aap jayegi)
-        await api.post('/auth/refresh'); // ← body mein kuch nahi chahiye, cookie se refresh ho jayega
-        // Naya access token aa gaya (NestJS naye access token ko body mein dega ya cookie update karega)
-
-        // Original request phir se try karo
+        await api.post('/auth/refresh');
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh bhi fail → logout
-        console.error('Refresh token expired → logout');
-        // Yahan logout logic daal sakte ho (localStorage clear + redirect /login)
+        console.warn('Refresh token expired or missing → session ended');
+        
         if (typeof window !== 'undefined') {
           window.location.href = '/login?sessionExpired=true';
         }

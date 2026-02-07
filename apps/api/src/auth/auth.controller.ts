@@ -7,6 +7,7 @@ import {
   UseGuards,
   Req,
   Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request as ExpressRequest, Response, CookieOptions } from 'express';
 
@@ -63,10 +64,14 @@ export class AuthController {
     @Body() oldRefreshToken?: string,
   ): Promise<TokenResponse> {
     const token =
-      oldRefreshToken ||
+      (typeof oldRefreshToken === 'string' ? oldRefreshToken : undefined) ||
       (req.cookies && (req.cookies.refreshToken as string)) ||
       (req.headers['x-refresh-token'] as string | undefined);
-    return this.authService.refreshToken(token ?? '');
+
+    if (!token) {
+      throw new UnauthorizedException('Refresh token is missing');
+    }
+    return this.authService.refreshToken(token);
   }
 
   @Post('logout')

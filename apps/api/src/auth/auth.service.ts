@@ -89,6 +89,9 @@ export class AuthService {
   }
 
   async refreshToken(oldRefreshToken: string): Promise<TokenResponse> {
+    if (!oldRefreshToken) {
+      throw new UnauthorizedException('Refresh token is missing');
+    }
     try {
       const payload = this.jwtService.verify(oldRefreshToken, {
         secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
