@@ -5,7 +5,9 @@ const getBaseURL = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   console.log(apiUrl)
   if (!apiUrl) return '/api';
-  return apiUrl.endsWith('/') ? `${apiUrl}api` : `${apiUrl}/api`;
+  const baseURL = apiUrl.endsWith('/') ? `${apiUrl}api` : `${apiUrl}/api`;
+  console.log('🌐 API BaseURL:', baseURL);
+  return baseURL;
 };
 
 const api = axios.create({
