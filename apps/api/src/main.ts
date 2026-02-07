@@ -3,9 +3,12 @@ import 'tsconfig-paths/register';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
+
   // Serve static files for local storage
   if (process.env.STORAGE_DISK === 'local' || !process.env.STORAGE_DISK) {
     const path = await import('path');
@@ -24,6 +27,8 @@ async function bootstrap() {
     process.env.APP_URL || 'http://localhost:3000',
     'http://localhost:3002',
     'http://localhost:3005',
+    'https://pro.adca.pk',
+    'http://pro.adca.pk',
   ];
 
   // Add Vercel deployment URL for production
@@ -38,6 +43,8 @@ async function bootstrap() {
   ) {
     allowedOrigins.push(process.env.FRONTEND_URL);
   }
+
+  console.log('✅ Allowed Origins:', allowedOrigins);
 
   app.enableCors({
     origin: allowedOrigins,
