@@ -9,6 +9,18 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
 
+  // Add MongoDB connection event logging
+  const mongoose = await import('mongoose');
+  mongoose.connection.on('connected', () => {
+    console.log('✅ MongoDB connected successfully');
+  });
+  mongoose.connection.on('error', (err) => {
+    console.error('❌ MongoDB connection error:', err.message);
+  });
+  mongoose.connection.on('disconnected', () => {
+    console.warn('⚠️ MongoDB disconnected');
+  });
+
   // Serve static files for local storage
   if (process.env.STORAGE_DISK === 'local' || !process.env.STORAGE_DISK) {
     const path = await import('path');
@@ -47,7 +59,17 @@ async function bootstrap() {
   console.log('✅ Allowed Origins:', allowedOrigins);
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`🚫 CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   });
 
