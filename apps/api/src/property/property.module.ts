@@ -13,8 +13,8 @@ import { StorageModule } from '@rent-ghar/storage';
       { name: Property.name, schema: PropertySchema },
       { name: Area.name, schema: AreaSchema },
       { name: City.name, schema: CitySchema }
-    ])
-    // StorageModule - temporarily removed
+    ]),
+    StorageModule,
   ],
   controllers: [PropertyController],
   providers: [PropertyService],

@@ -63,6 +63,14 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3001;
   await app.listen(port);
-  console.log(`🚀 API server is running on http://localhost:${port}`);
+  
+  const serverUrl = process.env.NODE_ENV === 'production' 
+    ? `${process.env.NEXT_PUBLIC_API_URL}/api` 
+    : `http://localhost:${port}`;
+    
+  console.log(`🚀 API server is running on: ${serverUrl}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`📡 Local debugging at http://localhost:${port}/hello`);
+  }
 }
 bootstrap();

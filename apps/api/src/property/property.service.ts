@@ -106,38 +106,43 @@ export class PropertyService {
             }
           }
           
-          const properties = await this.propertyModel.find(query).sort({ createdAt: -1 }).exec();
-          await this.ensureSlugForProperties(properties);
-          
-          // Populate area and city - handle cases where area might be null
-          if (properties.length === 0) {
-            return [];
-          }
-          
-          // Only populate if area exists
-          const propertiesWithArea = properties.filter(p => this.isValidAreaRef(p.area));
-          if (propertiesWithArea.length > 0) {
-            try {
-              await this.propertyModel.populate(propertiesWithArea, {
-                path: 'area',
-                select: 'name',
-                populate: { 
-                  path: 'city', 
-                  select: 'name state country'
-                }
-              });
-            } catch (populateError) {
-              console.error('Error populating properties:', populateError);
-              // Continue without population
+      const properties = await this.propertyModel.find(query).sort({ createdAt: -1 }).exec();
+      
+      try {
+        await this.ensureSlugForProperties(properties);
+      } catch (slugError: any) {
+        console.warn('⚠️ Non-critical: Failed to ensure slugs:', slugError.message);
+      }
+      
+      // Populate area and city - handle cases where area might be null
+      if (properties.length === 0) {
+        return [];
+      }
+      
+      // Only populate if area exists
+      const propertiesWithArea = properties.filter(p => this.isValidAreaRef(p.area));
+      if (propertiesWithArea.length > 0) {
+        try {
+          await this.propertyModel.populate(propertiesWithArea, {
+            path: 'area',
+            select: 'name',
+            populate: { 
+              path: 'city', 
+              select: 'name state country'
             }
-          }
-          
-          return properties;
-        } catch (error) {
-          console.error('Error in findAllApproved:', error);
-          throw error;
+          });
+        } catch (populateError: any) {
+          console.warn('⚠️ Non-critical: Error populating properties:', populateError.message);
+          // Return properties anyway, even if population fails
         }
       }
+      
+      return properties;
+    } catch (error) {
+      console.error('❌ Critical: Error in findAllApproved:', error);
+      throw error;
+    }
+  }
     
       async findAll(filters?: { cityId?: string; areaId?: string }) {
         try {
@@ -164,7 +169,12 @@ export class PropertyService {
           }
           
           const properties = await this.propertyModel.find(query).sort({ createdAt: -1 }).exec();
-          await this.ensureSlugForProperties(properties);
+          
+          try {
+            await this.ensureSlugForProperties(properties);
+          } catch (slugError: any) {
+            console.warn('⚠️ Non-critical: Failed to ensure slugs in findAll:', slugError.message);
+          }
           
           // Populate area and city - handle cases where area might be null
           if (properties.length === 0) {
@@ -183,15 +193,14 @@ export class PropertyService {
                   select: 'name state country'
                 }
               });
-            } catch (populateError) {
-              console.error('Error populating properties:', populateError);
-              // Continue without population
+            } catch (populateError: any) {
+              console.warn('⚠️ Non-critical: Error populating properties in findAll:', populateError.message);
             }
           }
           
           return properties;
         } catch (error) {
-          console.error('Error in findAll:', error);
+          console.error('❌ Critical: Error in findAll:', error);
           throw error;
         }
       }
