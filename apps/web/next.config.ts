@@ -2,7 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
+    // Only rewrite if NEXT_PUBLIC_API_URL is explicitly set
+    // Otherwise, use relative paths (same domain) - no rewriting needed
+    if (!process.env.NEXT_PUBLIC_API_URL) {
+      return [];
+    }
+    
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
     
     return [
       {
