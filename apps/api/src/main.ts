@@ -9,18 +9,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
 
-  // Add MongoDB connection event logging
-  const mongoose = await import('mongoose');
-  mongoose.connection.on('connected', () => {
-    console.log('✅ MongoDB connected successfully');
-  });
-  mongoose.connection.on('error', (err) => {
-    console.error('❌ MongoDB connection error:', err.message);
-  });
-  mongoose.connection.on('disconnected', () => {
-    console.warn('⚠️ MongoDB disconnected');
-  });
-
   // Serve static files for local storage
   if (process.env.STORAGE_DISK === 'local' || !process.env.STORAGE_DISK) {
     const path = await import('path');
