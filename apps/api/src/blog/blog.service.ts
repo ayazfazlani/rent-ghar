@@ -15,7 +15,13 @@ export class BlogService {
 
 
     async findPublishedBlogs(): Promise<BlogDocument[]> {
-        return await this.blogModel.find({ status: 'published' }).exec();
+        try {
+            return await this.blogModel.find({ status: 'published' }).exec();
+        } catch (error) {
+            console.error('Error fetching published blogs:', error);
+            // Return empty array instead of throwing to prevent 500 errors
+            return [];
+        }
     }
     async findActiveBlogs(): Promise<BlogDocument[]> {
         return await this.blogModel.find({ status: 'active' }).exec();
