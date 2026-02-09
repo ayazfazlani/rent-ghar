@@ -85,7 +85,7 @@ export default function DashboardHome() {
       pending: 'secondary',
       rejected: 'destructive',
     };
-    
+
     const colors: Record<string, string> = {
       approved: 'bg-green-100 text-green-800 hover:bg-green-100',
       pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100',
@@ -120,7 +120,7 @@ export default function DashboardHome() {
               Manage all your property listings
             </p>
           </div>
-          <Button onClick={() => window.location.href = '/dashboard/property/add-property'}>
+          <Button onClick={() => router.push('/dashboard/property/add-property')}>
             Add New Property
           </Button>
         </div>
@@ -136,14 +136,14 @@ export default function DashboardHome() {
         ) : error ? (
           <div className="text-center py-12">
             <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>
+            <Button onClick={() => router.refresh()}>
               Retry
             </Button>
           </div>
         ) : properties.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">No properties found.</p>
-            <Button onClick={() => window.location.href = '/dashboard/property/add-property'}>
+            <Button onClick={() => router.push('/dashboard/property/add-property')}>
               Add Your First Property
             </Button>
           </div>
@@ -199,15 +199,15 @@ export default function DashboardHome() {
                     {formatDate(property.createdAt)}
                   </TableCell>
 
-                
-                  
+
+
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="sm" className="btn btn-sm rounded-md" onClick={() => {
-                    updateStatus(property._id);
-                   }}>
-                    {property.status === 'approved' ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                   </Button>
+                      <Button variant="ghost" size="sm" className="btn btn-sm rounded-md" onClick={() => {
+                        updateStatus(property._id);
+                      }}>
+                        {property.status === 'approved' ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -270,8 +270,8 @@ export default function DashboardHome() {
               {/* Main Image */}
               {selectedProperty.mainPhotoUrl && (
                 <div>
-                  <img 
-                    src={selectedProperty.mainPhotoUrl} 
+                  <img
+                    src={selectedProperty.mainPhotoUrl}
                     alt={selectedProperty.title}
                     className="w-full h-64 object-cover rounded-lg"
                     onError={(e) => {
@@ -379,9 +379,9 @@ export default function DashboardHome() {
                   <label className="text-sm font-medium text-gray-500">Additional Photos</label>
                   <div className="grid grid-cols-3 gap-2 mt-2">
                     {selectedProperty.additionalPhotosUrls.map((url, index) => (
-                      <img 
+                      <img
                         key={index}
-                        src={url} 
+                        src={url}
                         alt={`Additional ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg"
                         onError={(e) => {

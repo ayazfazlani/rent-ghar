@@ -16,7 +16,16 @@ export class BlogController {
     @Post()
     @HttpCode(HttpStatus.CREATED)
     async createBlog(@Body() createBlogDto: CreateBlogDto): Promise<BlogDocument> {
-        return this.blogService.createBlog(createBlogDto);
+        try {
+            console.log('📝 Creating blog with DTO:', createBlogDto);
+            const result = await this.blogService.createBlog(createBlogDto);
+            console.log('✅ Blog created successfully:', result._id);
+            return result;
+        } catch (error: any) {
+            console.error('❌ Error creating blog:', error.message);
+            console.error('Stack:', error.stack);
+            throw error;
+        }
     }
 
     // Get all blogs (optionally filtered by status)

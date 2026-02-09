@@ -15,8 +15,8 @@ export class Blog {
   @Prop({ required: true, trim: true })
   title: string;
 
-  @Prop({ required: true, unique: true, lowercase: true, index: true })
-  slug: string;                    // ← SEO king: /blog/my-awesome-post
+  @Prop({ unique: true, lowercase: true, index: true })
+  slug: string;                    // ← SEO king: /blog/my-awesome-post (auto-generated)
 
   @Prop({ required: true })
   content: string;                 // markdown / HTML / JSON from editor

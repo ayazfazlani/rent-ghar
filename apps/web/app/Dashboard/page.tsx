@@ -13,8 +13,10 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardHome() {
+  const router = useRouter();
   const [properties, setProperties] = useState<BackendProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +45,7 @@ export default function DashboardHome() {
       pending: 'secondary',
       rejected: 'destructive',
     };
-    
+
     const colors: Record<string, string> = {
       approved: 'bg-green-100 text-green-800 hover:bg-green-100',
       pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100',
@@ -78,7 +80,7 @@ export default function DashboardHome() {
               Manage all your property listings
             </p>
           </div>
-          <Button onClick={() => window.location.href = '/dashboard/property/add-property'}>
+          <Button onClick={() => router.push('/dashboard/property/add-property')}>
             Add New Property
           </Button>
         </div>
@@ -94,14 +96,14 @@ export default function DashboardHome() {
         ) : error ? (
           <div className="text-center py-12">
             <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>
+            <Button onClick={() => router.refresh()}>
               Retry
             </Button>
           </div>
         ) : properties.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">No properties found.</p>
-            <Button onClick={() => window.location.href = '/dashboard/property/add-property'}>
+            <Button onClick={() => router.push('/dashboard/property/add-property')}>
               Add Your First Property
             </Button>
           </div>
