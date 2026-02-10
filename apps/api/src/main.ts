@@ -6,6 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
+  // Trigger restart for Cookie fix
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
 

@@ -60,6 +60,12 @@ export class Property extends Document {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   owner: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId, ref: 'Subscription', required: false })
+  subscriptionId?: Types.ObjectId
+
+  @Prop({ default: false })
+  isFeatured: boolean
+
   @Prop({ default: 'pending' })
   status: 'pending' | 'approved' | 'rejected'
 }

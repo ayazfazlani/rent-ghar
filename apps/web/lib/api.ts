@@ -156,4 +156,80 @@ export const blogApi = {
   },
 };
 
+// Package API functions
+export const packageApi = {
+  getAll: async () => {
+    const response = await api.get('/packages');
+    return response.data;
+  },
+
+  getAllIncludingInactive: async () => {
+    const response = await api.get('/packages/all');
+    return response.data;
+  },
+
+  getById: async (id: string) => {
+    const response = await api.get(`/packages/${id}`);
+    return response.data;
+  },
+
+  create: async (dto: any) => {
+    const response = await api.post('/packages', dto);
+    return response.data;
+  },
+
+  update: async (id: string, dto: any) => {
+    const response = await api.put(`/packages/${id}`, dto);
+    return response.data;
+  },
+
+  delete: async (id: string) => {
+    const response = await api.delete(`/packages/${id}`);
+    return response.data;
+  },
+};
+
+// Subscription API functions
+export const subscriptionApi = {
+  purchase: async (packageId: string) => {
+    const response = await api.post('/subscriptions/purchase', { packageId });
+    return response.data;
+  },
+
+  getMySubscriptions: async () => {
+    const response = await api.get('/subscriptions/my-subscriptions');
+    return response.data;
+  },
+
+  getActiveSubscription: async () => {
+    const response = await api.get('/subscriptions/active');
+    return response.data;
+  },
+
+  canCreateProperty: async () => {
+    const response = await api.get('/subscriptions/can-create-property');
+    return response.data;
+  },
+
+  getAll: async () => {
+    const response = await api.get('/subscriptions');
+    return response.data;
+  },
+
+  getById: async (id: string) => {
+    const response = await api.get(`/subscriptions/${id}`);
+    return response.data;
+  },
+
+  activate: async (id: string) => {
+    const response = await api.put(`/subscriptions/${id}/activate`);
+    return response.data;
+  },
+
+  cancel: async (id: string) => {
+    const response = await api.put(`/subscriptions/${id}/cancel`);
+    return response.data;
+  },
+};
+
 export default api;

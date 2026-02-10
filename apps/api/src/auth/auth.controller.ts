@@ -45,22 +45,36 @@ export class AuthController {
   ): Promise<Omit<LoginResponse, 'refreshToken'>> {
     const result = await this.authService.login(dto);
     // set HttpOnly refresh token cookie
-    const { refreshToken, ...rest } = result;
+    const { refreshToken, token, ...rest } = result;
+    
+    // Cookie options
+    const cookieOpts: CookieOptions = {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+    };
+
     if (refreshToken) {
-      const cookieOpts: CookieOptions = {
-        httpOnly: true,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
+      res.cookie('refreshToken', refreshToken, {
+        ...cookieOpts,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      };
-      res.cookie('refreshToken', refreshToken, cookieOpts);
+      });
     }
-    return rest;
+
+    if (token) {
+      res.cookie('access_token', token, {
+        ...cookieOpts,
+        maxAge: 1000 * 60 * 15, // 15 minutes (matches JWT expiry usually)
+      });
+    }
+
+    return { token, ...rest };
   }
   @Post('refresh')
   async refresh(
     @Req() req: AuthRequest,
+    @Res({ passthrough: true }) res: Response,
     @Body() oldRefreshToken?: string,
   ): Promise<TokenResponse> {
     const token =
@@ -71,7 +85,23 @@ export class AuthController {
     if (!token) {
       throw new UnauthorizedException('Refresh token is missing');
     }
-    return this.authService.refreshToken(token);
+    const result = await this.authService.refreshToken(token);
+
+    // Cookie options
+    const cookieOpts: CookieOptions = {
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+    };
+
+    // Update access token cookie
+    res.cookie('access_token', result.token, {
+        ...cookieOpts,
+        maxAge: 1000 * 60 * 15, // 15 minutes
+    });
+
+    return result;
   }
 
   @Post('logout')
@@ -79,11 +109,14 @@ export class AuthController {
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ status: number; message: string }> {
-    // clear refresh cookie and user refresh token
+    // clear cookies
     const token =
       (req.cookies && (req.cookies.refreshToken as string)) ||
       (req.headers['x-refresh-token'] as string | undefined);
+    
     res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('access_token', { path: '/' });
+    
     return this.authService.invalidateRefreshToken(token ?? '');
   }
 }

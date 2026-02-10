@@ -10,6 +10,8 @@ import { AreaModule } from './area/area.module';
 import { CategoryModule } from './category/category.module';
 import { BlogModule } from './blog/blog.module';
 import { PageModule } from './page/page.module';
+import { PackageModule } from './package/package.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 import { StorageModule } from '../../../packages/storage/storage.module';
 
 @Module({
@@ -51,9 +53,12 @@ import { StorageModule } from '../../../packages/storage/storage.module';
     CategoryModule,
     BlogModule,
     PageModule,
+    PackageModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+
 

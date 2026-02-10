@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post, Query, UseGuards, UseInterceptors, Request, Param, Patch, Delete, Put, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards, UseInterceptors, Request, Param, Patch, Delete, Put, UploadedFile, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { StorageService } from '@rent-ghar/storage/storage.service';
 import { PropertyService } from './property.service';
-import { CreatePropertyDto } from '@rent-ghar/types/property';
+import { CreatePropertyDto } from './dto/create-property.dto'; // Local DTO with validation
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
 
 
 @Controller('properties')
@@ -14,7 +15,7 @@ export class PropertyController {
   ) {}
 
   @Post()
-//   @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async create(
     @Request() req,
@@ -61,10 +62,41 @@ export class PropertyController {
       console.log('Additional photos URLs from body:', bodyUrls);
     }
 
-    // TODO: Replace with actual user ID from JWT when auth is enabled
-    const userId = req.user?.sub || 'temp-user-id'
-    const created = await this.propertyService.create(userId, dto, mainPhotoUrl, additionalPhotosUrls)
-    return { message: 'Property submitted for approval', property: created }
+    // Extract user from request
+    const user = req.user;
+    console.log('Property Create - User from request:', user);
+    
+    if (!user || !user.userId) {
+        console.error('User not found in request despite JwtAuthGuard');
+        // This should theoretically be caught by the guard, but just in case
+        throw new UnauthorizedException('User not authenticated');
+    }
+
+    const userId = user.userId;
+    
+    // Validate User ID format to prevent Mongoose cast errors
+    // access Types from mongoose is needed, let's just check regex for now to avoid importing Types if not already
+    const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+    if (!objectIdPattern.test(userId)) {
+         console.error('Invalid user ID format:', userId);
+         // If it's the temp ID causing issues, we'll see it here
+         throw new BadRequestException(`Invalid user ID format: ${userId}`);
+    }
+
+    const userRole = user.role || 'USER';
+
+    const fs = require('fs');
+    fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Controller: processing create request for user ${userId}\n`);
+    
+    try {
+      const created = await this.propertyService.create(userId, dto as any, mainPhotoUrl, additionalPhotosUrls, userRole)
+      fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Controller: property created successfully\n`);
+      return { message: 'Property submitted for approval', property: created }
+    } catch (error: any) {
+      console.error('Error creating property in service:', error);
+      fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Controller Error: ${(error as any)?.message}\nStack: ${(error as any)?.stack}\n`);
+      throw error;
+    }
   }
 
   @Get()
@@ -129,8 +161,7 @@ export class PropertyController {
             })
           )
         : undefined
-
-      const updated = await this.propertyService.update(id, dto, mainPhotoUrl, additionalPhotosUrls)
+      const updated = await this.propertyService.update(id, dto as any, mainPhotoUrl, additionalPhotosUrls)
       return { message: 'Property updated successfully', property: updated }
     } catch (error) {
       console.error('Error in update controller:', error);

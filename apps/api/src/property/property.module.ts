@@ -6,6 +6,7 @@ import { Area, AreaSchema } from '@rent-ghar/db/schemas/area.schema';
 import { City, CitySchema } from '@rent-ghar/db/schemas/city.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { StorageModule } from '@rent-ghar/storage';
+import { SubscriptionModule } from '../subscription/subscription.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { StorageModule } from '@rent-ghar/storage';
       { name: City.name, schema: CitySchema }
     ]),
     StorageModule,
+    SubscriptionModule,
   ],
   controllers: [PropertyController],
   providers: [PropertyService],

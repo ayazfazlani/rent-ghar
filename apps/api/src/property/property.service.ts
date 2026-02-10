@@ -1,15 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { Property } from '@rent-ghar/db/schemas/property.schema';
 import { InjectModel} from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreatePropertyDto } from '@rent-ghar/types/property';
 import { Area } from '@rent-ghar/db/schemas/area.schema';
+import { SubscriptionService } from '../subscription/subscription.service';
 
 @Injectable()
 export class PropertyService {
     constructor(
         @InjectModel(Property.name) private propertyModel: Model<Property>,
-        @InjectModel(Area.name) private areaModel: Model<Area>
+        @InjectModel(Area.name) private areaModel: Model<Area>,
+        private subscriptionService: SubscriptionService,
     ) {}
 
     private toSlug(value: string): string {
@@ -57,29 +59,78 @@ export class PropertyService {
         }).select('_id title slug').exec();
         await this.ensureSlugForProperties(missing);
     }
-    async create(userId: string, dto: CreatePropertyDto, mainPhotoUrl?: string, additionalPhotosUrls?: string[]) {
+    async create(userId: string, dto: CreatePropertyDto, mainPhotoUrl?: string, additionalPhotosUrls?: string[], userRole?: string) {
+        // Validation: Verify user exists if not admin (though controller handles auth)
+        // Check subscription unless user is admin
+        let subscriptionId: string | undefined;
+        const fs = require('fs');
+
+        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service: Start create. User: ${userId}, Role: ${userRole}\n`);
+
+        if (userRole !== 'ADMIN') {
+          fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service: Checking subscription for user ${userId}\n`);
+          // SYNC: Before checking subscription, ensure the count is accurate
+          const actualCount = await this.propertyModel.countDocuments({ 
+            owner: userId,
+            // status: { $ne: 'deleted' } // depend on business logic if deleted counts
+          }).exec();
+          
+          await this.subscriptionService.syncPropertyUsage(userId, actualCount);
+
+          const subscriptionCheck = await this.subscriptionService.canCreateProperty(userId);
+          
+          fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service: Subscription check result: ${JSON.stringify(subscriptionCheck)}\n`);
+
+          if (!subscriptionCheck.canCreate) {
+            throw new ForbiddenException(subscriptionCheck.message || 'No active subscription');
+          }
+          
+          // Increment property count on the subscription
+          if (subscriptionCheck.subscription) {
+            subscriptionId = subscriptionCheck.subscription._id.toString();
+            await this.subscriptionService.incrementPropertyCount(
+              subscriptionId
+            );
+          }
+        }
+
         const slug = dto.slug ? this.toSlug(dto.slug) : (dto.title ? this.toSlug(dto.title) : undefined);
-        // Convert string values from FormData to proper types
-        const property = new this.propertyModel({
-          listingType: dto.listingType,
-          propertyType: dto.propertyType,
-          area: dto.area, // Area ID (ObjectId as string, Mongoose will convert)
-          slug,
-          title: dto.title,
-          location: dto.location,
-          bedrooms: typeof dto.bedrooms === 'string' ? parseInt(dto.bedrooms, 10) : dto.bedrooms,
-          bathrooms: typeof dto.bathrooms === 'string' ? parseInt(dto.bathrooms, 10) : dto.bathrooms,
-          areaSize: typeof dto.areaSize === 'string' ? parseInt(dto.areaSize, 10) : dto.areaSize,
-          price: typeof dto.price === 'string' ? parseFloat(dto.price) : dto.price,
-          description: dto.description,
-          contactNumber: dto.contactNumber,
-          features: dto.features || [],
-          owner: userId,
-          mainPhotoUrl,
-          additionalPhotosUrls: additionalPhotosUrls || [],
-          status: 'pending',
-        })
-        return property.save()
+        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service: Generated slug: ${slug}\n`);        
+        
+        try {
+            // Convert string values from FormData to proper types
+            fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service: Creating property model instance\n`);
+            const property = new this.propertyModel({
+              listingType: dto.listingType,
+              propertyType: dto.propertyType,
+              area: dto.area, // Area ID (ObjectId as string, Mongoose will convert)
+              slug,
+              title: dto.title,
+              location: dto.location,
+              bedrooms: typeof dto.bedrooms === 'string' ? parseInt(dto.bedrooms, 10) : dto.bedrooms,
+              bathrooms: typeof dto.bathrooms === 'string' ? parseInt(dto.bathrooms, 10) : dto.bathrooms,
+              areaSize: typeof dto.areaSize === 'string' ? parseInt(dto.areaSize, 10) : dto.areaSize,
+              price: typeof dto.price === 'string' ? parseFloat(dto.price) : dto.price,
+              description: dto.description,
+              contactNumber: dto.contactNumber,
+              features: dto.features || [],
+              owner: userId,
+              mainPhotoUrl,
+              additionalPhotosUrls: additionalPhotosUrls || [],
+              status: 'pending',
+            })
+            const saved = await property.save()
+            fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service: Property saved successfully. ID: ${saved._id}\n`);
+            return saved;
+        } catch (error) {
+            fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service Error: ${error}\n`);
+            // ROLLBACK: If property creation fails, decrement the subscription count
+            if (subscriptionId) {
+                console.error('Property creation failed, rolling back subscription count');
+                await this.subscriptionService.decrementPropertyCount(subscriptionId);
+            }
+            throw error;
+        }
       }
     
       async findAllApproved(filters?: { cityId?: string; areaId?: string }) {
