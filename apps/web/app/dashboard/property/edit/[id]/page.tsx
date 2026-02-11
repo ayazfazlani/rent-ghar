@@ -15,6 +15,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import dynamic from 'next/dynamic'
+
+const MapPicker = dynamic(() => import('@/components/MapPicker'), {
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-lg flex items-center justify-center text-gray-400">Loading Map...</div>
+})
 
 interface City {
   _id: string
@@ -32,7 +38,7 @@ interface Area {
 export default function EditProperty() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  
+
   // Form state
   const [listingType, setListingType] = useState<'rent' | 'sale'>('rent')
   const [propertyType, setPropertyType] = useState('')
@@ -46,13 +52,15 @@ export default function EditProperty() {
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
   const [contactNumber, setContactNumber] = useState('')
-  
+  const [latitude, setLatitude] = useState<number | undefined>()
+  const [longitude, setLongitude] = useState<number | undefined>()
+
   // Cities and Areas state
   const [cities, setCities] = useState<City[]>([])
   const [areas, setAreas] = useState<Area[]>([])
   const [loadingProperty, setLoadingProperty] = useState(true)
   const [loadingAreas, setLoadingAreas] = useState(false)
-  
+
   // Image state - store both File objects and preview URLs
   const [mainImageFile, setMainImageFile] = useState<File | null>(null)
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null)
@@ -63,7 +71,7 @@ export default function EditProperty() {
   const params = useParams()
   const propertyId = params.id as string
   console.log(propertyId)
-  
+
   // Fetch cities on component mount
   useEffect(() => {
     const fetchCities = async () => {
@@ -79,7 +87,7 @@ export default function EditProperty() {
     }
     fetchCities()
   }, [])
-  
+
   // Fetch property data
   useEffect(() => {
     const fetchProperty = async (propertyId: string) => {
@@ -98,6 +106,8 @@ export default function EditProperty() {
         setPrice(property.price)
         setDescription(property.description)
         setContactNumber(property.contactNumber)
+        setLatitude(property.latitude)
+        setLongitude(property.longitude)
         setMainImagePreview(property.mainImage)
         // Ensure additionalImagePreviews always has 3 elements
         const additionalImages = property.additionalImages || []
@@ -166,7 +176,7 @@ export default function EditProperty() {
       const newFiles = [...additionalImageFiles]
       newFiles[index] = file
       setAdditionalImageFiles(newFiles)
-      
+
       const reader = new FileReader()
       reader.onloadend = () => {
         const newPreviews = [...additionalImagePreviews]
@@ -186,7 +196,7 @@ export default function EditProperty() {
     const newFiles = [...additionalImageFiles]
     newFiles[index] = null
     setAdditionalImageFiles(newFiles)
-    
+
     const newPreviews = [...additionalImagePreviews]
     newPreviews[index] = null
     setAdditionalImagePreviews(newPreviews)
@@ -219,7 +229,7 @@ export default function EditProperty() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Validation
     if (!propertyType || !cityId || !areaId || !title || !location || !bedrooms || !bathrooms || !areaSize || !price || !description || !contactNumber) {
       toast.error('Please fill in all required fields')
@@ -237,19 +247,19 @@ export default function EditProperty() {
     try {
       // Create FormData
       const formData = new FormData()
-      
+
       // Add main photo only if a new file is selected
       if (mainImageFile) {
         formData.append('mainPhoto', mainImageFile)
       }
-      
+
       // Add additional photos (only non-null files)
       additionalImageFiles.forEach((file) => {
         if (file) {
           formData.append('additionalPhotos', file)
         }
       })
-      
+
       // Add JSON data as separate fields (backend expects these in the body)
       formData.append('listingType', listingType)
       formData.append('propertyType', mapPropertyTypeToBackend(propertyType))
@@ -262,7 +272,10 @@ export default function EditProperty() {
       formData.append('price', price)
       formData.append('description', description)
       formData.append('contactNumber', contactNumber)
-      
+
+      if (latitude !== undefined) formData.append('latitude', latitude.toString())
+      if (longitude !== undefined) formData.append('longitude', longitude.toString())
+
       // Add features (filter out empty strings)
       const validFeatures = features.filter(f => f.trim() !== '')
       if (validFeatures.length > 0) {
@@ -273,24 +286,24 @@ export default function EditProperty() {
 
       // Update property using the property ID
       const response = await propertyApi.update(propertyId, formData)
-      
+
       toast.success('Property updated successfully!', {
         description: 'Your property has been updated.',
       })
-      
+
       // Redirect to dashboard after a short delay
       setTimeout(() => {
         router.push('/dashboard/property')
         router.refresh()
       }, 1500)
-      
+
     } catch (error: any) {
       console.error('Error updating property:', error)
-      const errorMessage = 
-        error.response?.data?.message || 
-        error.message || 
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
         'Failed to update property. Please try again.'
-      
+
       toast.error('Update Failed', {
         description: errorMessage,
       })
@@ -305,7 +318,7 @@ export default function EditProperty() {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Update Property</h1>
           <p className="text-gray-600 mb-8">Fill in the details to update your property</p>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Listing Type */}
             <div>
@@ -316,22 +329,20 @@ export default function EditProperty() {
                 <button
                   type="button"
                   onClick={() => setListingType('rent')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
-                    listingType === 'rent'
-                      ? 'bg-gray-800 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${listingType === 'rent'
+                    ? 'bg-gray-800 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                 >
                   For Rent
                 </button>
                 <button
                   type="button"
                   onClick={() => setListingType('sale')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
-                    listingType === 'sale'
-                      ? 'bg-gray-800 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${listingType === 'sale'
+                    ? 'bg-gray-800 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                 >
                   For Sale
                 </button>
@@ -371,9 +382,9 @@ export default function EditProperty() {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   City *
                 </label>
-                <Select 
-                  value={cityId} 
-                  onValueChange={setCityId} 
+                <Select
+                  value={cityId}
+                  onValueChange={setCityId}
                   disabled={isLoading || loadingProperty}
                 >
                   <SelectTrigger>
@@ -393,20 +404,20 @@ export default function EditProperty() {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Area *
                 </label>
-                <Select 
-                  value={areaId} 
-                  onValueChange={setAreaId} 
+                <Select
+                  value={areaId}
+                  onValueChange={setAreaId}
                   disabled={isLoading || loadingAreas || !cityId}
                 >
                   <SelectTrigger>
-                    <SelectValue 
+                    <SelectValue
                       placeholder={
-                        !cityId 
-                          ? "Select city first" 
-                          : loadingAreas 
-                            ? "Loading areas..." 
+                        !cityId
+                          ? "Select city first"
+                          : loadingAreas
+                            ? "Loading areas..."
                             : "Select area"
-                      } 
+                      }
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -451,6 +462,31 @@ export default function EditProperty() {
                 disabled={isLoading}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
+            </div>
+
+            {/* Map Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Pin Location on Map
+              </label>
+              <div className="mb-2">
+                <MapPicker
+                  onLocationSelect={(lat, lng) => {
+                    setLatitude(lat)
+                    setLongitude(lng)
+                  }}
+                  initialLat={latitude}
+                  initialLng={longitude}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                Click on the map to pin the exact location of your property.
+                {latitude && longitude && (
+                  <span className="text-green-600 font-medium ml-1">
+                    Location pinned: {latitude.toFixed(4)}, {longitude.toFixed(4)}
+                  </span>
+                )}
+              </p>
             </div>
 
             {/* Beds, Baths, and Area */}
@@ -522,9 +558,9 @@ export default function EditProperty() {
               </label>
               {mainImagePreview ? (
                 <div className="relative">
-                  <img 
-                    src={mainImagePreview} 
-                    alt="Main property" 
+                  <img
+                    src={mainImagePreview}
+                    alt="Main property"
                     className="w-full h-64 object-cover rounded-lg"
                   />
                   <Button
@@ -570,9 +606,9 @@ export default function EditProperty() {
                   <div key={index}>
                     {additionalImagePreviews?.[index] ? (
                       <div className="relative">
-                        <img 
-                          src={additionalImagePreviews[index]!} 
-                          alt={`Additional ${index + 1}`} 
+                        <img
+                          src={additionalImagePreviews[index]!}
+                          alt={`Additional ${index + 1}`}
                           className="w-full h-32 object-cover rounded-lg"
                         />
                         <Button

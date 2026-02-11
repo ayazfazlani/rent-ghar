@@ -110,6 +110,17 @@ export const propertyApi = {
     return response.data;
   },
 
+  // Get location statistics
+  getLocationStats: async (city: string, listingType?: string, propertyType?: string) => {
+    const params = new URLSearchParams();
+    params.append('city', city);
+    if (listingType) params.append('listingType', listingType);
+    if (propertyType) params.append('propertyType', propertyType);
+    
+    const response = await api.get(`/properties/stats/locations?${params.toString()}`);
+    return response.data;
+  },
+
   // Upload image
   uploadImage: async (file: File) => {
     const formData = new FormData();
@@ -228,6 +239,34 @@ export const subscriptionApi = {
 
   cancel: async (id: string) => {
     const response = await api.put(`/subscriptions/${id}/cancel`);
+    return response.data;
+  },
+};
+
+// City API functions
+export const cityApi = {
+  getAll: async () => {
+    const response = await api.get('/cities');
+    return response.data;
+  },
+  getById: async (id: string) => {
+    const response = await api.get(`/cities/${id}`);
+    return response.data;
+  },
+};
+
+// Area API functions
+export const areaApi = {
+  getAll: async () => {
+    const response = await api.get('/areas');
+    return response.data;
+  },
+  getAreasByCity: async (cityId: string) => {
+    const response = await api.get(`/areas?cityId=${cityId}`);
+    return response.data;
+  },
+  getById: async (id: string) => {
+    const response = await api.get(`/areas/${id}`);
     return response.data;
   },
 };

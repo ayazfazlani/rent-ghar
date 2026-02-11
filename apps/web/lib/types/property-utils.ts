@@ -32,6 +32,8 @@ export interface BackendProperty {
   owner?: any;
   createdAt?: string;
   updatedAt?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 function toSlug(value: string): string {
@@ -99,6 +101,8 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
     features: backend.features || [],
     areaId: backend.area && typeof backend.area === 'object' ? backend.area._id : (typeof backend.area === 'string' ? backend.area : undefined),
     areaName: areaName,
+    latitude: backend.latitude,
+    longitude: backend.longitude,
   };
 }
 

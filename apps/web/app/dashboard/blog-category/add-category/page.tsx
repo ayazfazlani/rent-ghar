@@ -22,12 +22,18 @@ export default function AddCategoryPage() {
     const formSchema = z.object({
         name: z.string().min(2,{message: "Name must be atleast 2 charcters long"}),
         description: z.string().optional(),
+        slug: z.string().optional(),
+        metaTitle: z.string().optional(),
+        metaDescription: z.string().optional(),
     });
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
             description: "",
+            slug: "",
+            metaTitle: "",
+            metaDescription: "",
         },
     });
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
@@ -63,9 +69,45 @@ export default function AddCategoryPage() {
                                 <FormItem>
                                     <FormLabel>Category Name *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g Property" {...field} />
+                                        <Input placeholder="e.g Property" {...field} onChange={(e) =>{
+                                            field.onChange(e);
+                                            const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                                            if (slug) {
+                                                form.setValue('slug', slug);
+                                            }
+                                        }}/>
                                     </FormControl>
                                     <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <FormField control={form.control} name="slug" render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Slug</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g property-category" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* meta title and description */}
+                            <FormField control={form.control} name="metaTitle" render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Meta Title</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g Property Category" {...field} />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                            />
+                            <FormField control={form.control} name="metaDescription" render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Meta Description</FormLabel>
+                                    <FormControl>
+                                        <Textarea placeholder="e.g Property Category Description" {...field} />
+                                    </FormControl>
                                 </FormItem>
                             )}
                             />

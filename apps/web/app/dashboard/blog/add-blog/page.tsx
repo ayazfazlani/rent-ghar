@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, Image as ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import RichEditor from "@/components/RichEditor";
 import {
     Form,
     FormControl,
@@ -208,7 +209,7 @@ export default function AddBlogPage() {
                                     </FormItem>
                                 )} />
 
-                                <FormField control={form.control} name="content" render={({ field }) => (
+                                {/* <FormField control={form.control} name="content" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Content *</FormLabel>
                                         <FormControl>
@@ -220,7 +221,22 @@ export default function AddBlogPage() {
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
-                                )} />
+                                )} /> */}
+
+                                {/* rich editor */}
+                                <FormField
+                                    control={form.control}
+                                    name="content"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Content *</FormLabel>
+                                            <FormControl>
+                                                <RichEditor value={field.value} onChange={field.onChange} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <FormField control={form.control} name="status" render={({ field }) => (

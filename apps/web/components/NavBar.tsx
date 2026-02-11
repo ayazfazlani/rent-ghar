@@ -106,21 +106,7 @@ const Navbar = () => {
             {/* Desktop Actions - Premium buttons */}
             <div className="hidden md:flex items-center gap-2">
               {/* Add Property Button - Gradient style */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 relative overflow-hidden border-primary/30 hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 group"
-                onClick={() => setShowAddProperty(true)}
-              >
-                {/* Animated gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
-                {/* Icon with rotation */}
-                <div className="relative z-10 transition-transform duration-500 group-hover:rotate-180">
-                  <Plus className="w-4 h-4" />
-                </div>
-                <span className="relative z-10 font-medium">Add Property</span>
-              </Button>
 
               {/* Heart Button - Floating style */}
               <div className="relative">

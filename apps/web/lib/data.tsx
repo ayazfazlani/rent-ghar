@@ -1,4 +1,4 @@
- export interface Property {
+export interface Property {
   id: string;
   name: string;
   slug: string;
@@ -16,6 +16,8 @@
   features?: string[];
   areaId?: string; // Area ObjectId
   areaName?: string; // Area name
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface Hotel {

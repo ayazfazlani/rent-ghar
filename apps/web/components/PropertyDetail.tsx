@@ -11,6 +11,12 @@ import { propertyApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 import { toast } from 'sonner';
+import dynamic from 'next/dynamic';
+
+const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
+  ssr: false,
+  loading: () => <div className="h-[350px] w-full bg-secondary animate-pulse rounded-xl flex items-center justify-center text-muted-foreground">Loading Map...</div>
+});
 
 const PropertyDetail = ({ slug }: { slug?: string }) => {
   const router = useRouter();
@@ -30,6 +36,7 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
     message: '',
     features: []
   });
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -278,6 +285,14 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                     <div className="flex items-center gap-2 text-muted-foreground mb-4">
                       <MapPin className="w-5 h-5 text-primary" />
                       <span className="text-lg">{property.location}, {property.city}</span>
+                      {property.latitude && property.longitude && (
+                        <button
+                          onClick={() => document.getElementById('property-location')?.scrollIntoView({ behavior: 'smooth' })}
+                          className="text-primary hover:underline text-sm ml-2 font-medium"
+                        >
+                          (Show on Map)
+                        </button>
+                      )}
                     </div>
                     {/* Short Excerpt */}
                     <p className="text-muted-foreground text-lg leading-relaxed">
@@ -340,7 +355,10 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
               <section>
                 <div className="relative w-full group">
                   {/* Main Image */}
-                  <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden bg-secondary">
+                  <div
+                    className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden bg-secondary cursor-zoom-in"
+                    onClick={() => setIsLightboxOpen(true)}
+                  >
                     {images.length > 0 && images[selectedImage] ? (
                       <img
                         src={images[selectedImage]}
@@ -473,14 +491,31 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
               </Card>
 
               {/* Location */}
-              <Card>
+              <Card id="property-location">
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-4">Location</h2>
-                  <div className="bg-secondary rounded-lg p-8 text-center">
-                    <MapPin className="w-12 h-12 mx-auto mb-3 text-primary" />
-                    <p className="text-lg font-semibold mb-1">{property.location}</p>
-                    <p className="text-muted-foreground">{property.city}, Pakistan</p>
-                  </div>
+                  {property.latitude && property.longitude ? (
+                    <div className="space-y-4">
+                      <PropertyMap
+                        latitude={property.latitude}
+                        longitude={property.longitude}
+                        title={property.name}
+                      />
+                      <div className="flex items-center gap-2 p-3 bg-secondary rounded-lg">
+                        <MapPin className="w-5 h-5 text-primary" />
+                        <div>
+                          <p className="text-sm font-semibold">{property.location}</p>
+                          <p className="text-xs text-muted-foreground">{property.city}, Pakistan</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-secondary rounded-lg p-8 text-center">
+                      <MapPin className="w-12 h-12 mx-auto mb-3 text-primary" />
+                      <p className="text-lg font-semibold mb-1">{property.location}</p>
+                      <p className="text-muted-foreground">{property.city}, Pakistan</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -590,6 +625,62 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
               Send Message
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Lightbox */}
+      <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
+        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 bg-black/95 border-none flex items-center justify-center rounded-xl overflow-hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 right-4 text-white hover:bg-white/10 z-50 rounded-full h-12 w-12"
+            onClick={() => setIsLightboxOpen(false)}
+          >
+            <X className="w-8 h-8" />
+          </Button>
+
+          {images.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full h-12 w-12"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prevImage();
+                }}
+              >
+                <ChevronLeft className="w-10 h-10" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full h-12 w-12"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nextImage();
+                }}
+              >
+                <ChevronRight className="w-10 h-10" />
+              </Button>
+            </>
+          )}
+
+          <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
+            <img
+              src={images[selectedImage]}
+              alt={`${property.name} - Full Image ${selectedImage + 1}`}
+              className="max-w-full max-h-full object-contain select-none"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+
+          {images.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm font-medium border border-white/10 backdrop-blur-md">
+              {selectedImage + 1} / {images.length}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

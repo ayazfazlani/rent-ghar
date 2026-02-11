@@ -118,6 +118,8 @@ export class PropertyService {
               mainPhotoUrl,
               additionalPhotosUrls: additionalPhotosUrls || [],
               status: 'pending',
+              latitude: typeof dto.latitude === 'string' ? parseFloat(dto.latitude) : dto.latitude,
+              longitude: typeof dto.longitude === 'string' ? parseFloat(dto.longitude) : dto.longitude,
             })
             const saved = await property.save()
             fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service: Property saved successfully. ID: ${saved._id}\n`);
@@ -133,7 +135,18 @@ export class PropertyService {
         }
       }
     
-      async findAllApproved(filters?: { cityId?: string; areaId?: string }) {
+      async findAllApproved(filters?: { 
+        cityId?: string; 
+        areaId?: string;
+        priceMin?: number;
+        priceMax?: number;
+        areaMin?: number;
+        areaMax?: number;
+        beds?: number;
+        baths?: number;
+        type?: string;
+        purpose?: string;
+      }) {
         try {
           const query: any = { status: 'approved' };
           
@@ -155,6 +168,52 @@ export class PropertyService {
               // No areas in this city, return empty result
               return [];
             }
+          }
+
+          // Price Range Filter
+          if (filters?.priceMin !== undefined || filters?.priceMax !== undefined) {
+            query.price = {};
+            if (filters.priceMin !== undefined) query.price.$gte = filters.priceMin;
+            if (filters.priceMax !== undefined) query.price.$lte = filters.priceMax;
+          }
+
+          // Area Size Filter
+          if (filters?.areaMin !== undefined || filters?.areaMax !== undefined) {
+            query.areaSize = {};
+            if (filters.areaMin !== undefined) query.areaSize.$gte = filters.areaMin;
+            if (filters.areaMax !== undefined) query.areaSize.$lte = filters.areaMax;
+          }
+
+          // Beds Filter
+          if (filters?.beds !== undefined) {
+            if (filters.beds >= 5) {
+                query.bedrooms = { $gte: 5 }; // 5+ logic
+            } else {
+                query.bedrooms = filters.beds;
+            }
+          }
+
+          // Baths Filter
+          if (filters?.baths !== undefined) {
+             if (filters.baths >= 4) {
+                query.bathrooms = { $gte: 4 }; // 4+ logic
+            } else {
+                query.bathrooms = filters.baths;
+            }
+          }
+
+          // Type Filter
+          if (filters?.type && filters.type !== 'all') {
+             // Case-insensitive match for property type
+             query.propertyType = new RegExp(`^${filters.type}$`, 'i');
+          }
+
+          // Purpose Filter
+          if (filters?.purpose && filters.purpose !== 'all') {
+             // Map frontend 'buy' -> backend 'sale'
+             const purposeMap: any = { 'buy': 'sale', 'rent': 'rent' };
+             const mappedPurpose = purposeMap[filters.purpose] || filters.purpose;
+             query.listingType = mappedPurpose;
           }
           
       const properties = await this.propertyModel.find(query).sort({ createdAt: -1 }).exec();
@@ -195,9 +254,14 @@ export class PropertyService {
     }
   }
     
-      async findAll(filters?: { cityId?: string; areaId?: string }) {
+      async findAll(filters?: { cityId?: string; areaId?: string }, userId?: string, userRole?: string) {
         try {
           const query: any = {};
+          
+          // Role-based filtering: AGENT can only see their own properties in the dashboard
+          if (userRole === 'AGENT' && userId) {
+            query.owner = userId;
+          }
           
           if (filters?.areaId) {
             if (!this.isValidObjectId(filters.areaId)) {
@@ -315,11 +379,16 @@ export class PropertyService {
         }
       }
 
-      async update(id: string, dto: CreatePropertyDto, mainPhotoUrl?: string, additionalPhotosUrls?: string[]) {
+      async update(id: string, dto: CreatePropertyDto, mainPhotoUrl?: string, additionalPhotosUrls?: string[], userId?: string, userRole?: string) {
         try {
           const property = await this.propertyModel.findById(id).exec();
           if (!property) {
             throw new NotFoundException('Property not found');
+          }
+
+          // Ownership check for non-admins
+          if (userRole !== 'ADMIN' && property.owner.toString() !== userId) {
+            throw new ForbiddenException('You do not have permission to update this property');
           }
 
           // Build update object
@@ -336,6 +405,8 @@ export class PropertyService {
             description: dto.description,
             contactNumber: dto.contactNumber,
             features: dto.features || [],
+            latitude: typeof dto.latitude === 'string' ? parseFloat(dto.latitude) : dto.latitude,
+            longitude: typeof dto.longitude === 'string' ? parseFloat(dto.longitude) : dto.longitude,
           };
 
           if (dto.slug) {
@@ -360,12 +431,19 @@ export class PropertyService {
         }
       }
 
-      async delete(id: string) {
+      async delete(id: string, userId?: string, userRole?: string) {
         try {
-          const property = await this.propertyModel.findByIdAndDelete(id).exec();
+          const property = await this.propertyModel.findById(id).exec();
           if (!property) {
-            throw new Error('Property not found');
+            throw new NotFoundException('Property not found');
           }
+
+          // Ownership check for non-admins
+          if (userRole !== 'ADMIN' && property.owner.toString() !== userId) {
+            throw new ForbiddenException('You do not have permission to delete this property');
+          }
+
+          await this.propertyModel.findByIdAndDelete(id).exec();
           return {
             success: true,
             message: 'Property deleted successfully'
@@ -373,6 +451,136 @@ export class PropertyService {
         } catch (error) {
           console.error('Error deleting property:', error);
           throw error;
+        }
+      }
+
+      async getLocationStats(city: string, listingType?: string, propertyType?: string): Promise<any> {
+        try {
+            const cityRegex = new RegExp(`^${city}$`, 'i');
+            
+            const matchStage: any = { status: 'approved' };
+            if (listingType) {
+                matchStage.listingType = listingType;
+            }
+            if (propertyType && propertyType !== 'all') {
+                matchStage.propertyType = propertyType;
+            }
+            
+            console.log(`[DEBUG] getLocationStats city: "${city}", listingType: "${listingType}"`);
+            console.log(`[DEBUG] matchStage:`, JSON.stringify(matchStage));
+            
+            const initialCount = await this.propertyModel.countDocuments(matchStage);
+            console.log(`[DEBUG] Total approved properties matching type: ${initialCount}`);
+            
+            if (initialCount > 0) {
+                const samples = await this.propertyModel.find(matchStage).limit(3).lean();
+                // console.log(`[DEBUG] Sample Properties for city search:`, JSON.stringify(samples.map(p => ({
+                //     id: p._id,
+                //     city: p.city,
+                //     area: p.area,
+                //     areaType: typeof p.area
+                // }))));
+            }
+    
+            const stats = await this.propertyModel.aggregate([
+                { $match: matchStage },
+                {
+                    $lookup: {
+                        from: 'areas',
+                        localField: 'area',
+                        foreignField: '_id',
+                        as: 'areaDetails'
+                    }
+                },
+                { $unwind: { path: '$areaDetails', preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: 'cities',
+                        localField: 'areaDetails.city',
+                        foreignField: '_id',
+                        as: 'cityDetails'
+                    }
+                },
+                { $unwind: { path: '$cityDetails', preserveNullAndEmptyArrays: true } },
+                {
+                    $addFields: {
+                        computedCityName: {
+                            $ifNull: ['$cityDetails.name', '$city']
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        computedCityName: cityRegex
+                    }
+                },
+                {
+                    $addFields: {
+                        debug: 'match_city'
+                    }
+                },
+                // Add a temporary stage to log intermediate results if needed, 
+                // but for now let's just log the count after aggregation
+                {
+                    $facet: {
+                        locations: [
+                            { $match: { 'areaDetails.name': { $exists: true, $ne: null } } },
+                            {
+                                $group: {
+                                    _id: { name: '$areaDetails.name', id: '$areaDetails._id' },
+                                    count: { $sum: 1 }
+                                }
+                            },
+                            { $sort: { count: -1 } },
+                            {
+                                $project: {
+                                    name: '$_id.name',
+                                    id: '$_id.id',
+                                    count: 1,
+                                    _id: 0
+                                }
+                            }
+                        ],
+                        summary: [
+                            {
+                                $group: {
+                                    _id: '$propertyType',
+                                    count: { $sum: 1 }
+                                }
+                            }
+                        ],
+                        listingTypes: [
+                             {
+                                $group: {
+                                    _id: '$listingType',
+                                    count: { $sum: 1 }
+                                }
+                            }
+                        ],
+                        total: [
+                            { $count: 'count' }
+                        ]
+                    }
+                }
+            ]).exec();
+    
+            const result = stats[0];
+            console.log(`[DEBUG] Final Stats for ${city}:`, JSON.stringify({
+                locationsCount: result.locations.length,
+                summary: result.summary,
+                total: result.total[0]?.count || 0
+            }));
+
+            return {
+                locations: result.locations,
+                summary: result.summary.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {}),
+                listingTypes: result.listingTypes.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {}),
+                total: result.total[0]?.count || 0
+            };
+    
+        } catch (error) {
+            console.error('Error fetching location stats:', error);
+            throw error;
         }
       }
 }

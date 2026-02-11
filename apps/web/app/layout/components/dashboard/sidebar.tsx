@@ -26,11 +26,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
   const isActive = (path: string) =>
     pathname === path || pathname.startsWith(`${path}/`);
@@ -130,7 +133,7 @@ export default function DashboardSidebar() {
           <div className="flex flex-col">
             <span className="text-lg font-semibold tracking-tight">Rent Ghar</span>
             <span className="text-xs text-muted-foreground font-medium">
-              Admin Panel
+              {isAdmin ? 'Admin Panel' : 'Agent Panel'}
             </span>
           </div>
         </div>
@@ -157,65 +160,70 @@ export default function DashboardSidebar() {
           {/* <SidebarGroupLabel>Overview</SidebarGroupLabel> */}
         </SidebarGroup>
 
-        {/* Blog Category */}
-        <Collapsible defaultOpen={isSectionActive("/dashboard/blog/category")}>
-          <SidebarGroup>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
-                <div className="flex items-center gap-3">
-                  <BookOpen className="h-5 w-5" />
-                  <span>Blog Category</span>
-                </div>
-                <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
+        {/* Blog Section - Admin Only */}
+        {isAdmin && (
+          <>
+            {/* Blog Category */}
+            <Collapsible defaultOpen={isSectionActive("/dashboard/blog/category")}>
+              <SidebarGroup>
+                <CollapsibleTrigger asChild>
+                  <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <BookOpen className="h-5 w-5" />
+                      <span>Blog Category</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
 
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu className="pl-3">
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/dashboard/blog-category")}>
-                      <Link href="/dashboard/blog-category">
-                        <span>All Categories</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu className="pl-3">
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/dashboard/blog-category")}>
+                          <Link href="/dashboard/blog-category">
+                            <span>All Categories</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
 
-        {/* Blog */}
-        <Collapsible defaultOpen={isSectionActive(blogSection.basePath)}>
-          <SidebarGroup>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
-                <div className="flex items-center gap-3">
-                  <blogSection.icon className="h-5 w-5" />
-                  <span>{blogSection.title}</span>
-                </div>
-                <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
+            {/* Blog */}
+            <Collapsible defaultOpen={isSectionActive(blogSection.basePath)}>
+              <SidebarGroup>
+                <CollapsibleTrigger asChild>
+                  <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <blogSection.icon className="h-5 w-5" />
+                      <span>{blogSection.title}</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
 
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu className="pl-3">
-                  {blogSection.items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                        <Link href={item.href}>
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu className="pl-3">
+                      {blogSection.items.map((item) => (
+                        <SidebarMenuItem key={item.href}>
+                          <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                            <Link href={item.href}>
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          </>
+        )}
 
         {/* Properties */}
         <Collapsible defaultOpen={isSectionActive(propertiesSection.basePath)}>
@@ -248,179 +256,189 @@ export default function DashboardSidebar() {
           </SidebarGroup>
         </Collapsible>
 
-        {/* Packages */}
-        <Collapsible defaultOpen={isSectionActive(packagesSection.basePath)}>
-          <SidebarGroup>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
-                <div className="flex items-center gap-3">
-                  <packagesSection.icon className="h-5 w-5" />
-                  <span>{packagesSection.title}</span>
-                </div>
-                <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
+        {/* Packages & Subscriptions - Admin Only */}
+        {isAdmin && (
+          <>
+            {/* Packages */}
+            <Collapsible defaultOpen={isSectionActive(packagesSection.basePath)}>
+              <SidebarGroup>
+                <CollapsibleTrigger asChild>
+                  <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <packagesSection.icon className="h-5 w-5" />
+                      <span>{packagesSection.title}</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
 
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu className="pl-3">
-                  {packagesSection.items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                        <Link href={item.href}>
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu className="pl-3">
+                      {packagesSection.items.map((item) => (
+                        <SidebarMenuItem key={item.href}>
+                          <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                            <Link href={item.href}>
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
 
-        {/* Subscriptions */}
-        <Collapsible defaultOpen={isSectionActive(subscriptionsSection.basePath)}>
-          <SidebarGroup>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
-                <div className="flex items-center gap-3">
-                  <subscriptionsSection.icon className="h-5 w-5" />
-                  <span>{subscriptionsSection.title}</span>
-                </div>
-                <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
+            {/* Subscriptions */}
+            <Collapsible defaultOpen={isSectionActive(subscriptionsSection.basePath)}>
+              <SidebarGroup>
+                <CollapsibleTrigger asChild>
+                  <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <subscriptionsSection.icon className="h-5 w-5" />
+                      <span>{subscriptionsSection.title}</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
 
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu className="pl-3">
-                  {subscriptionsSection.items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                        <Link href={item.href}>
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu className="pl-3">
+                      {subscriptionsSection.items.map((item) => (
+                        <SidebarMenuItem key={item.href}>
+                          <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                            <Link href={item.href}>
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          </>
+        )}
 
-        {/* Cities & Areas */}
-        <Collapsible
-          defaultOpen={
-            isSectionActive(citiesSection.basePath) ||
-            isSectionActive(areasSection.basePath)
-          }
-        >
-          <SidebarGroup>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5" />
-                  <span>Locations</span>
-                </div>
-                <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
+        {/* Admin Management Sections */}
+        {isAdmin && (
+          <>
+            {/* Cities & Areas */}
+            <Collapsible
+              defaultOpen={
+                isSectionActive(citiesSection.basePath) ||
+                isSectionActive(areasSection.basePath)
+              }
+            >
+              <SidebarGroup>
+                <CollapsibleTrigger asChild>
+                  <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-5 w-5" />
+                      <span>Locations</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
 
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                {/* Cities */}
-                <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                  Cities
-                </div>
-                <SidebarMenu className="pl-3 mb-2">
-                  {citiesSection.items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                        <Link href={item.href}>
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    {/* Cities */}
+                    <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                      Cities
+                    </div>
+                    <SidebarMenu className="pl-3 mb-2">
+                      {citiesSection.items.map((item) => (
+                        <SidebarMenuItem key={item.href}>
+                          <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                            <Link href={item.href}>
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
 
-                {/* Areas */}
-                <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                  Areas
-                </div>
-                <SidebarMenu className="pl-3">
-                  {areasSection.items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                        <Link href={item.href}>
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
+                    {/* Areas */}
+                    <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                      Areas
+                    </div>
+                    <SidebarMenu className="pl-3">
+                      {areasSection.items.map((item) => (
+                        <SidebarMenuItem key={item.href}>
+                          <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                            <Link href={item.href}>
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
 
-          {/* Images Gallery */}
-          <Collapsible defaultOpen={isSectionActive(imagesGallerySection.basePath)}>
-            <SidebarGroup>
-              <CollapsibleTrigger asChild>
-                <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
-                  <div className="flex items-center gap-3">
-                    <imagesGallerySection.icon className="h-5 w-5" />
-                    <span>{imagesGallerySection.title}</span>
-                  </div>
-                  <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu className="pl-3">
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/dashboard/images-gallery")}>
-                        <Link href="/dashboard/images-gallery">
-                          <span>All Images</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
-        </Collapsible>
+            {/* Images Gallery */}
+            <Collapsible defaultOpen={isSectionActive(imagesGallerySection.basePath)}>
+              <SidebarGroup>
+                <CollapsibleTrigger asChild>
+                  <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <imagesGallerySection.icon className="h-5 w-5" />
+                      <span>{imagesGallerySection.title}</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu className="pl-3">
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/dashboard/images-gallery")}>
+                          <Link href="/dashboard/images-gallery">
+                            <span>All Images</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
 
-        {/* pages */}
-
-        <Collapsible defaultOpen={isSectionActive("/dashboard/pages")}>
-          <SidebarGroup>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
-                <div className="flex items-center gap-3">
-                  <FileTextIcon className="h-5 w-5" />
-                  <span>Pages</span>
-                </div>
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu className="pl-3">
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/dashboard/pages")}>
-                      <Link href="/dashboard/pages">
-                        <span>All Pages</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+            {/* Pages Section */}
+            <Collapsible defaultOpen={isSectionActive("/dashboard/pages")}>
+              <SidebarGroup>
+                <CollapsibleTrigger asChild>
+                  <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <FileTextIcon className="h-5 w-5" />
+                      <span>Pages</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu className="pl-3">
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/dashboard/pages")}>
+                          <Link href="/dashboard/pages">
+                            <span>All Pages</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          </>
+        )}
 
 
         {/* Account (bottom) */}

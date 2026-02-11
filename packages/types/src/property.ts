@@ -12,4 +12,6 @@ export class CreatePropertyDto {
     description!: string
     contactNumber!: string
     features?: string[]
+    latitude?: number
+    longitude?: number
   }

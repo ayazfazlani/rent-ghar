@@ -150,10 +150,19 @@ export default function PropertiesFilterBar() {
     const citySlug = tempCity ? cityToSlug(tempCity) : '';
     const typeSlug = tempType && tempType !== 'all' ? `/${tempType.toLowerCase()}` : '';
 
+    const params = new URLSearchParams(searchParams.toString());
+    // These are handled by path
+    params.delete('city');
+    params.delete('type');
+    params.delete('purpose');
+
+    const queryString = params.toString();
+    const suffix = queryString ? `?${queryString}` : '';
+
     if (citySlug) {
-      router.push(`/properties/${purpose}/${citySlug}${typeSlug}`);
+      router.push(`/properties/${purpose}/${citySlug}${typeSlug}${suffix}`);
     } else {
-      router.push(`/properties/${purpose}`);
+      router.push(`/properties/${purpose}${suffix}`);
     }
   };
 
@@ -163,10 +172,18 @@ export default function PropertiesFilterBar() {
     const citySlug = tempCity ? cityToSlug(tempCity) : '';
     const typeSlug = tempType && tempType !== 'all' ? `/${tempType.toLowerCase()}` : '';
 
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('city');
+    params.delete('type');
+    params.delete('purpose');
+
+    const queryString = params.toString();
+    const suffix = queryString ? `?${queryString}` : '';
+
     if (citySlug) {
-      router.push(`/properties/${purpose}/${citySlug}${typeSlug}`);
+      router.push(`/properties/${purpose}/${citySlug}${typeSlug}${suffix}`);
     } else {
-      router.push(`/properties/${purpose}`);
+      router.push(`/properties/${purpose}${suffix}`);
     }
   };
 

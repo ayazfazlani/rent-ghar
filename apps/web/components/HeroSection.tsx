@@ -1,8 +1,8 @@
- 'use client'
+'use client'
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, MapPin, Home, Loader2 } from 'lucide-react';
+import { Search, X, MapPin, Home, Loader2, Map } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { propertyApi } from '@/lib/api';
+import { propertyApi, cityApi, areaApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 
@@ -10,14 +10,19 @@ const HeroSection = () => {
   const router = useRouter();
   const [purpose, setPurpose] = useState<'rent' | 'buy'>('rent');
   const [city, setCity] = useState('');
+  const [cityId, setCityId] = useState('');
+  const [area, setArea] = useState('');
+  const [areaId, setAreaId] = useState('');
   const [type, setType] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<Property[]>([]);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
+  const [cityList, setCityList] = useState<{ _id: string; name: string }[]>([]);
+  const [areaList, setAreaList] = useState<{ _id: string; name: string }[]>([]);
   const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingAreas, setLoadingAreas] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Helper function to convert city name to slug
@@ -34,37 +39,75 @@ const HeroSection = () => {
     return typeName.toLowerCase().trim();
   };
 
-  // Fetch properties from backend
+  // Fetch initial data (cities and types)
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const response = await propertyApi.getAll();
-        const backendProperties = response as BackendProperty[];
+
+        // Fetch cities and properties in parallel
+        const [citiesData, propertiesData] = await Promise.all([
+          cityApi.getAll(),
+          propertyApi.getAll()
+        ]);
+
+        // Set Cities
+        const sortedCities = (citiesData as any[]).sort((a, b) => a.name.localeCompare(b.name));
+        setCityList(sortedCities);
+
+        // Process Properties for suggestions and types
+        const backendProperties = propertiesData as BackendProperty[];
         const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
-        
         setAllProperties(transformedProperties);
-        
-        // Extract unique cities and property types
-        const uniqueCities = Array.from(new Set(transformedProperties.map(p => p.city).filter(Boolean))) as string[];
+
+        // Extract unique property types
         const uniqueTypes = Array.from(new Set(transformedProperties.map(p => p.type).filter(Boolean))) as string[];
-        
-        setCities(uniqueCities.sort());
         setPropertyTypes(uniqueTypes.sort());
-        
+
         // Set default city if available
-        if (uniqueCities.length > 0 && !city && uniqueCities[0]) {
-          setCity(uniqueCities[0]);
+        if (sortedCities.length > 0 && !city) {
+          setCity(sortedCities[0].name);
+          setCityId(sortedCities[0]._id);
         }
       } catch (error) {
-        console.error('Error fetching properties:', error);
+        console.error('Error fetching initial data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProperties();
+    fetchInitialData();
   }, []);
+
+  // Fetch areas when city changes
+  useEffect(() => {
+    const fetchAreas = async () => {
+      if (!cityId) {
+        setAreaList([]);
+        setArea('');
+        setAreaId('');
+        return;
+      }
+
+      try {
+        setLoadingAreas(true);
+        const areasData = await areaApi.getAreasByCity(cityId);
+        const sortedAreas = (areasData as any[]).sort((a, b) => a.name.localeCompare(b.name));
+        setAreaList(sortedAreas);
+
+        // Reset area when city changes
+        setArea('');
+        setAreaId('');
+      } catch (error) {
+        console.error('Error fetching areas:', error);
+        setAreaList([]);
+      } finally {
+        setLoadingAreas(false);
+      }
+    };
+
+    fetchAreas();
+  }, [cityId]);
 
   // Handle click outside to close suggestions
   useEffect(() => {
@@ -82,13 +125,13 @@ const HeroSection = () => {
   useEffect(() => {
     if (searchQuery.trim().length >= 2) {
       const searchTerm = searchQuery.toLowerCase().trim();
-      const filtered = allProperties.filter(property => 
+      const filtered = allProperties.filter(property =>
         property.name?.toLowerCase().includes(searchTerm) ||
         property.city?.toLowerCase().includes(searchTerm) ||
         property.type?.toLowerCase().includes(searchTerm) ||
         property.location?.toLowerCase().includes(searchTerm)
       ).slice(0, 8); // Limit to 8 suggestions
-      
+
       setFilteredSuggestions(filtered);
       setShowSuggestions(filtered.length > 0);
     } else {
@@ -98,21 +141,29 @@ const HeroSection = () => {
   }, [searchQuery, allProperties]);
 
   const handleSearch = () => {
+    const purposeSlug = purpose === 'buy' ? 'sale' : 'rent';
+    const typeSlug = type ? typeToSlug(type) : 'all';
+
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (areaId) params.set('areaId', areaId);
+    if (searchQuery) params.set('search', searchQuery);
+
+    const queryString = params.toString();
+    const suffix = queryString ? `?${queryString}` : '';
+
     if (!city) {
-      // If no city selected, go to general properties page
-      router.push('/properties');
+      router.push(`/properties${suffix}`);
       return;
     }
 
-    const purposeSlug = purpose === 'buy' ? 'sale' : 'rent';
     const citySlug = cityToSlug(city);
-    const typeSlug = type ? typeToSlug(type) : 'all';
 
-    // Navigate to clean URL: /properties/rent/[city]/[type]
+    // Navigate to clean URL: /properties/rent/[city]/[type]?areaId=...
     if (typeSlug === 'all') {
-      router.push(`/properties/${purposeSlug}/${citySlug}`);
+      router.push(`/properties/${purposeSlug}/${citySlug}${suffix}`);
     } else {
-      router.push(`/properties/${purposeSlug}/${citySlug}/${typeSlug}`);
+      router.push(`/properties/${purposeSlug}/${citySlug}/${typeSlug}${suffix}`);
     }
   };
 
@@ -135,26 +186,26 @@ const HeroSection = () => {
         {/* Large Diagonal Cuts - More Prominent */}
         <div className="absolute top-0 right-0 w-2/5 h-2/5 bg-black transform rotate-12 origin-top-right opacity-10"></div>
         <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-black transform -rotate-12 origin-bottom-left opacity-10"></div>
-        
+
         {/* Medium Geometric Shapes */}
         <div className="absolute top-1/4 left-1/4 w-48 h-48 border-8 border-black/10 transform rotate-45"></div>
         <div className="absolute bottom-1/3 right-1/4 w-56 h-56 border-8 border-black/10 transform -rotate-12"></div>
         <div className="absolute top-2/3 left-1/3 w-32 h-32 bg-black/10 transform rotate-45"></div>
-        
+
         {/* Animated Lines - More Visible */}
         <div className="absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-transparent via-black/20 to-transparent animate-pulse"></div>
         <div className="absolute top-1/3 left-0 w-full h-1 bg-gradient-to-r from-transparent via-black/15 to-transparent"></div>
         <div className="absolute top-2/3 right-0 w-2/3 h-1 bg-gradient-to-l from-transparent via-black/15 to-transparent"></div>
-        
+
         {/* Small Scattered Squares */}
         <div className="absolute top-1/5 right-1/3 w-12 h-12 bg-black/10 transform rotate-12 animate-float"></div>
         <div className="absolute bottom-1/5 left-1/5 w-16 h-16 bg-black/10 transform -rotate-12 animate-float-delayed"></div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+      <div className="relative  mt-6 z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         {/* Main Heading */}
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 leading-tight text-black mt-8 md:mt-12">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-2 leading-tight text-black mt-8 md:mt-12">
           Find Your Perfect{' '}
           <span className="relative inline-block">
             Home
@@ -164,9 +215,9 @@ const HeroSection = () => {
         </h2>
 
         {/* Subtitle */}
-        <p className="text-gray-600 text-center text-base md:text-md mb-6 md:mb-4 max-w-2xl mx-auto">
+        {/* <p className="text-gray-600 text-center text-base md:text-md mb-6 md:mb-4 max-w-2xl mx-auto">
           Discover thousands of properties for rent and sale across major cities
-        </p>
+        </p> */}
 
         {/* Search Box */}
         <div className="max-w-2xl mx-auto mb-2 md:mb-6">
@@ -248,22 +299,20 @@ const HeroSection = () => {
             <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg max-w-xs mx-auto">
               <button
                 onClick={() => setPurpose('rent')}
-                className={`relative flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300 overflow-hidden group ${
-                  purpose === 'rent'
-                    ? 'bg-black text-white shadow-lg'
-                    : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`relative flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300 overflow-hidden group ${purpose === 'rent'
+                  ? 'bg-black text-white shadow-lg'
+                  : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                  }`}
               >
                 <span className="relative z-10">Rent</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-40 transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-all duration-700"></div>
               </button>
               <button
                 onClick={() => setPurpose('buy')}
-                className={`relative flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300 overflow-hidden group ${
-                  purpose === 'buy'
-                    ? 'bg-black text-white shadow-lg'
-                    : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`relative flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300 overflow-hidden group ${purpose === 'buy'
+                  ? 'bg-black text-white shadow-lg'
+                  : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                  }`}
               >
                 <span className="relative z-10">Buy</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-40 transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-all duration-700"></div>
@@ -271,7 +320,7 @@ const HeroSection = () => {
             </div>
 
             {/* Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-2 max-w-2xl mx-auto">
               <div className="relative">
                 {loading ? (
                   <div className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 flex items-center justify-center">
@@ -281,21 +330,58 @@ const HeroSection = () => {
                   <>
                     <select
                       value={city}
-                      onChange={(e) => setCity(e.target.value)}
+                      onChange={(e) => {
+                        const selectedCityName = e.target.value;
+                        setCity(selectedCityName);
+                        const selectedCity = cityList.find(c => c.name === selectedCityName);
+                        setCityId(selectedCity?._id || '');
+                      }}
                       className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
                       title="Select city"
                     >
                       <option value="">All Cities</option>
-                      {cities.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
+                      {cityList.map((c) => (
+                        <option key={c._id} value={c.name}>
+                          {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
                         </option>
                       ))}
                     </select>
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <MapPin className="w-3 h-3 text-gray-400" />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Area Selection - Dynamic */}
+              <div className="relative">
+                {loadingAreas ? (
+                  <div className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 flex items-center justify-center">
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  </div>
+                ) : (
+                  <>
+                    <select
+                      value={area}
+                      onChange={(e) => {
+                        const selectedAreaName = e.target.value;
+                        setArea(selectedAreaName);
+                        const selectedArea = areaList.find(a => a.name === selectedAreaName);
+                        setAreaId(selectedArea?._id || '');
+                      }}
+                      disabled={!city || areaList.length === 0}
+                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
+                      title="Select area"
+                    >
+                      <option value="">{city ? (areaList.length > 0 ? 'All Areas' : 'No Areas Found') : 'Select City First'}</option>
+                      {areaList.map((a) => (
+                        <option key={a._id} value={a.name}>
+                          {a.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <Map className="w-3 h-3 text-gray-400" />
                     </div>
                   </>
                 )}
@@ -304,7 +390,7 @@ const HeroSection = () => {
               <div className="relative">
                 {loading ? (
                   <div className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 flex items-center justify-center">
-                    <Loader2 className="w-2 h-2 animate-spin text-gray-400" />
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                   </div>
                 ) : (
                   <>
@@ -322,9 +408,7 @@ const HeroSection = () => {
                       ))}
                     </select>
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <svg className="w-2 h-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <Home className="w-3 h-3 text-gray-400" />
                     </div>
                   </>
                 )}
@@ -349,7 +433,7 @@ const HeroSection = () => {
             </div>
           </div>
         </div>
-       </div>
+      </div>
 
       {/* Custom CSS for Animations */}
       <style jsx>{`

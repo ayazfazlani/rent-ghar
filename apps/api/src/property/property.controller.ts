@@ -99,12 +99,44 @@ export class PropertyController {
     }
   }
 
+  @Get('stats/locations')
+  async getStats(
+    @Query('city') city: string, 
+    @Query('listingType') listingType?: string,
+    @Query('propertyType') propertyType?: string
+  ) {
+    if (!city) {
+        throw new BadRequestException('City is required');
+    }
+    return this.propertyService.getLocationStats(city, listingType, propertyType);
+  }
+
   @Get()
-  async findAll(@Query('cityId') cityId?: string, @Query('areaId') areaId?: string) {
+  async findAll(
+    @Query('cityId') cityId?: string, 
+    @Query('areaId') areaId?: string,
+    @Query('priceMin') priceMin?: string,
+    @Query('priceMax') priceMax?: string,
+    @Query('areaMin') areaMin?: string,
+    @Query('areaMax') areaMax?: string,
+    @Query('beds') beds?: string,
+    @Query('baths') baths?: string,
+    @Query('type') type?: string,
+    @Query('purpose') purpose?: string
+  ) {
     try {
-      const filters: { cityId?: string; areaId?: string } = {};
+      const filters: any = {};
       if (cityId) filters.cityId = cityId;
       if (areaId) filters.areaId = areaId;
+      if (priceMin) filters.priceMin = Number(priceMin);
+      if (priceMax) filters.priceMax = Number(priceMax);
+      if (areaMin) filters.areaMin = Number(areaMin);
+      if (areaMax) filters.areaMax = Number(areaMax);
+      if (beds) filters.beds = Number(beds);
+      if (baths) filters.baths = Number(baths);
+      if (type) filters.type = type;
+      if (purpose) filters.purpose = purpose;
+
       return await this.propertyService.findAllApproved(filters);
     } catch (error) {
       console.error('Error in findAll controller:', error);
@@ -113,11 +145,16 @@ export class PropertyController {
   }
 
   @Get('all')
-  async findAllProperties(@Query('cityId') cityId?: string, @Query('areaId') areaId?: string) {
+  @UseGuards(JwtAuthGuard)
+  async findAllProperties(@Request() req, @Query('cityId') cityId?: string, @Query('areaId') areaId?: string) {
     const filters: { cityId?: string; areaId?: string } = {};
     if (cityId) filters.cityId = cityId;
     if (areaId) filters.areaId = areaId;
-    return this.propertyService.findAll(filters)
+    
+    const userId = req.user?.userId;
+    const userRole = req.user?.role;
+    
+    return this.propertyService.findAll(filters, userId, userRole)
   }
 
   // get property by slug (must be before :id route)
@@ -161,7 +198,10 @@ export class PropertyController {
             })
           )
         : undefined
-      const updated = await this.propertyService.update(id, dto as any, mainPhotoUrl, additionalPhotosUrls)
+      const userId = req.user?.userId;
+      const userRole = req.user?.role;
+
+      const updated = await this.propertyService.update(id, dto as any, mainPhotoUrl, additionalPhotosUrls, userId, userRole)
       return { message: 'Property updated successfully', property: updated }
     } catch (error) {
       console.error('Error in update controller:', error);
@@ -175,9 +215,12 @@ export class PropertyController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string) {
+  @UseGuards(JwtAuthGuard)
+  async delete(@Param('id') id: string, @Request() req) {
     try {
-      return await this.propertyService.delete(id);
+      const userId = req.user?.userId;
+      const userRole = req.user?.role;
+      return await this.propertyService.delete(id, userId, userRole);
     } catch (error) {
       console.error('Error in delete controller:', error);
       throw error;

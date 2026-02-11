@@ -14,7 +14,13 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import dynamic from 'next/dynamic';
+import { useAuth } from '@/context/auth-context';
+
+const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-lg flex items-center justify-center text-gray-400">Loading Map...</div>
+})
 import {
   Dialog,
   DialogContent,
@@ -29,6 +35,9 @@ export default function DashboardHome() {
   const [error, setError] = useState<string | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<BackendProperty | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
   const router = useRouter();
   useEffect(() => {
@@ -203,11 +212,17 @@ export default function DashboardHome() {
 
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="sm" className="btn btn-sm rounded-md" onClick={() => {
-                        updateStatus(property._id);
-                      }}>
-                        {property.status === 'approved' ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                      </Button>
+                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="btn btn-sm rounded-md hover:bg-green-50"
+                          onClick={() => updateStatus(property._id)}
+                          title={property.status === 'approved' ? 'Unapprove' : 'Approve'}
+                        >
+                          {property.status === 'approved' ? <Check className="w-4 h-4 text-green-600" /> : <X className="w-4 h-4 text-red-600" />}
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -258,7 +273,7 @@ export default function DashboardHome() {
 
       {/* View Property Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="w-full  max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Property Details</DialogTitle>
             <DialogDescription>
@@ -324,6 +339,18 @@ export default function DashboardHome() {
                   })()}
                 </p>
               </div>
+
+              {/* Map View */}
+              {(selectedProperty as any).latitude && (selectedProperty as any).longitude && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500 mb-2 block">Map Location</label>
+                  <PropertyMap
+                    latitude={(selectedProperty as any).latitude}
+                    longitude={(selectedProperty as any).longitude}
+                    title={selectedProperty.title}
+                  />
+                </div>
+              )}
 
               {/* Property Details */}
               <div className="grid grid-cols-3 gap-4">

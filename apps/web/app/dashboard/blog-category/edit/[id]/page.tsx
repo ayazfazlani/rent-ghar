@@ -21,6 +21,9 @@ import blogCategoryApi from "@/lib/api/blog-category/blog-category.api";
 
 const formSchema = z.object({
     name: z.string().min(2, { message: "Name must be at least 2 characters long" }),
+    slug: z.string().optional(),
+    metaTitle: z.string().optional(),
+    metaDescription: z.string().optional(),
     description: z.string().optional(),
 });
 
@@ -34,6 +37,9 @@ export default function EditCategoryPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
+            slug: "",
+            metaTitle: "",
+            metaDescription: "",
             description: "",
         },
     });
@@ -108,6 +114,15 @@ export default function EditCategoryPage() {
                             )}
                             />
                          
+                            <FormField control={form.control} name="slug" render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Slug</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g property-category" {...field} />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                            />
                             <FormField control={form.control} name="description" render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Description</FormLabel>
@@ -116,8 +131,27 @@ export default function EditCategoryPage() {
                                     </FormControl>
                                 </FormItem>
                             )}
+
                             />
 
+                            <FormField control={form.control} name="metaTitle" render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Meta Title</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g Property Category" {...field} />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                            />
+                            <FormField control={form.control} name="metaDescription" render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Meta Description</FormLabel>
+                                    <FormControl>
+                                        <Textarea placeholder="e.g Property Category Description" {...field} />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                            />
                             <div className="flex gap-4 pt-6">
                                 <Button 
                                     type="submit" 

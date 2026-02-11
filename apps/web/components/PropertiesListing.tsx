@@ -8,7 +8,7 @@
  */
 
 import { useState, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { SlidersHorizontal, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PropertyCard from '@/components/PropertyCard';
@@ -16,6 +16,17 @@ import { propertyApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 import { toast } from 'sonner';
+import SearchSidebar from '@/components/SearchSidebar';
+import LocationExplorer from '@/components/LocationExplorer';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
+import { Filter } from 'lucide-react';
+
 
 interface PropertiesListingProps {
   purpose: 'rent' | 'buy' | 'all';
@@ -31,6 +42,7 @@ export default function PropertiesListing({
   useCleanUrls = false
 }: PropertiesListingProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // STATE: Properties and filters
   const [properties, setProperties] = useState<Property[]>([]);
@@ -42,6 +54,20 @@ export default function PropertiesListing({
   // Local state for filters before applying
   const [tempCity, setTempCity] = useState(initialCity);
   const [tempType, setTempType] = useState(initialType);
+
+  // State for advanced filters
+  const [advancedFilters, setAdvancedFilters] = useState<{
+    priceMin?: number;
+    priceMax?: number;
+    areaMin?: number;
+    areaMax?: number;
+    beds?: number;
+    baths?: number;
+  }>({});
+
+  const handleFilterChange = (newFilters: any) => {
+    setAdvancedFilters(newFilters);
+  };
 
   // FETCH PROPERTIES FROM API
   useEffect(() => {
@@ -108,6 +134,8 @@ export default function PropertiesListing({
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   };
+
+
 
   // Helper function to find city name from slug (handles both full slugs and abbreviations)
   const slugToCity = (slug: string): string | null => {
@@ -180,66 +208,52 @@ export default function PropertiesListing({
 
   // Filter properties based on selected filters
   const filteredProperties = useMemo(() => {
+    const selectedAreaId = searchParams.get('areaId');
+    const searchTerm = searchParams.get('search')?.toLowerCase();
+
     const filtered = properties.filter((property: Property) => {
       const matchesPurpose = property.purpose === purpose || purpose === 'all';
       const matchesCity = !matchedCity || property.city === matchedCity;
       // Case-insensitive type matching
       const matchesType = !normalizedType ||
         property.type.toLowerCase() === normalizedType.toLowerCase();
-      return matchesPurpose && matchesCity && matchesType;
+
+      // Area/Location Filter from Explorer or URL
+      const matchesArea = !selectedAreaId || property.areaId === selectedAreaId;
+
+      // Search term filter (matches title, location, or city)
+      const matchesSearch = !searchTerm ||
+        property.name.toLowerCase().includes(searchTerm) ||
+        property.location.toLowerCase().includes(searchTerm) ||
+        property.city.toLowerCase().includes(searchTerm) ||
+        property.areaName?.toLowerCase().includes(searchTerm);
+
+      // Advanced Filters (Sidebar)
+      const matchesPriceMin = !advancedFilters.priceMin || property.price >= advancedFilters.priceMin;
+      const matchesPriceMax = !advancedFilters.priceMax || property.price <= advancedFilters.priceMax;
+
+      const matchesAreaMin = !advancedFilters.areaMin || property.area >= advancedFilters.areaMin;
+      const matchesAreaMax = !advancedFilters.areaMax || property.area <= advancedFilters.areaMax;
+
+      const matchesBeds = !advancedFilters.beds ||
+        (advancedFilters.beds >= 5 ? property.bedrooms >= 5 : property.bedrooms === advancedFilters.beds);
+
+      const matchesBaths = !advancedFilters.baths ||
+        (advancedFilters.baths >= 4 ? property.bathrooms >= 4 : property.bathrooms === advancedFilters.baths);
+
+      return matchesPurpose && matchesCity && matchesType && matchesArea && matchesSearch &&
+        matchesPriceMin && matchesPriceMax &&
+        matchesAreaMin && matchesAreaMax &&
+        matchesBeds && matchesBaths;
     });
 
-    // Debug logging in development
-    if (process.env.NODE_ENV === 'development' && (matchedCity || normalizedType)) {
-      console.log('[PropertiesListing] Filter debug:', {
-        totalProperties: properties.length,
-        filteredCount: filtered.length,
-        filters: {
-          purpose,
-          city: matchedCity,
-          type: normalizedType,
-        },
-        sampleProperty: properties[0] ? {
-          purpose: properties[0].purpose,
-          city: properties[0].city,
-          type: properties[0].type,
-        } : null,
-      });
-    }
-
     return filtered;
-  }, [properties, purpose, matchedCity, normalizedType]);
+  }, [properties, purpose, matchedCity, normalizedType, advancedFilters, searchParams]);
 
-  const updateFilters = (newCity: string, newType: string, newPurpose?: 'rent' | 'buy' | 'all', forceCleanUrl = false) => {
-    const currentPurpose = newPurpose || purpose;
-
-    // Always use clean URLs when forceCleanUrl is true (from Apply button) or when useCleanUrls is true
-    const shouldUseCleanUrl = forceCleanUrl || useCleanUrls;
-
-    if (shouldUseCleanUrl && currentPurpose !== 'all') {
-      // Use clean URL format: /properties/rent/city/type
-      const purposePath = currentPurpose; // rent or buy
-      const citySlug = newCity ? cityToSlug(newCity) : '';
-      // Convert type to lowercase for URL (e.g., "House" -> "house")
-      const typeSlug = newType && newType !== 'all'
-        ? `/${newType.toLowerCase()}`
-        : '';
-
-      if (citySlug) {
-        router.push(`/properties/${purposePath}/${citySlug}${typeSlug}`);
-      } else {
-        router.push(`/properties/${purposePath}`);
-      }
-    } else {
-      // Use query params format (for 'all' purpose or when not forcing clean URLs)
-      const params = new URLSearchParams();
-      if (currentPurpose !== 'all') params.set('purpose', currentPurpose);
-      if (newCity) params.set('city', newCity);
-      if (newType && newType !== 'all') params.set('type', newType);
-      const queryString = params.toString();
-      router.push(queryString ? `/properties?${queryString}` : '/properties');
-    }
-  };
+  const currentAreaId = useMemo(() => {
+    // If we're filtering by areaId, pass it to explorer
+    return searchParams.get('areaId') || '';
+  }, [searchParams]);
 
   // LOADING STATE
   if (loading) {
@@ -270,70 +284,188 @@ export default function PropertiesListing({
     );
   }
 
+  const updateFilters = (newCity: string, newType: string, newPurpose?: 'rent' | 'buy' | 'all', forceCleanUrl = false) => {
+    const currentPurpose = newPurpose || purpose;
+
+    // Always use clean URLs when forceCleanUrl is true (from Apply button) or when useCleanUrls is true
+    const shouldUseCleanUrl = (forceCleanUrl || useCleanUrls) && currentPurpose !== 'all';
+
+    // Get existing parameters to preserve
+    const params = new URLSearchParams(searchParams.toString());
+
+    // City and Type are now handled by path in clean URLs, so remove them from query if present
+    if (shouldUseCleanUrl) {
+      params.delete('city');
+      params.delete('type');
+      params.delete('purpose');
+
+      const purposePath = currentPurpose; // rent or buy
+      const citySlug = newCity ? cityToSlug(newCity) : '';
+      const typeSlug = newType && newType !== 'all'
+        ? `/${newType.toLowerCase()}`
+        : '';
+
+      const queryString = params.toString();
+      const suffix = queryString ? `?${queryString}` : '';
+
+      if (citySlug) {
+        router.push(`/properties/${purposePath}/${citySlug}${typeSlug}${suffix}`);
+      } else {
+        router.push(`/properties/${purposePath}${suffix}`);
+      }
+    } else {
+      // Use query params format
+      if (currentPurpose !== 'all') params.set('purpose', currentPurpose);
+      else params.delete('purpose');
+
+      if (newCity) params.set('city', newCity);
+      else params.delete('city');
+
+      if (newType && newType !== 'all') params.set('type', newType);
+      else params.delete('type');
+
+      const queryString = params.toString();
+      router.push(queryString ? `/properties?${queryString}` : '/properties');
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-background">
 
-      {/* Hero Banner with fade-in animation */}
-      <section className="pt-20 pb-8 md:pt-24 md:pb-12 bg-secondary animate-in fade-in duration-500">
+      {/* Hero Banner with fade-in animation - Made more subtle since Explorer is below */}
+      <section className="pt-20 pb-4 md:pt-24 md:pb-6 bg-secondary/50 animate-in fade-in duration-500">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 animate-in slide-in-from-bottom-4 duration-700">
-            {purpose === 'rent' ? 'Properties for Rent' : purpose === 'buy' ? 'Properties for Sale' : 'Properties'}
-            {matchedCity ? ` in ${matchedCity}` : ''}
-            {type && type !== 'all' ? ` - ${type}` : ''}
-          </h1>
-          <p className="text-muted-foreground animate-in slide-in-from-bottom-4 duration-700 delay-100">
-            Find your perfect property from our extensive listings
+          <p className="text-sm font-medium text-primary mb-1 uppercase tracking-wider">
+            Property Search
           </p>
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">
+            Browse Listings in {matchedCity || 'Pakistan'}
+          </h1>
         </div>
       </section>
 
-      {/* Properties Grid with staggered animation */}
-      <section className="py-8 md:py-12">
+      {/* Main Content Area - Sidebar + Grid */}
+      <section className="py-8 md:py-10">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-6 animate-in slide-in-from-bottom-2 duration-500">
-            <p className="text-muted-foreground">
-              <span className="font-semibold text-foreground">{filteredProperties.length}</span> properties found
-            </p>
-          </div>
 
-          {filteredProperties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProperties.map((property, index) => (
-                <div
-                  key={`${property.id}-${index}`}
-                  className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-                  style={{
-                    animationDelay: `${index * 50}ms`,
-                    animationFillMode: 'backwards'
-                  }}
-                >
-                  <PropertyCard property={property} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 animate-in fade-in zoom-in-95 duration-500">
-              <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 animate-in spin-in-180 duration-700">
-                <SlidersHorizontal className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2 animate-in slide-in-from-bottom-2 duration-500 delay-200">
-                No properties found
-              </h3>
-              <p className="text-muted-foreground mb-6 animate-in slide-in-from-bottom-2 duration-500 delay-300">
-                Try adjusting your filters to find more properties
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setType('all');
-                  updateFilters('', 'all');
+          <div className="flex flex-col lg:flex-row gap-8">
+
+            {/* Sidebar - Desktop Only */}
+            <aside className="w-full lg:w-1/4 hidden lg:block">
+              <SearchSidebar
+                city={matchedCity}
+                purpose={purpose}
+                filters={advancedFilters}
+                onFilterChange={handleFilterChange}
+                className="sticky top-24"
+              />
+            </aside>
+
+            {/* Main Listing Side */}
+            <div className="w-full lg:w-3/4 space-y-10">
+
+              {/* Location Explorer Board */}
+              <LocationExplorer
+                city={matchedCity}
+                purpose={purpose}
+                currentAreaId={currentAreaId}
+                onAreaSelect={(areaId) => {
+                  // Standardize navigation to preserve current filters
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set('areaId', areaId);
+
+                  // Use standardized updateFilters logic for navigation
+                  // This ensures we stay on /properties/rent/city/type if we are already there
+                  const queryString = params.toString();
+                  const currentPath = window.location.pathname;
+                  router.push(`${currentPath}?${queryString}`);
                 }}
-                className="animate-in slide-in-from-bottom-2 duration-500 delay-400 transition-all hover:scale-105"
-              >
-                Clear Filters
-              </Button>
+                onTypeSelect={(newType) => {
+                  // Use standardized updateFilters
+                  updateFilters(matchedCity, newType);
+                }}
+              />
+
+              {/* Properties Grid */}
+              <div className="pt-4">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold">
+                    Property Listings
+                  </h3>
+
+                  {/* Mobile Filters Trigger */}
+                  <div className="lg:hidden">
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-2">
+                          <Filter className="w-4 h-4" />
+                          Filter
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
+                        <SheetHeader className="p-4 border-b text-left">
+                          <SheetTitle>Search Filters</SheetTitle>
+                        </SheetHeader>
+                        <div className="p-4 overflow-y-auto h-[calc(100vh-100px)]">
+                          <SearchSidebar
+                            city={matchedCity}
+                            purpose={purpose}
+                            filters={advancedFilters}
+                            onFilterChange={(newFilters) => {
+                              handleFilterChange(newFilters);
+                            }}
+                          />
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+                </div>
+
+                {filteredProperties.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {filteredProperties.map((property, index) => (
+                      <div
+                        key={`${property.id}-${index}`}
+                        className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                        style={{
+                          animationDelay: `${index * 50}ms`,
+                          animationFillMode: 'backwards'
+                        }}
+                      >
+                        <PropertyCard property={property} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-16 animate-in fade-in zoom-in-95 duration-500 bg-secondary/30 rounded-xl">
+                    <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 animate-in spin-in-180 duration-700">
+                      <SlidersHorizontal className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground mb-2 animate-in slide-in-from-bottom-2 duration-500 delay-200">
+                      No properties found
+                    </h3>
+                    <p className="text-muted-foreground mb-6 animate-in slide-in-from-bottom-2 duration-500 delay-300">
+                      Try adjusting your filters to find more properties
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setType('all');
+                          updateFilters('', 'all');
+                          setAdvancedFilters({});
+                        }}
+                        className="animate-in slide-in-from-bottom-2 duration-500 delay-400 transition-all hover:scale-105"
+                      >
+                        Clear All Filters
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </section>
 

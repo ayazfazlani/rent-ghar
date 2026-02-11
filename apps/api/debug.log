@@ -78,3 +78,35 @@ Stack: ForbiddenException: Property limit (1) reached for your current package.
 [2026-02-10T09:59:08.614Z] Service: Creating property model instance
 [2026-02-10T09:59:08.679Z] Service: Property saved successfully. ID: 698b016c57cb9e559ccd0577
 [2026-02-10T09:59:08.679Z] Controller: property created successfully
+[2026-02-10T12:07:10.528Z] Controller: processing create request for user 6986e80543f4ec84c089f5eb
+[2026-02-10T12:07:10.541Z] Service: Start create. User: 6986e80543f4ec84c089f5eb, Role: AGENT
+[2026-02-10T12:07:10.541Z] Service: Checking subscription for user 6986e80543f4ec84c089f5eb
+[2026-02-10T12:07:10.885Z] Service: Subscription check result: {"canCreate":true,"subscription":{"_id":"698b00fc57cb9e559ccd052e","userId":"6986e80543f4ec84c089f5eb","packageId":{"_id":"698ae4110e999e361e76965f","name":"Enterprise","description":"For large property management companies","price":19999,"duration":90,"propertyLimit":50,"featuredListings":10,"photosPerProperty":20,"isActive":true,"features":["50 property listings","10 featured listings","20 photos per property","90 days validity","Enterprise badge","Dedicated support","Premium placement","Analytics dashboard"],"createdAt":"2026-02-10T07:53:53.022Z","updatedAt":"2026-02-10T07:53:53.022Z","__v":0},"status":"active","propertiesUsed":4,"paymentStatus":"completed","createdAt":"2026-02-10T09:57:16.930Z","updatedAt":"2026-02-10T09:59:08.551Z","__v":0,"endDate":"2026-05-11T09:57:24.325Z","startDate":"2026-02-10T09:57:24.325Z"}}
+[2026-02-10T12:07:11.096Z] Service: Generated slug: commodi-maiores-nostrum-optio-est
+[2026-02-10T12:07:11.097Z] Service: Creating property model instance
+[2026-02-10T12:07:11.167Z] Service: Property saved successfully. ID: 698b1f6ff302e0d68c7e5154
+[2026-02-10T12:07:11.168Z] Controller: property created successfully
+[2026-02-11T08:41:30.663Z] Controller: processing create request for user 6986e80543f4ec84c089f5eb
+[2026-02-11T08:41:30.672Z] Service: Start create. User: 6986e80543f4ec84c089f5eb, Role: AGENT
+[2026-02-11T08:41:30.672Z] Service: Checking subscription for user 6986e80543f4ec84c089f5eb
+[2026-02-11T08:41:31.048Z] Service: Subscription check result: {"canCreate":true,"subscription":{"_id":"698b00fc57cb9e559ccd052e","userId":"6986e80543f4ec84c089f5eb","packageId":{"_id":"698ae4110e999e361e76965f","name":"Enterprise","description":"For large property management companies","price":19999,"duration":90,"propertyLimit":50,"featuredListings":10,"photosPerProperty":20,"isActive":true,"features":["50 property listings","10 featured listings","20 photos per property","90 days validity","Enterprise badge","Dedicated support","Premium placement","Analytics dashboard"],"createdAt":"2026-02-10T07:53:53.022Z","updatedAt":"2026-02-10T07:53:53.022Z","__v":0},"status":"active","propertiesUsed":5,"paymentStatus":"completed","createdAt":"2026-02-10T09:57:16.930Z","updatedAt":"2026-02-10T12:07:11.019Z","__v":0,"endDate":"2026-05-11T09:57:24.325Z","startDate":"2026-02-10T09:57:24.325Z"}}
+[2026-02-11T08:41:31.268Z] Service: Generated slug: animi-provident-debitis-hic-quidem-dignissimos-perspiciatis-provident-ipsa-soluta
+[2026-02-11T08:41:31.269Z] Service: Creating property model instance
+[2026-02-11T08:41:31.352Z] Service: Property saved successfully. ID: 698c40bb58d1746c69b3047a
+[2026-02-11T08:41:31.353Z] Controller: property created successfully
+[2026-02-11T08:46:15.988Z] Controller: processing create request for user 6986e80543f4ec84c089f5eb
+[2026-02-11T08:46:15.993Z] Service: Start create. User: 6986e80543f4ec84c089f5eb, Role: AGENT
+[2026-02-11T08:46:16.008Z] Service: Checking subscription for user 6986e80543f4ec84c089f5eb
+[2026-02-11T08:46:16.381Z] Service: Subscription check result: {"canCreate":true,"subscription":{"_id":"698b00fc57cb9e559ccd052e","userId":"6986e80543f4ec84c089f5eb","packageId":{"_id":"698ae4110e999e361e76965f","name":"Enterprise","description":"For large property management companies","price":19999,"duration":90,"propertyLimit":50,"featuredListings":10,"photosPerProperty":20,"isActive":true,"features":["50 property listings","10 featured listings","20 photos per property","90 days validity","Enterprise badge","Dedicated support","Premium placement","Analytics dashboard"],"createdAt":"2026-02-10T07:53:53.022Z","updatedAt":"2026-02-10T07:53:53.022Z","__v":0},"status":"active","propertiesUsed":6,"paymentStatus":"completed","createdAt":"2026-02-10T09:57:16.930Z","updatedAt":"2026-02-11T08:41:31.187Z","__v":0,"endDate":"2026-05-11T09:57:24.325Z","startDate":"2026-02-10T09:57:24.325Z"}}
+[2026-02-11T08:46:16.601Z] Service: Generated slug: placeat-ad-unde-numquam
+[2026-02-11T08:46:16.602Z] Service: Creating property model instance
+[2026-02-11T08:46:16.682Z] Service: Property saved successfully. ID: 698c41d858d1746c69b304b6
+[2026-02-11T08:46:16.683Z] Controller: property created successfully
+[2026-02-11T08:50:09.485Z] Controller: processing create request for user 6986e80543f4ec84c089f5eb
+[2026-02-11T08:50:09.490Z] Service: Start create. User: 6986e80543f4ec84c089f5eb, Role: AGENT
+[2026-02-11T08:50:09.490Z] Service: Checking subscription for user 6986e80543f4ec84c089f5eb
+[2026-02-11T08:50:09.881Z] Service: Subscription check result: {"canCreate":true,"subscription":{"_id":"698b00fc57cb9e559ccd052e","userId":"6986e80543f4ec84c089f5eb","packageId":{"_id":"698ae4110e999e361e76965f","name":"Enterprise","description":"For large property management companies","price":19999,"duration":90,"propertyLimit":50,"featuredListings":10,"photosPerProperty":20,"isActive":true,"features":["50 property listings","10 featured listings","20 photos per property","90 days validity","Enterprise badge","Dedicated support","Premium placement","Analytics dashboard"],"createdAt":"2026-02-10T07:53:53.022Z","updatedAt":"2026-02-10T07:53:53.022Z","__v":0},"status":"active","propertiesUsed":7,"paymentStatus":"completed","createdAt":"2026-02-10T09:57:16.930Z","updatedAt":"2026-02-11T08:46:16.519Z","__v":0,"endDate":"2026-05-11T09:57:24.325Z","startDate":"2026-02-10T09:57:24.325Z"}}
+[2026-02-11T08:50:10.099Z] Service: Generated slug: sed-quas-ad-facilis-accusantium
+[2026-02-11T08:50:10.100Z] Service: Creating property model instance
+[2026-02-11T08:50:10.175Z] Service: Property saved successfully. ID: 698c42c26db46aebc137f2bf
+[2026-02-11T08:50:10.176Z] Controller: property created successfully

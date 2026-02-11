@@ -12,5 +12,13 @@ export class CreateCategoryDto {
 
     @IsString()
     @IsOptional()
+    metaTitle?: string;
+
+    @IsString()
+    @IsOptional()
+    metaDescription?: string;
+
+    @IsString()
+    @IsOptional()
     description?: string;
 }

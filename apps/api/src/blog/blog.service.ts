@@ -16,7 +16,11 @@ export class BlogService {
 
     async findPublishedBlogs(): Promise<BlogDocument[]> {
         try {
-            return await this.blogModel.find({ status: 'published' }).exec();
+            return await this.blogModel
+                .find({ status: 'published' })
+                .populate('author', 'name email')
+                .populate('categories', 'name slug')
+                .exec();
         } catch (error) {
             console.error('Error fetching published blogs:', error);
             // Return empty array instead of throwing to prevent 500 errors
@@ -24,7 +28,11 @@ export class BlogService {
         }
     }
     async findActiveBlogs(): Promise<BlogDocument[]> {
-        return await this.blogModel.find({ status: 'active' }).exec();
+        return await this.blogModel
+            .find({ status: 'active' })
+            .populate('author', 'name email')
+            .populate('categories', 'name slug')
+            .exec();
     }
     async createBlog(createBlogDto: CreateBlogDto): Promise<BlogDocument> {
         try {

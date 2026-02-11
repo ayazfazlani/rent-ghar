@@ -16,6 +16,13 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ImagePickerDialog, type GalleryImageItem } from '@/components/ImagePickerDialog'
+import dynamic from 'next/dynamic'
+
+// Dynamically import MapPicker as it uses window object
+const MapPicker = dynamic(() => import('@/components/MapPicker'), {
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-lg flex items-center justify-center text-gray-400">Loading Map...</div>
+})
 
 interface City {
   _id: string
@@ -49,6 +56,8 @@ export default function AddProperty() {
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
   const [contactNumber, setContactNumber] = useState('')
+  const [latitude, setLatitude] = useState<number | undefined>()
+  const [longitude, setLongitude] = useState<number | undefined>()
 
   // Cities and Areas state
   const [cities, setCities] = useState<City[]>([])
@@ -249,6 +258,9 @@ export default function AddProperty() {
       formData.append('description', description)
       formData.append('contactNumber', contactNumber)
 
+      if (latitude !== undefined) formData.append('latitude', latitude.toString())
+      if (longitude !== undefined) formData.append('longitude', longitude.toString())
+
       // Add features (filter out empty strings)
       const validFeatures = features.filter(f => f.trim() !== '')
       if (validFeatures.length > 0) {
@@ -303,8 +315,8 @@ export default function AddProperty() {
                   type="button"
                   onClick={() => setListingType('rent')}
                   className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${listingType === 'rent'
-                      ? 'bg-gray-800 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gray-800 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                 >
                   For Rent
@@ -313,8 +325,8 @@ export default function AddProperty() {
                   type="button"
                   onClick={() => setListingType('sale')}
                   className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${listingType === 'sale'
-                      ? 'bg-gray-800 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gray-800 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                 >
                   For Sale
@@ -468,6 +480,31 @@ export default function AddProperty() {
               />
             </div>
 
+            {/* Map Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Pin Location on Map
+              </label>
+              <div className="mb-2">
+                <MapPicker
+                  onLocationSelect={(lat, lng) => {
+                    setLatitude(lat)
+                    setLongitude(lng)
+                  }}
+                  initialLat={latitude}
+                  initialLng={longitude}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                Click on the map to pin the exact location of your property.
+                {latitude && longitude && (
+                  <span className="text-green-600 font-medium ml-1">
+                    Location pinned: {latitude.toFixed(4)}, {longitude.toFixed(4)}
+                  </span>
+                )}
+              </p>
+            </div>
+
             {/* Beds, Baths, and Area */}
             <div className="grid md:grid-cols-3 gap-6">
               <div>
@@ -541,8 +578,8 @@ export default function AddProperty() {
                   type="button"
                   onClick={() => setMainImageSource('upload')}
                   className={`text-xs px-3 py-1.5 rounded-full border ${mainImageSource === 'upload'
-                      ? 'bg-gray-900 text-white border-gray-900'
-                      : 'bg-white text-gray-700 border-gray-200'
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-700 border-gray-200'
                     }`}
                 >
                   Upload new
@@ -554,8 +591,8 @@ export default function AddProperty() {
                     setGalleryDialogOpen(true)
                   }}
                   className={`text-xs px-3 py-1.5 rounded-full border flex items-center gap-1 ${mainImageSource === 'gallery'
-                      ? 'bg-gray-900 text-white border-gray-900'
-                      : 'bg-white text-gray-700 border-gray-200'
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-700 border-gray-200'
                     }`}
                 >
                   <ImageIcon className="w-3 h-3" />

@@ -68,6 +68,12 @@ export class Property extends Document {
 
   @Prop({ default: 'pending' })
   status: 'pending' | 'approved' | 'rejected'
+
+  @Prop({ type: Number })
+  latitude?: number
+
+  @Prop({ type: Number })
+  longitude?: number
 }
 
 export const PropertySchema = SchemaFactory.createForClass(Property)
