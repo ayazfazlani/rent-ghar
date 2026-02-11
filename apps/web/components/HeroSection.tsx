@@ -180,279 +180,220 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative flex items-center justify-center overflow-hidden bg-white">
-      {/* Enhanced Geometric Cut Pattern Background */}
+    <div className="relative min-h-[600px] flex items-center justify-center overflow-hidden bg-white">
+      {/* Animated Mesh Gradient Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Large Diagonal Cuts - More Prominent */}
-        <div className="absolute top-0 right-0 w-2/5 h-2/5 bg-black transform rotate-12 origin-top-right opacity-10"></div>
-        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-black transform -rotate-12 origin-bottom-left opacity-10"></div>
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-200 blur-[100px] animate-blob"></div>
+          <div className="absolute top-[20%] right-[-5%] w-[35%] h-[35%] rounded-full bg-blue-100 blur-[100px] animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-[-10%] left-[20%] w-[45%] h-[45%] rounded-full bg-pink-100 blur-[100px] animate-blob animation-delay-4000"></div>
+          <div className="absolute top-[40%] left-[40%] w-[30%] h-[30%] rounded-full bg-indigo-50 blur-[80px] animate-pulse"></div>
+        </div>
 
-        {/* Medium Geometric Shapes */}
-        <div className="absolute top-1/4 left-1/4 w-48 h-48 border-8 border-black/10 transform rotate-45"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-56 h-56 border-8 border-black/10 transform -rotate-12"></div>
-        <div className="absolute top-2/3 left-1/3 w-32 h-32 bg-black/10 transform rotate-45"></div>
+        {/* Subtle Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
-        {/* Animated Lines - More Visible */}
-        <div className="absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-transparent via-black/20 to-transparent animate-pulse"></div>
-        <div className="absolute top-1/3 left-0 w-full h-1 bg-gradient-to-r from-transparent via-black/15 to-transparent"></div>
-        <div className="absolute top-2/3 right-0 w-2/3 h-1 bg-gradient-to-l from-transparent via-black/15 to-transparent"></div>
-
-        {/* Small Scattered Squares */}
-        <div className="absolute top-1/5 right-1/3 w-12 h-12 bg-black/10 transform rotate-12 animate-float"></div>
-        <div className="absolute bottom-1/5 left-1/5 w-16 h-16 bg-black/10 transform -rotate-12 animate-float-delayed"></div>
+        {/* Soft Radial Vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(255,255,255,0.8)_100%)]"></div>
       </div>
 
       {/* Content */}
-      <div className="relative  mt-6 z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-        {/* Main Heading */}
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-2 leading-tight text-black mt-8 md:mt-12">
-          Find Your Perfect{' '}
-          <span className="relative inline-block">
-            Home
-            <div className="absolute bottom-1 left-0 w-full h-3 bg-black/15 -z-10 animate-pulse"></div>
-          </span>
-          {' '}in Pakistan
-        </h2>
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 lg:py-24">
+        {/* Main Heading with Premium Typography */}
+        <div className="text-center mb-10 md:mb-16">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-gray-900 mb-6 drop-shadow-sm">
+            Find Your Perfect{' '}
+            <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900">
+              Home
+              <div className="absolute -bottom-2 left-0 w-full h-1.5 bg-black/80 rounded-full transform scale-x-0 animate-expand-width origin-left"></div>
+            </span>
+            <br className="hidden md:block" />
+            {' '}in Pakistan
+          </h2>
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-medium opacity-80">
+            Premium properties, verified listings, and seamless experiences.
+          </p>
+        </div>
 
-        {/* Subtitle */}
-        {/* <p className="text-gray-600 text-center text-base md:text-md mb-6 md:mb-4 max-w-2xl mx-auto">
-          Discover thousands of properties for rent and sale across major cities
-        </p> */}
+        {/* Search Box with Glassmorphism */}
+        <div className="max-w-4xl mx-auto">
+          <div className="relative backdrop-blur-xl bg-white/60 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/15 p-6 md:p-8 hover:shadow-[0_25px_60px_rgba(0,0,0,0.15)] transition-all duration-500 group">
 
-        {/* Search Box */}
-        <div className="max-w-2xl mx-auto mb-2 md:mb-6">
-          <div className="relative bg-white rounded-xl shadow-xl border-2 border-black/10 p-4 hover:shadow-2xl transition-shadow duration-300">
-            {/* Autocomplete Search Bar - Moved to top */}
-            <div ref={searchRef} className="relative mb-2 max-w-2xl mx-auto">
-              <div className="relative">
+            {/* Search Input Area */}
+            <div ref={searchRef} className="relative mb-8">
+              <div className="relative group/input">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
-                  placeholder="Search properties..."
-                  className="w-full px-3 py-2 pl-9 pr-9 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md"
+                  placeholder="Search by building, area, or city..."
+                  className="w-full h-14 pl-14 pr-12 rounded-2xl border border-gray-300 bg-white/80 focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 outline-none transition-all duration-300 text-gray-900 font-medium placeholder:text-gray-400"
                 />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 transition-colors group-focus-within/input:text-black" />
                 {searchQuery && (
                   <button
                     onClick={clearSearch}
-                    title="Clear search"
-                    aria-label="Clear search"
-                    className="absolute right-2 top-1/2 -translate-y-1/2  hover:bg-gray-100 rounded-full transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-100 rounded-full transition-colors"
                   >
-                    <X className="w-3 h-3 text-gray-500" />
+                    <X className="w-4 h-4 text-gray-500" />
                   </button>
                 )}
               </div>
 
-              {/* Suggestions Dropdown */}
+              {/* Suggestions Dropdown - Glassmorphism */}
               {showSuggestions && filteredSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto z-50">
+                <div className="absolute top-[calc(100%+0.75rem)] left-0 right-0 bg-white/95 backdrop-blur-md border border-gray-300 rounded-2xl shadow-2xl max-h-[400px] overflow-y-auto z-50 p-2">
                   {filteredSuggestions.map((property) => (
                     <button
                       key={property.id}
                       onClick={() => handlePropertyClick(property)}
-                      className="w-full px-3 py-2.5 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0 group"
+                      className="w-full flex items-center gap-4 p-3 hover:bg-black/5 rounded-xl transition-all duration-200 text-left group/item"
                     >
-                      <div className="flex items-start gap-2">
-                        <div className="w-8 h-6 bg-black/5 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-black/10 transition-colors">
-                          <Home className="w-4 h-4 text-gray-600" />
+                      <div className="w-12 h-12 bg-black/5 rounded-lg flex items-center justify-center shrink-0">
+                        <Home className="w-6 h-6 text-gray-600 group-hover/item:text-black" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-gray-900 truncate">
+                          {property.name}
+                        </h4>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <MapPin className="w-3.5 h-3.5" />
+                          <span>{property.location}, {property.city}</span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-xs font-semibold text-gray-900 mb-0.5 truncate group-hover:text-black transition-colors">
-                            {property.name}
-                          </h4>
-                          <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                            <span className="flex items-center gap-0.5">
-                              <MapPin className="w-2.5 h-2.5" />
-                              {property.location}, {property.city}
-                            </span>
-                            <span className="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] font-medium">
-                              {property.type}
-                            </span>
-                          </div>
-                          <div className="text-[10px] font-semibold text-gray-700 mt-0.5">
-                            PKR {property.price.toLocaleString()}
-                            {property.purpose === 'rent' ? '/month' : ''}
-                          </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-black text-black">
+                          {property.price.toLocaleString()}
+                        </div>
+                        <div className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">
+                          {property.type}
                         </div>
                       </div>
                     </button>
                   ))}
                 </div>
               )}
+            </div>
 
-              {/* No Results */}
-              {showSuggestions && searchQuery.length > 0 && filteredSuggestions.length === 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl p-4 text-center z-50">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <Search className="w-5 h-5 text-gray-400" />
-                  </div>
-                  <p className="text-xs text-gray-600 mb-0.5 font-medium">No properties found</p>
-                  <p className="text-[10px] text-gray-500">Try searching with different keywords</p>
+            {/* Controls Bar */}
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              {/* Type Toggle */}
+              <div className="flex bg-gray-100/80 p-1.5 rounded-2xl w-full md:w-auto border border-gray-200">
+                <button
+                  onClick={() => setPurpose('rent')}
+                  className={`flex-1 md:w-28 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 border ${purpose === 'rent' ? 'bg-black text-white border-black shadow-xl' : 'text-gray-500 hover:text-black hover:bg-white/50 border-transparent'
+                    }`}
+                >
+                  For Rent
+                </button>
+                <button
+                  onClick={() => setPurpose('buy')}
+                  className={`flex-1 md:w-28 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 border ${purpose === 'buy' ? 'bg-black text-white border-black shadow-xl' : 'text-gray-500 hover:text-black hover:bg-white/50 border-transparent'
+                    }`}
+                >
+                  For Sale
+                </button>
+              </div>
+
+              {/* Separation Line for Desktop */}
+              <div className="hidden md:block w-px h-8 bg-gray-200 mx-2"></div>
+
+              {/* Filters Group */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1 w-full">
+                {/* City Select */}
+                <div className="relative group/select">
+                  <select
+                    value={city}
+                    onChange={(e) => {
+                      const selectedCityName = e.target.value;
+                      setCity(selectedCityName);
+                      const selectedCity = cityList.find(c => c.name === selectedCityName);
+                      setCityId(selectedCity?._id || '');
+                    }}
+                    className="w-full h-12 pl-4 pr-10 rounded-xl border border-gray-300 bg-white/50 hover:bg-white hover:border-black transition-all appearance-none text-sm font-semibold cursor-pointer outline-none focus:border-black"
+                  >
+                    <option value="">All Cities</option>
+                    {cityList.map((c) => (
+                      <option key={c._id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                  <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-hover/select:text-black transition-colors" />
                 </div>
-              )}
-            </div>
 
-            {/* Purpose Tabs - Enhanced Lightning Effect */}
-            <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg max-w-xs mx-auto">
-              <button
-                onClick={() => setPurpose('rent')}
-                className={`relative flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300 overflow-hidden group ${purpose === 'rent'
-                  ? 'bg-black text-white shadow-lg'
-                  : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                  }`}
-              >
-                <span className="relative z-10">Rent</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-40 transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-all duration-700"></div>
-              </button>
-              <button
-                onClick={() => setPurpose('buy')}
-                className={`relative flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300 overflow-hidden group ${purpose === 'buy'
-                  ? 'bg-black text-white shadow-lg'
-                  : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                  }`}
-              >
-                <span className="relative z-10">Buy</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-40 transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-all duration-700"></div>
-              </button>
-            </div>
+                {/* Area Select */}
+                <div className="relative group/select">
+                  <select
+                    value={area}
+                    onChange={(e) => {
+                      const selectedAreaName = e.target.value;
+                      setArea(selectedAreaName);
+                      const selectedArea = areaList.find(a => a.name === selectedAreaName);
+                      setAreaId(selectedArea?._id || '');
+                    }}
+                    disabled={!city || areaList.length === 0}
+                    className="w-full h-12 pl-4 pr-10 rounded-xl border border-gray-300 bg-white/50 hover:bg-white hover:border-black transition-all appearance-none text-sm font-semibold cursor-pointer outline-none focus:border-black disabled:opacity-50"
+                  >
+                    <option value="">{city ? (areaList.length > 0 ? 'All Areas' : 'No Areas') : 'Select City'}</option>
+                    {areaList.map((a) => (
+                      <option key={a._id} value={a.name}>{a.name}</option>
+                    ))}
+                  </select>
+                  <Map className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-hover/select:text-black transition-colors" />
+                </div>
 
-            {/* Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-2 max-w-2xl mx-auto">
-              <div className="relative">
-                {loading ? (
-                  <div className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 flex items-center justify-center">
-                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                  </div>
-                ) : (
-                  <>
-                    <select
-                      value={city}
-                      onChange={(e) => {
-                        const selectedCityName = e.target.value;
-                        setCity(selectedCityName);
-                        const selectedCity = cityList.find(c => c.name === selectedCityName);
-                        setCityId(selectedCity?._id || '');
-                      }}
-                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
-                      title="Select city"
-                    >
-                      <option value="">All Cities</option>
-                      {cityList.map((c) => (
-                        <option key={c._id} value={c.name}>
-                          {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <MapPin className="w-3 h-3 text-gray-400" />
-                    </div>
-                  </>
-                )}
+                {/* Type Select */}
+                <div className="relative group/select">
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    className="w-full h-12 pl-4 pr-10 rounded-xl border border-gray-300 bg-white/50 hover:bg-white hover:border-black transition-all appearance-none text-sm font-semibold cursor-pointer outline-none focus:border-black"
+                  >
+                    <option value="">Property Type</option>
+                    {propertyTypes.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                  <Home className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-hover/select:text-black transition-colors" />
+                </div>
               </div>
 
-              {/* Area Selection - Dynamic */}
-              <div className="relative">
-                {loadingAreas ? (
-                  <div className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 flex items-center justify-center">
-                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                  </div>
-                ) : (
-                  <>
-                    <select
-                      value={area}
-                      onChange={(e) => {
-                        const selectedAreaName = e.target.value;
-                        setArea(selectedAreaName);
-                        const selectedArea = areaList.find(a => a.name === selectedAreaName);
-                        setAreaId(selectedArea?._id || '');
-                      }}
-                      disabled={!city || areaList.length === 0}
-                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
-                      title="Select area"
-                    >
-                      <option value="">{city ? (areaList.length > 0 ? 'All Areas' : 'No Areas Found') : 'Select City First'}</option>
-                      {areaList.map((a) => (
-                        <option key={a._id} value={a.name}>
-                          {a.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Map className="w-3 h-3 text-gray-400" />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="relative">
-                {loading ? (
-                  <div className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 flex items-center justify-center">
-                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                  </div>
-                ) : (
-                  <>
-                    <select
-                      value={type}
-                      onChange={(e) => setType(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-300 bg-white text-xs font-medium hover:border-gray-500 hover:shadow-md appearance-none cursor-pointer"
-                      title="Select property type"
-                    >
-                      <option value="">All Types</option>
-                      {propertyTypes.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Home className="w-3 h-3 text-gray-400" />
-                    </div>
-                  </>
-                )}
-              </div>
-
+              {/* Search Button */}
               <button
                 onClick={handleSearch}
-                disabled={loading}
-                className="relative bg-black text-white px-4 py-2 rounded-lg font-semibold text-xs transform hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1.5 shadow-lg hover:shadow-2xl overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full md:w-auto h-12 px-8 rounded-xl bg-black text-white font-bold hover:bg-gray-800 border border-black transition-all flex items-center justify-center gap-2 shadow-xl hover:shadow-black/20"
               >
-                <span className="relative z-10 flex items-center gap-1.5">
-                  {loading ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                  ) : (
-                    <Search className="w-3 h-3" />
-                  )}
-                  Search
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-all duration-1000"></div>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl bg-white/20"></div>
+                <Search className="w-5 h-5" />
+                <span>Find</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Custom CSS for Animations */}
       <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(12deg); }
-          50% { transform: translateY(-20px) rotate(12deg); }
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
         }
-        
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px) rotate(-12deg); }
-          50% { transform: translateY(-15px) rotate(-12deg); }
+        .animate-blob {
+          animation: blob 7s infinite;
         }
-        
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
+        .animation-delay-2000 {
+          animation-delay: 2s;
         }
-        
-        .animate-float-delayed {
-          animation: float-delayed 8s ease-in-out infinite;
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+        @keyframes expand {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
+        }
+        .animate-expand-width {
+          animation: expand 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation-delay: 0.5s;
         }
       `}</style>
     </div>
