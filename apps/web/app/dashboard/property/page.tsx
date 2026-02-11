@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/auth-context';
-
+import { toast } from 'sonner';
 const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
   ssr: false,
   loading: () => <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-lg flex items-center justify-center text-gray-400">Loading Map...</div>
