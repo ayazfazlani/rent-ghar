@@ -333,13 +333,13 @@ export default function PropertiesListing({
   return (
     <div className="min-h-screen bg-background">
 
-      {/* Hero Banner with fade-in animation - Made more subtle since Explorer is below */}
-      <section className="pt-20 pb-4 md:pt-24 md:pb-6 bg-secondary/50 animate-in fade-in duration-500">
+      {/* Hero Banner - Responsive sizing */}
+      <section className="pt-24 pb-6 md:pt-28 md:pb-8 bg-secondary/50 animate-in fade-in duration-500">
         <div className="container mx-auto px-4">
-          <p className="text-sm font-medium text-primary mb-1 uppercase tracking-wider">
+          <p className="text-[10px] md:text-sm font-bold text-primary mb-1 uppercase tracking-widest opacity-70">
             Property Search
           </p>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
             Browse Listings in {matchedCity || 'Pakistan'}
           </h1>
         </div>
@@ -394,13 +394,13 @@ export default function PropertiesListing({
                     Property Listings
                   </h3>
 
-                  {/* Mobile Filters Trigger */}
+                  {/* Mobile Filters Trigger - Hide if FilterBar is enough, or keep as advanced */}
                   <div className="lg:hidden">
                     <Sheet>
                       <SheetTrigger asChild>
-                        <Button variant="outline" size="sm" className="gap-2">
+                        <Button variant="outline" size="sm" className="gap-2 h-9 rounded-full border-gray-300">
                           <Filter className="w-4 h-4" />
-                          Filter
+                          Advanced Filters
                         </Button>
                       </SheetTrigger>
                       <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">

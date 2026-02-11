@@ -126,21 +126,21 @@ export default function SearchSidebar({
           {/* Price Range */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">Price Range (PKR)</Label>
-            <div className="flex gap-2 items-center">
+            <div className="grid grid-cols-1 xs:grid-cols-[1fr,auto,1fr] gap-2 items-center">
               <Input
                 type="number"
                 placeholder="Min"
                 value={localFilters.priceMin || ''}
                 onChange={(e) => updateFilter('priceMin', e.target.value ? Number(e.target.value) : undefined)}
-                className="h-9"
+                className="h-10 text-sm"
               />
-              <span className="text-muted-foreground">-</span>
+              <span className="text-muted-foreground hidden xs:inline">-</span>
               <Input
                 type="number"
                 placeholder="Max"
                 value={localFilters.priceMax || ''}
                 onChange={(e) => updateFilter('priceMax', e.target.value ? Number(e.target.value) : undefined)}
-                className="h-9"
+                className="h-10 text-sm"
               />
             </div>
           </div>
@@ -148,21 +148,21 @@ export default function SearchSidebar({
           {/* Area Range */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">Area (Sq. Ft.)</Label>
-            <div className="flex gap-2 items-center">
+            <div className="grid grid-cols-1 xs:grid-cols-[1fr,auto,1fr] gap-2 items-center">
               <Input
                 type="number"
                 placeholder="Min"
                 value={localFilters.areaMin || ''}
                 onChange={(e) => updateFilter('areaMin', e.target.value ? Number(e.target.value) : undefined)}
-                className="h-9"
+                className="h-10 text-sm"
               />
-              <span className="text-muted-foreground">-</span>
+              <span className="text-muted-foreground hidden xs:inline">-</span>
               <Input
                 type="number"
                 placeholder="Max"
                 value={localFilters.areaMax || ''}
                 onChange={(e) => updateFilter('areaMax', e.target.value ? Number(e.target.value) : undefined)}
-                className="h-9"
+                className="h-10 text-sm"
               />
             </div>
           </div>
@@ -176,8 +176,8 @@ export default function SearchSidebar({
                   key={bed}
                   onClick={() => updateFilter('beds', localFilters.beds === bed ? undefined : bed)}
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-sm transition-colors border ${localFilters.beds === bed
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-background hover:bg-muted border-input'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background hover:bg-muted border-input'
                     }`}
                 >
                   {bed}{bed === 5 ? '+' : ''}
@@ -195,8 +195,8 @@ export default function SearchSidebar({
                   key={bath}
                   onClick={() => updateFilter('baths', localFilters.baths === bath ? undefined : bath)}
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-sm transition-colors border ${localFilters.baths === bath
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-background hover:bg-muted border-input'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background hover:bg-muted border-input'
                     }`}
                 >
                   {bath}{bath === 4 ? '+' : ''}

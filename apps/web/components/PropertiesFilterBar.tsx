@@ -314,7 +314,7 @@ export default function PropertiesFilterBar() {
   );
 
   return (
-    <section className="py-4 border-b border-border bg-white sticky top-16 md:top-20 z-40 shadow-md transition-all duration-300">
+    <section className="py-3 border-b border-border bg-white/95 backdrop-blur-md sticky top-0 z-40 shadow-sm transition-all duration-300">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center gap-4 max-w-6xl mx-auto">
           {/* Purpose Tabs - Desktop Only */}

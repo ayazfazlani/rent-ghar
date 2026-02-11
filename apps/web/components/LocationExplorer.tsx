@@ -88,17 +88,18 @@ export default function LocationExplorer({
     <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
       {/* Header / Summary Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            {stats?.total.toLocaleString() || 0} Properties for {purpose === 'buy' ? 'Sale' : 'Rent'} in {city}
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl md:text-3xl font-bold text-foreground mb-3 leading-tight">
+            <span className="block md:inline">{stats?.total.toLocaleString() || 0} Properties </span>
+            <span className="block md:inline">for {purpose === 'buy' ? 'Sale' : 'Rent'} in {city}</span>
           </h2>
-          <div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
-            <Button variant="outline" size="sm" className="h-8 gap-2 rounded-full border-primary/20 hover:bg-primary/5">
+          <div className="flex flex-wrap gap-3 items-center text-sm text-muted-foreground">
+            <Button variant="outline" size="sm" className="h-8 gap-2 rounded-full border-primary/20 hover:bg-primary/5 shrink-0">
               <Bookmark className="w-3.5 h-3.5" />
               Save Search
             </Button>
-            <span className="hidden md:inline mx-2 text-muted-foreground/30">|</span>
-            <div className="flex gap-4">
+            <span className="hidden md:inline text-muted-foreground/30 text-lg">|</span>
+            <div className="flex flex-wrap gap-x-4 gap-y-2 py-1">
               <button
                 onClick={() => onTypeSelect('all')}
                 className="hover:text-primary transition-colors flex items-center gap-1.5"
@@ -120,25 +121,27 @@ export default function LocationExplorer({
           </div>
         </div>
 
-        {purpose === 'buy' ? (
-          <Button variant="link" className="text-primary p-0 h-auto font-medium">
-            {city} Homes for Rent
-          </Button>
-        ) : (
-          <Button variant="link" className="text-primary p-0 h-auto font-medium">
-            {city} Homes for Sale
-          </Button>
-        )}
+        <div className="mt-2 md:mt-0">
+          {purpose === 'buy' ? (
+            <Button variant="link" className="text-primary p-0 h-auto font-medium text-sm md:text-base">
+              {city} Homes for Rent
+            </Button>
+          ) : (
+            <Button variant="link" className="text-primary p-0 h-auto font-medium text-sm md:text-base">
+              {city} Homes for Sale
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Locations Section */}
-      <Card className="p-6 border-none bg-secondary/30 shadow-none">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-primary" />
-            Locations of Homes for {purpose === 'buy' ? 'Sale' : 'Rent'} in {city}
+      <Card className="p-4 md:p-6 border-none bg-secondary/30 shadow-none rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h3 className="text-base md:text-lg font-semibold flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary shrink-0" />
+            <span className="leading-tight">Locations of Homes in {city}</span>
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
