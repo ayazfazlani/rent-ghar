@@ -28,7 +28,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
