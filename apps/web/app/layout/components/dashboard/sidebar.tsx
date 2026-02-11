@@ -437,6 +437,34 @@ export default function DashboardSidebar() {
                 </CollapsibleContent>
               </SidebarGroup>
             </Collapsible>
+
+            {/* Users Section */}
+            <Collapsible defaultOpen={isSectionActive("/dashboard/users")}>
+              <SidebarGroup>
+                <CollapsibleTrigger asChild>
+                  <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <User className="h-5 w-5" />
+                      <span>Users</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu className="pl-3">
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/dashboard/users")}>
+                          <Link href="/dashboard/users">
+                            <span>Manage Users</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
           </>
         )}
 

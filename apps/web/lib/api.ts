@@ -271,4 +271,24 @@ export const areaApi = {
   },
 };
 
+// User API functions
+export const userApi = {
+  getAll: async () => {
+    const response = await api.get('/users');
+    return response.data;
+  },
+  getById: async (id: string) => {
+    const response = await api.get(`/users/${id}`);
+    return response.data;
+  },
+  update: async (id: string, data: any) => {
+    const response = await api.patch(`/users/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
+};
+
 export default api;

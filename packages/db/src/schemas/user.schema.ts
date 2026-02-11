@@ -25,6 +25,9 @@ export class User {
   @Prop()
   phone?: string;
 
+  @Prop({ default: true })
+  isActive: boolean;
+
   // Add profile picture, agencyId, etc. later
 }
 

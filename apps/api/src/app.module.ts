@@ -12,6 +12,7 @@ import { BlogModule } from './blog/blog.module';
 import { PageModule } from './page/page.module';
 import { PackageModule } from './package/package.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { UserModule } from './user/user.module';
 import { StorageModule } from '../../../packages/storage/storage.module';
 
 @Module({
@@ -55,6 +56,7 @@ import { StorageModule } from '../../../packages/storage/storage.module';
     PageModule,
     PackageModule,
     SubscriptionModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
