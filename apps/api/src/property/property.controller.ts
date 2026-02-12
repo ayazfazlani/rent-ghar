@@ -4,6 +4,7 @@ import { StorageService } from '@rent-ghar/storage/storage.service';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dto/create-property.dto'; // Local DTO with validation
 import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 
 @Controller('properties')
@@ -144,6 +145,11 @@ export class PropertyController {
     }
   }
 
+  @Get('types')
+  async getPropertyTypes() {
+    return this.propertyService.getPropertyTypes();
+  }
+
   @Get('all')
   @UseGuards(JwtAuthGuard)
   async findAllProperties(@Request() req, @Query('cityId') cityId?: string, @Query('areaId') areaId?: string) {
@@ -174,6 +180,7 @@ export class PropertyController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async update(
     @Param('id') id: string,
@@ -210,12 +217,13 @@ export class PropertyController {
   }
 
   @Patch(':id/update-status')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async updateStatus(@Param('id') id: string) {
     return await this.propertyService.updateStatus(id)
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async delete(@Param('id') id: string, @Request() req) {
     try {
       const userId = req.user?.userId;

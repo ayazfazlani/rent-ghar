@@ -22,15 +22,19 @@ import type { BlogPost } from '@/lib/utils/blog-utils';
 import { Blog } from '@/lib/types/blog';
 import { toast } from 'sonner';
 
-const BlogGrid = () => {
+interface BlogGridProps {
+  initialCategory?: string;
+}
+
+const BlogGrid = ({ initialCategory = 'All' }: BlogGridProps) => {
   // STATE MANAGEMENT
   // ================
   // These state variables store the component's data and UI state
-  
+
   const [blogs, setBlogs] = useState<BlogPost[]>([]); // All blogs from API (transformed)
   const [loading, setLoading] = useState(true);        // Loading state for API call
   const [error, setError] = useState<string | null>(null); // Error message if API fails
-  const [selectedCategory, setSelectedCategory] = useState('All'); // Currently selected category filter
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory); // Currently selected category filter
   const [visiblePosts, setVisiblePosts] = useState(9); // Number of posts to show (pagination)
 
   // FETCH BLOGS FROM API
@@ -54,7 +58,7 @@ const BlogGrid = () => {
         // Backend returns: { _id, title, slug, content, author: { name, email }, categories: [{ name, slug }], ... }
         // Transform function converts to: { id, title, slug, excerpt, date, author: "Name", category: "Category Name", ... }
         const transformedBlogs = transformBlogsToPosts(response as Blog[]);
-        
+
         // STEP 3: Store in state (triggers re-render)
         setBlogs(transformedBlogs);
       } catch (err: any) {
@@ -71,6 +75,13 @@ const BlogGrid = () => {
     fetchBlogs(); // Call the async function
   }, []); // Empty array = run only once on mount
 
+  // Update selected category when initialCategory changes
+  useEffect(() => {
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+    }
+  }, [initialCategory]);
+
   // EXTRACT CATEGORIES FROM BLOGS
   // =============================
   // Get unique categories from all blogs
@@ -81,8 +92,8 @@ const BlogGrid = () => {
   // ========================
   // If 'All' selected → show all blogs
   // Otherwise → filter blogs where category matches selectedCategory
-  const filteredPosts = selectedCategory === 'All' 
-    ? blogs 
+  const filteredPosts = selectedCategory === 'All'
+    ? blogs
     : blogs.filter(post => post.category === selectedCategory);
 
   // PAGINATION LOGIC
@@ -149,33 +160,29 @@ const BlogGrid = () => {
                   setSelectedCategory(category);
                   setVisiblePosts(9);
                 }}
-                className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-500 overflow-hidden group ${
-                  selectedCategory === category
+                className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-500 overflow-hidden group ${selectedCategory === category
                     ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
                     : 'bg-secondary/50 text-muted-foreground hover:text-foreground'
-                }`}
+                  }`}
               >
                 {/* Smooth Gradient Background on Hover */}
-                <div className={`absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 -translate-x-full transition-transform duration-700 ${
-                  selectedCategory !== category ? 'group-hover:translate-x-full' : ''
-                }`} />
-                
+                <div className={`absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 -translate-x-full transition-transform duration-700 ${selectedCategory !== category ? 'group-hover:translate-x-full' : ''
+                  }`} />
+
                 {/* Glow Effect */}
-                <div className={`absolute inset-0 rounded-lg transition-all duration-500 ${
-                  selectedCategory === category 
-                    ? 'bg-primary/20 blur-xl' 
+                <div className={`absolute inset-0 rounded-lg transition-all duration-500 ${selectedCategory === category
+                    ? 'bg-primary/20 blur-xl'
                     : 'bg-transparent group-hover:bg-primary/5 group-hover:blur-md'
-                }`} />
-                
+                  }`} />
+
                 {/* Text */}
                 <span className="relative z-10">{category}</span>
-                
+
                 {/* Bottom Border Animation */}
-                <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-transform duration-500 ${
-                  selectedCategory === category 
-                    ? 'scale-x-100' 
+                <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-transform duration-500 ${selectedCategory === category
+                    ? 'scale-x-100'
                     : 'scale-x-0 group-hover:scale-x-100'
-                }`} />
+                  }`} />
               </button>
             ))}
           </div>
@@ -196,7 +203,7 @@ const BlogGrid = () => {
                   <p className="text-muted-foreground text-base mb-4">
                     No posts found in this category.
                   </p>
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={() => setSelectedCategory('All')}
                     className="gap-2"
@@ -208,65 +215,65 @@ const BlogGrid = () => {
               ) : (
                 displayedPosts.map((post, index) => (
                   <Link key={post.id} href={`/blog/${post.slug}`}>
-                  <article 
-                    className="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer group h-full flex flex-col"
-                    style={{ 
-                      animation: `fadeInUp 0.5s ease-out ${index * 0.05}s both` 
-                    }}
-                  >
-                    {/* Image - Smaller */}
-                    <div className="relative overflow-hidden h-44">
-                      <img 
-                        src={post.image} 
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      {/* Subtle Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                      
-                      {/* Category Badge - Smaller */}
-                      <div className="absolute top-3 left-3">
-                        <span className="px-3 py-1 bg-background/95 backdrop-blur-sm text-foreground text-xs font-medium rounded-md shadow-sm">
-                          {post.category}
-                        </span>
+                    <article
+                      className="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer group h-full flex flex-col"
+                      style={{
+                        animation: `fadeInUp 0.5s ease-out ${index * 0.05}s both`
+                      }}
+                    >
+                      {/* Image - Smaller */}
+                      <div className="relative overflow-hidden h-44">
+                        <img
+                          src={post.image}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        {/* Subtle Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+
+                        {/* Category Badge - Smaller */}
+                        <div className="absolute top-3 left-3">
+                          <span className="px-3 py-1 bg-background/95 backdrop-blur-sm text-foreground text-xs font-medium rounded-md shadow-sm">
+                            {post.category}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    
-                    {/* Content - Compact */}
-                    <div className="p-4 flex-1 flex flex-col">
-                      {/* Meta Info - Smaller */}
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={12} />
-                          {post.date}
-                        </span>
-                        <span>•</span>
-                        <span>{post.readTime}</span>
+
+                      {/* Content - Compact */}
+                      <div className="p-4 flex-1 flex flex-col">
+                        {/* Meta Info - Smaller */}
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                          <span className="flex items-center gap-1">
+                            <Calendar size={12} />
+                            {post.date}
+                          </span>
+                          <span>•</span>
+                          <span>{post.readTime}</span>
+                        </div>
+
+                        {/* Title - Smaller */}
+                        <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                          {post.title}
+                        </h3>
+
+                        {/* Excerpt - Smaller */}
+                        <p className="text-muted-foreground text-xs mb-3 line-clamp-2 leading-relaxed flex-1">
+                          {post.excerpt}
+                        </p>
+
+                        {/* Read More - Inline */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <User size={12} />
+                            {post.author}
+                          </span>
+                          <span className="flex items-center gap-1 text-primary text-xs font-semibold group-hover:gap-2 transition-all">
+                            Read
+                            <ArrowRight size={14} />
+                          </span>
+                        </div>
                       </div>
-                      
-                      {/* Title - Smaller */}
-                      <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
-                        {post.title}
-                      </h3>
-                      
-                      {/* Excerpt - Smaller */}
-                      <p className="text-muted-foreground text-xs mb-3 line-clamp-2 leading-relaxed flex-1">
-                        {post.excerpt}
-                      </p>
-                      
-                      {/* Read More - Inline */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <User size={12} />
-                          {post.author}
-                        </span>
-                        <span className="flex items-center gap-1 text-primary text-xs font-semibold group-hover:gap-2 transition-all">
-                          Read
-                          <ArrowRight size={14} />
-                        </span>
-                      </div>
-                    </div>
-                  </article>
+                    </article>
                   </Link>
                 ))
               )}
@@ -284,7 +291,7 @@ const BlogGrid = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   {filteredPosts.length - visiblePosts} more articles in this category
                 </p>
-                <Button 
+                <Button
                   onClick={loadMore}
                   className="w-full gap-2 relative overflow-hidden bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg hover:shadow-primary/30 group"
                 >
@@ -329,13 +336,13 @@ const BlogGrid = () => {
                   >
                     {/* Smooth Slide Effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                    
+
                     <span className="relative z-10">{cat}</span>
-                    
+
                     {/* Arrow on Hover */}
-                    <ArrowRight 
-                      size={14} 
-                      className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 transition-all duration-300 text-primary" 
+                    <ArrowRight
+                      size={14}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 transition-all duration-300 text-primary"
                     />
                   </button>
                 ))}

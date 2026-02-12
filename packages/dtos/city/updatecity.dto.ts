@@ -12,4 +12,20 @@ export class UpdateCityDto {
     @IsOptional()
     @IsString()
     country?: string;
+
+    @IsOptional()
+    @IsString()
+    metaTitle?: string;
+
+    @IsOptional()
+    @IsString()
+    metaDescription?: string;
+
+    @IsOptional()
+    @IsString()
+    canonicalUrl?: string;
+
+    @IsOptional()
+    @IsString()
+    description?: string;
 }

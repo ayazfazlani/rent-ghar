@@ -1,5 +1,7 @@
 import PropertiesListing from '@/components/PropertiesListing';
 import { Suspense } from 'react';
+import { Metadata, ResolvingMetadata } from 'next';
+import { cityApi } from '@/lib/api/city/city.api';
 
 interface PageProps {
   params: Promise<{
@@ -8,8 +10,44 @@ interface PageProps {
   }>;
 }
 
+export async function generateMetadata(
+  props: PageProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { city: citySlug, type } = await props.params;
+
+  try {
+    const cityData = await cityApi.getByName(citySlug);
+
+    if (!cityData) return { title: `${type} for Sale in ${citySlug} | RENT-GHAR` };
+
+    const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
+
+    return {
+      title: cityData.metaTitle
+        ? `${typeCapitalized} - ${cityData.metaTitle}`
+        : `${typeCapitalized} for Sale in ${cityData.name} | RENT-GHAR`,
+      description: cityData.metaDescription || `Find the best ${type} for sale in ${cityData.name}. Best real estate listings.`,
+      alternates: {
+        canonical: cityData.canonicalUrl || undefined,
+      },
+    };
+  } catch (error) {
+    return {
+      title: `${type} for Sale in ${citySlug} | RENT-GHAR`,
+    };
+  }
+}
+
 export default async function SaleCityTypePage(props: PageProps) {
   const { city, type } = await props.params;
+  let cityDetails = null;
+
+  try {
+    cityDetails = await cityApi.getByName(city);
+  } catch (error) {
+    console.error('Error fetching city details:', error);
+  }
 
   return (
     <Suspense fallback={
@@ -17,7 +55,13 @@ export default async function SaleCityTypePage(props: PageProps) {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     }>
-      <PropertiesListing purpose="buy" city={city} type={type} useCleanUrls={true} />
+      <PropertiesListing
+        purpose="buy"
+        city={city}
+        type={type}
+        useCleanUrls={true}
+        richDescription={cityDetails?.description}
+      />
     </Suspense>
   );
 }

@@ -1,5 +1,7 @@
 import PropertiesListing from '@/components/PropertiesListing';
 import { Suspense } from 'react';
+import { Metadata, ResolvingMetadata } from 'next';
+import { cityApi } from '@/lib/api/city/city.api';
 
 interface PageProps {
   params: Promise<{
@@ -7,8 +9,40 @@ interface PageProps {
   }>;
 }
 
+export async function generateMetadata(
+  props: PageProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { city: citySlug } = await props.params;
+
+  try {
+    const cityData = await cityApi.getByName(citySlug);
+
+    if (!cityData) return { title: `Properties for Sale in ${citySlug} | RENT-GHAR` };
+
+    return {
+      title: cityData.metaTitle || `Properties for Sale in ${cityData.name} | RENT-GHAR`,
+      description: cityData.metaDescription || `Find properties for sale in ${cityData.name}. Best real estate listings in Pakistan.`,
+      alternates: {
+        canonical: cityData.canonicalUrl || undefined,
+      },
+    };
+  } catch (error) {
+    return {
+      title: `Properties for Sale in ${citySlug} | RENT-GHAR`,
+    };
+  }
+}
+
 export default async function SaleCityPage(props: PageProps) {
   const { city } = await props.params;
+  let cityDetails = null;
+
+  try {
+    cityDetails = await cityApi.getByName(city);
+  } catch (error) {
+    console.error('Error fetching city details:', error);
+  }
 
   return (
     <Suspense fallback={
@@ -16,7 +50,12 @@ export default async function SaleCityPage(props: PageProps) {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     }>
-      <PropertiesListing purpose="buy" city={city} useCleanUrls={true} />
+      <PropertiesListing
+        purpose="buy"
+        city={city}
+        useCleanUrls={true}
+        richDescription={cityDetails?.description}
+      />
     </Suspense>
   );
 }

@@ -3,6 +3,10 @@ import api from '../../api'
 export interface CreateAreaData {
   name: string;
   city: string; // City ID
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  description?: string;
 }
 
 export const areaApi = {
@@ -29,6 +33,12 @@ export const areaApi = {
   
   delete: async (id: string) => {
     const response = await api.delete(`/areas/${id}`);
+    return response.data;
+  },
+  
+  getByName: async (name: string, cityId?: string) => {
+    const url = cityId ? `/areas/name/${name}?cityId=${cityId}` : `/areas/name/${name}`;
+    const response = await api.get(url);
     return response.data;
   },
 };

@@ -63,6 +63,12 @@ export const propertyApi = {
     return response.data;
   },
 
+  // Get dynamic property types
+  getTypes: async () => {
+    const response = await api.get('/properties/types');
+    return response.data;
+  },
+
   // get property by id 
   getPropertyById: async (params: {id: string}) => {
     const response = await api.get(`/properties/${params.id}`);
@@ -240,6 +246,17 @@ export const subscriptionApi = {
   cancel: async (id: string) => {
     const response = await api.put(`/subscriptions/${id}/cancel`);
     return response.data;
+  },
+};
+
+export const importApi = {
+  importWordPress: async (formData: FormData) => {
+    const response = await api.post('/import/wordpress', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data; // { totalFound, imported, skipped, ... }
   },
 };
 

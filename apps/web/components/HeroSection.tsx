@@ -46,23 +46,23 @@ const HeroSection = () => {
         setLoading(true);
 
         // Fetch cities and properties in parallel
-        const [citiesData, propertiesData] = await Promise.all([
+        const [citiesData, propertiesData, typesData] = await Promise.all([
           cityApi.getAll(),
-          propertyApi.getAll()
+          propertyApi.getAll(),
+          propertyApi.getTypes()
         ]);
 
         // Set Cities
         const sortedCities = (citiesData as any[]).sort((a, b) => a.name.localeCompare(b.name));
         setCityList(sortedCities);
 
-        // Process Properties for suggestions and types
+        // Process Properties for suggestions
         const backendProperties = propertiesData as BackendProperty[];
         const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
         setAllProperties(transformedProperties);
 
-        // Extract unique property types
-        const uniqueTypes = Array.from(new Set(transformedProperties.map(p => p.type).filter(Boolean))) as string[];
-        setPropertyTypes(uniqueTypes.sort());
+        // Set Property Types (capitalize for display)
+        setPropertyTypes(typesData.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1)).sort());
 
         // Set default city if available
         if (sortedCities.length > 0 && !city) {

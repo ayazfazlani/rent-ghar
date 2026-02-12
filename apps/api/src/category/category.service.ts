@@ -25,6 +25,10 @@ export class CategoryService {
             slug: createCategoryDto.slug,
             description: createCategoryDto.description,
         };
+
+        if (createCategoryDto.metaTitle) categoryData.metaTitle = createCategoryDto.metaTitle;
+        if (createCategoryDto.metaDescription) categoryData.metaDescription = createCategoryDto.metaDescription;
+        if (createCategoryDto.canonicalUrl) categoryData.canonicalUrl = createCategoryDto.canonicalUrl;
         
         if (createCategoryDto.parentId) {
             if (!isValidObjectId(createCategoryDto.parentId)) {

@@ -4,12 +4,20 @@ export interface CreateCityData {
   name: string;
   state?: string;
   country?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  description?: string;
 }
 
 export interface UpdateCityData {
   name?: string;
   state?: string;
   country?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  description?: string;
 }
 
 export const cityApi = {
@@ -35,6 +43,11 @@ export const cityApi = {
   
   delete: async (id: string) => {
     const response = await api.delete(`/cities/${id}`);
+    return response.data;
+  },
+  
+  getByName: async (name: string) => {
+    const response = await api.get(`/cities/name/${name}`);
     return response.data;
   },
 };

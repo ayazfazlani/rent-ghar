@@ -13,6 +13,18 @@ export class City {
   @Prop({ required: false, lowercase: true, trim: true })
   country?: string;
 
+  @Prop({ trim: true })
+  metaTitle?: string;
+
+  @Prop({ trim: true })
+  metaDescription?: string;
+
+  @Prop({ trim: true })
+  canonicalUrl?: string;
+
+  @Prop({ trim: true })
+  description?: string; // Rich Text
+
   // Areas are optional - a city can exist without areas initially
   // Areas will reference the city, not the other way around
 }

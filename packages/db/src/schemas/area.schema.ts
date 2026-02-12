@@ -13,6 +13,18 @@ export class Area {
   @Prop({ type: Types.ObjectId, ref: 'City', required: true, index: true })
   city: Types.ObjectId | City;
 
+  @Prop({ trim: true })
+  metaTitle?: string;
+
+  @Prop({ trim: true })
+  metaDescription?: string;
+
+  @Prop({ trim: true })
+  canonicalUrl?: string;
+
+  @Prop({ trim: true })
+  description?: string; // Rich Text
+
   // Properties are optional - an area can exist without properties initially
   // Properties will reference the area, not the other way around
 }

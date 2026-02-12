@@ -110,3 +110,31 @@ Stack: ForbiddenException: Property limit (1) reached for your current package.
 [2026-02-11T08:50:10.100Z] Service: Creating property model instance
 [2026-02-11T08:50:10.175Z] Service: Property saved successfully. ID: 698c42c26db46aebc137f2bf
 [2026-02-11T08:50:10.176Z] Controller: property created successfully
+[2026-02-11T12:29:36.870Z] Controller: processing create request for user 6986fb94175bb603b3ae67d9
+[2026-02-11T12:29:36.874Z] Service: Start create. User: 6986fb94175bb603b3ae67d9, Role: AGENT
+[2026-02-11T12:29:36.874Z] Service: Checking subscription for user 6986fb94175bb603b3ae67d9
+[2026-02-11T12:29:37.207Z] Service: Subscription check result: {"canCreate":true,"subscription":{"_id":"698b0e76de86b3327f820e75","userId":"6986fb94175bb603b3ae67d9","packageId":{"_id":"698ae4110e999e361e76965f","name":"Enterprise","description":"For large property management companies","price":19999,"duration":90,"propertyLimit":50,"featuredListings":10,"photosPerProperty":20,"isActive":true,"features":["50 property listings","10 featured listings","20 photos per property","90 days validity","Enterprise badge","Dedicated support","Premium placement","Analytics dashboard"],"createdAt":"2026-02-10T07:53:53.022Z","updatedAt":"2026-02-10T07:53:53.022Z","__v":0},"status":"active","propertiesUsed":0,"paymentStatus":"completed","createdAt":"2026-02-10T10:54:46.822Z","updatedAt":"2026-02-10T10:54:58.594Z","__v":0,"endDate":"2026-05-11T10:54:58.594Z","startDate":"2026-02-10T10:54:58.594Z"}}
+[2026-02-11T12:29:37.403Z] Service: Generated slug: vero-nemo-ipsum
+[2026-02-11T12:29:37.403Z] Service: Creating property model instance
+[2026-02-11T12:29:37.477Z] Service: Property saved successfully. ID: 698c76317a13c302c3708395
+[2026-02-11T12:29:37.477Z] Controller: property created successfully
+[2026-02-11T12:41:23.173Z] Controller: processing create request for user 6986fb94175bb603b3ae67d9
+[2026-02-11T12:41:23.176Z] Service: Start create. User: 6986fb94175bb603b3ae67d9, Role: AGENT
+[2026-02-11T12:41:23.192Z] Service: Checking subscription for user 6986fb94175bb603b3ae67d9
+[2026-02-12T07:57:24.289Z] Controller: processing create request for user 698d86cdb63dfe156d70909e
+[2026-02-12T07:57:24.297Z] Service: Start create. User: 698d86cdb63dfe156d70909e, Role: AGENT
+[2026-02-12T07:57:24.297Z] Service: Checking subscription for user 698d86cdb63dfe156d70909e
+[2026-02-12T07:57:24.540Z] Service: Subscription check result: {"canCreate":false,"message":"No active subscription found. Please purchase a package to list properties."}
+[2026-02-12T07:57:24.542Z] Controller Error: No active subscription found. Please purchase a package to list properties.
+Stack: ForbiddenException: No active subscription found. Please purchase a package to list properties.
+    at PropertyService.create (D:\rent-ghar\apps\api\src\property\property.service.ts:85:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async PropertyController.create (D:\rent-ghar\apps\api\src\property\property.controller.ts:93:23)
+[2026-02-12T08:04:20.684Z] Controller: processing create request for user 698d86cdb63dfe156d70909e
+[2026-02-12T08:04:20.685Z] Service: Start create. User: 698d86cdb63dfe156d70909e, Role: AGENT
+[2026-02-12T08:04:20.685Z] Service: Checking subscription for user 698d86cdb63dfe156d70909e
+[2026-02-12T08:04:21.014Z] Service: Subscription check result: {"canCreate":true,"subscription":{"_id":"698d87f4ec8da95de2e54ebc","userId":"698d86cdb63dfe156d70909e","packageId":{"_id":"698ae4100e999e361e76965b","name":"Standard","description":"Great for small property owners","price":2999,"duration":30,"propertyLimit":5,"featuredListings":1,"photosPerProperty":10,"isActive":true,"features":["5 property listings","1 featured listing","10 photos per property","30 days validity","Priority support"],"createdAt":"2026-02-10T07:53:52.901Z","updatedAt":"2026-02-10T07:53:52.901Z","__v":0},"status":"active","propertiesUsed":0,"paymentStatus":"completed","createdAt":"2026-02-12T07:57:40.158Z","updatedAt":"2026-02-12T08:01:14.433Z","__v":0,"endDate":"2026-03-14T08:01:14.431Z","startDate":"2026-02-12T08:01:14.431Z"}}
+[2026-02-12T08:04:21.220Z] Service: Generated slug: luxury-3-bed-rooms-in-the-appartment
+[2026-02-12T08:04:21.220Z] Service: Creating property model instance
+[2026-02-12T08:04:21.291Z] Service: Property saved successfully. ID: 698d8985ec8da95de2e54ef9
+[2026-02-12T08:04:21.291Z] Controller: property created successfully

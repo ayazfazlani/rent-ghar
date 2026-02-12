@@ -67,7 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 3. Dynamic Properties
   let dynamicProperties: MetadataRoute.Sitemap = [];
   try {
-    const response = await fetch(`${API_URL}/properties`, { next: { revalidate: 3600 } });
+    const response = await fetch(`${API_URL}/api/properties`, { next: { revalidate: 3600 } });
     if (response.ok) {
       const properties = await response.json();
       dynamicProperties = (properties || []).map((prop: any) => ({
@@ -84,7 +84,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 4. Dynamic Blogs
   let dynamicBlogs: MetadataRoute.Sitemap = [];
   try {
-    const response = await fetch(`${API_URL}/blog/published`, { next: { revalidate: 3600 } });
+    const response = await fetch(`${API_URL}/api/blog/published`, { next: { revalidate: 3600 } });
     if (response.ok) {
       const blogs = await response.json();
       dynamicBlogs = (blogs || []).map((blog: any) => ({

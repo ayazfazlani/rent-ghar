@@ -25,6 +25,7 @@ export interface BackendProperty {
   price: number;
   description: string;
   contactNumber: string;
+  whatsappNumber?: string;
   features?: string[];
   mainPhotoUrl?: string;
   additionalPhotosUrls?: string[];
@@ -103,6 +104,8 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
     areaName: areaName,
     latitude: backend.latitude,
     longitude: backend.longitude,
+    whatsappNumber: backend.whatsappNumber,
+    contactNumber: backend.contactNumber,
   };
 }
 

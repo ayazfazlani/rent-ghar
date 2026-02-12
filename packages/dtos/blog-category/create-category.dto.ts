@@ -20,5 +20,9 @@ export class CreateCategoryDto {
 
     @IsString()
     @IsOptional()
+    canonicalUrl?: string;
+
+    @IsString()
+    @IsOptional()
     description?: string;
 }

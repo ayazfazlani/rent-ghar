@@ -39,6 +39,15 @@ export class PageController {
         return page;
     }
 
+    @Get('slug/:slug')
+    async getPageBySlug(@Param('slug') slug: string){
+        const page = await this.pageService.getBySlug(slug);
+        if (!page) {
+            throw new NotFoundException(`Page with slug ${slug} not found`);
+        }
+        return page;
+    }
+
     @Put(':id')
     updatePage(@Param('id') id: string, @Body() updatePageDto: UpdatePageDto){
         return this.pageService.update(id, updatePageDto);

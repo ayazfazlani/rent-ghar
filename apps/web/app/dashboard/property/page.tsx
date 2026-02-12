@@ -123,10 +123,10 @@ export default function DashboardHome() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-              Properties Dashboard
+              {isAdmin ? 'Properties Dashboard' : 'My Listings'}
             </h2>
             <p className="text-gray-600">
-              Manage all your property listings
+              {isAdmin ? 'Manage all property listings' : 'Manage your property listings'}
             </p>
           </div>
           <Button onClick={() => router.push('/dashboard/property/add-property')}>
@@ -230,38 +230,42 @@ export default function DashboardHome() {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          // TODO: Implement edit functionality
-                          router.push(`/dashboard/property/edit/${property._id}`);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={async () => {
-                          if (confirm('Are you sure you want to delete this property? This action cannot be undone.')) {
-                            try {
-                              await propertyApi.delete(property._id);
-                              toast.success('Property deleted successfully!');
-                              // Refresh the list
-                              const data = await propertyApi.getAllProperties();
-                              setProperties(Array.isArray(data) ? data : []);
-                            } catch (error: any) {
-                              console.error('Error deleting property:', error);
-                              toast.error('Error', {
-                                description: error?.response?.data?.message || 'Failed to delete property. Please try again.',
-                              });
-                            }
-                          }
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
+                      {isAdmin && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              // TODO: Implement edit functionality
+                              router.push(`/dashboard/property/edit/${property._id}`);
+                            }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                              if (confirm('Are you sure you want to delete this property? This action cannot be undone.')) {
+                                try {
+                                  await propertyApi.delete(property._id);
+                                  toast.success('Property deleted successfully!');
+                                  // Refresh the list
+                                  const data = await propertyApi.getAllProperties();
+                                  setProperties(Array.isArray(data) ? data : []);
+                                } catch (error: any) {
+                                  console.error('Error deleting property:', error);
+                                  toast.error('Error', {
+                                    description: error?.response?.data?.message || 'Failed to delete property. Please try again.',
+                                  });
+                                }
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -444,6 +448,6 @@ export default function DashboardHome() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }

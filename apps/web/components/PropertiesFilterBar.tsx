@@ -8,8 +8,8 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Search } from 'lucide-react';
-import { propertyApi } from '@/lib/api';
+import { Search, Loader2 } from 'lucide-react';
+import { propertyApi, cityApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 import {
@@ -30,16 +30,16 @@ export default function PropertiesFilterBar() {
 
   // STATE: Properties for filter options
   const [properties, setProperties] = useState<Property[]>([]);
+  const [allCities, setAllCities] = useState<any[]>([]);
+  const [allPropertyTypes, setAllPropertyTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Extract current filters from URL
   const currentPurpose = useMemo(() => {
-    if (!pathname) return 'all';
-    // Check if we're on a clean URL route
-    if (pathname.startsWith('/properties/rent')) return 'rent';
-    if (pathname.startsWith('/properties/sale')) return 'sale';
-    // Check query params
-    return (searchParams.get('purpose') as 'rent' | 'sale' | 'all') || 'all';
+    const purpose = searchParams.get('purpose');
+    if (purpose === 'buy' || purpose === 'sale') return 'sale';
+    if (purpose === 'rent') return 'rent';
+    return 'all';
   }, [pathname, searchParams]);
 
   const currentCity = useMemo(() => {
@@ -67,22 +67,29 @@ export default function PropertiesFilterBar() {
   const [tempCity, setTempCity] = useState('');
   const [tempType, setTempType] = useState('all');
 
-  // FETCH PROPERTIES FOR FILTER OPTIONS
+  // FETCH PROPERTIES AND CITIES FOR FILTER OPTIONS
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await propertyApi.getAll();
-        const backendProperties = response as BackendProperty[];
+        const [propsResponse, citiesResponse, typesResponse] = await Promise.all([
+          propertyApi.getAll(),
+          cityApi.getAll(),
+          propertyApi.getTypes()
+        ]);
+
+        const backendProperties = propsResponse as BackendProperty[];
         const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
         setProperties(transformedProperties);
+        setAllCities(citiesResponse);
+        setAllPropertyTypes(typesResponse);
       } catch (err) {
-        console.error('Error fetching properties for filters:', err);
+        console.error('Error fetching data for filters:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchProperties();
+    fetchData();
   }, []);
 
   // Update temp state when URL changes
@@ -96,14 +103,22 @@ export default function PropertiesFilterBar() {
 
   // Extract unique cities and property types
   const cities = useMemo(() => {
+    // If we have cities from API, use them, otherwise extract from properties
+    if (allCities && allCities.length > 0) {
+      return allCities.map(c => c.name).sort();
+    }
     const uniqueCities = Array.from(new Set(properties.map((p: Property) => p.city).filter(Boolean))) as string[];
     return uniqueCities.sort();
-  }, [properties]);
+  }, [properties, allCities]);
 
   const propertyTypes = useMemo(() => {
+    if (allPropertyTypes && allPropertyTypes.length > 0) {
+      // Capitalize first letter of each type for display
+      return allPropertyTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1)).sort();
+    }
     const uniqueTypes = Array.from(new Set(properties.map((p: Property) => p.type).filter(Boolean))) as string[];
     return uniqueTypes.sort();
-  }, [properties]);
+  }, [properties, allPropertyTypes]);
 
   // Helper functions for city slug conversion
   const cityToSlug = (cityName: string): string => {
@@ -128,7 +143,7 @@ export default function PropertiesFilterBar() {
       const firstLetters = words.map(w => w[0] || '').join('');
       const abbreviationMatch = cities.find(c => {
         const cityWords = c.toLowerCase().split(/\s+/);
-        const cityAbbr = cityWords.map(w => w[0] || '').join('');
+        const cityAbbr = cityWords.map((w: string) => w[0] || '').join('');
         return cityAbbr === firstLetters;
       });
       if (abbreviationMatch) return abbreviationMatch;
@@ -219,7 +234,7 @@ export default function PropertiesFilterBar() {
     setOpen(false);
   };
 
-  if (loading || isDetailPage) {
+  if (isDetailPage) {
     return null;
   }
 
@@ -301,12 +316,13 @@ export default function PropertiesFilterBar() {
 
       {/* Apply Button */}
       <button
-        className={`relative bg-black text-white px-6 py-2.5 rounded-lg font-semibold text-sm transform transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl overflow-hidden group w-full ${!mobile ? 'sm:w-auto hover:scale-105 active:scale-95' : 'active:scale-95'}`}
+        className={`relative bg-black text-white px-6 py-2.5 rounded-lg font-semibold text-sm transform transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl overflow-hidden group w-full ${!mobile ? 'sm:w-auto hover:scale-105 active:scale-95' : 'active:scale-95'} ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
         onClick={handleApplyFilters}
+        disabled={loading}
       >
         <span className="relative z-10 flex items-center gap-2">
-          <Search className="w-4 h-4" />
-          Apply Filters
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+          {loading ? 'Loading...' : 'Apply Filters'}
         </span>
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-all duration-1000"></div>
       </button>
@@ -314,7 +330,7 @@ export default function PropertiesFilterBar() {
   );
 
   return (
-    <section className="py-3 border-b border-border bg-white/95 backdrop-blur-md sticky top-0 z-40 shadow-sm transition-all duration-300">
+    <section className="py-3 border-b border-border bg-white/95 backdrop-blur-md sticky top-16 md:top-20 z-40 shadow-sm transition-all duration-300">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center gap-4 max-w-6xl mx-auto">
           {/* Purpose Tabs - Desktop Only */}

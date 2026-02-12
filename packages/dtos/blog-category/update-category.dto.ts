@@ -13,6 +13,18 @@ export class UpdateCategoryDto {
     @IsOptional()
     description?: string;
 
+    @IsString()
+    @IsOptional()
+    metaTitle?: string;
+
+    @IsString()
+    @IsOptional()
+    metaDescription?: string;
+
+    @IsString()
+    @IsOptional()
+    canonicalUrl?: string;
+
     @IsMongoId()
     @IsOptional()
     parentId?: string;

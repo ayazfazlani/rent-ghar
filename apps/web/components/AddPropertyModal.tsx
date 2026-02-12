@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react';
-import { Home } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Home, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { cities, propertyTypes } from '@/lib/data';
+import { cityApi, propertyApi } from '@/lib/api';
 
 interface AddPropertyModalProps {
   open: boolean;
@@ -28,6 +28,33 @@ const AddPropertyModal = ({ open, onClose }: AddPropertyModalProps) => {
     area: '',
     description: '',
   });
+
+  const [cities, setCities] = useState<any[]>([]);
+  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [citiesData, typesData] = await Promise.all([
+          cityApi.getAll(),
+          propertyApi.getTypes()
+        ]);
+        setCities(citiesData);
+        // Capitalize for display
+        setPropertyTypes(typesData.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1)));
+      } catch (error) {
+        console.error('Error fetching data for modal:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (open) {
+      fetchData();
+    }
+  }, [open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,11 +130,17 @@ const AddPropertyModal = ({ open, onClose }: AddPropertyModalProps) => {
                   <SelectValue placeholder="Select City" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cities.map((city) => (
-                    <SelectItem key={city} value={city}>
-                      {city}
-                    </SelectItem>
-                  ))}
+                  {loading ? (
+                    <div className="p-2 flex justify-center">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </div>
+                  ) : (
+                    cities.map((city) => (
+                      <SelectItem key={city._id || city.name} value={city.name}>
+                        {city.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>

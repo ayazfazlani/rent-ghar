@@ -83,6 +83,10 @@ export class CreatePropertyDto {
   contactNumber: string;
 
   @IsOptional()
+  @IsString()
+  whatsappNumber?: string;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   features?: string[];

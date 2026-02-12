@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cityApi } from '@/lib/api/city/city.api';
+import { useAuth } from '@/context/auth-context';
 import { toast } from 'sonner';
 
 import { Loader2, Eye, Edit, Trash2 } from 'lucide-react';
@@ -31,6 +32,8 @@ export default function DashboardCityPage() {
   const [selectedCity, setSelectedCity] = useState<any>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -66,14 +69,14 @@ export default function DashboardCityPage() {
     router.push(`/dashboard/city/edit/${cityId}`);
   };
 
-  const handleDelete = async (cityId: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this city? This action cannot be undone.')) {
       return;
     }
 
     try {
-      setDeletingId(cityId);
-      await cityApi.delete(cityId);
+      setDeletingId(id);
+      await cityApi.delete(id);
       toast.success('City deleted successfully!');
       // Refresh the list
       const data = await cityApi.getAll();
@@ -94,7 +97,7 @@ export default function DashboardCityPage() {
       pending: 'secondary',
       rejected: 'destructive',
     };
-    
+
     const colors: Record<string, string> = {
       approved: 'bg-green-100 text-green-800 hover:bg-green-100',
       pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100',
@@ -173,7 +176,7 @@ export default function DashboardCityPage() {
                   <TableCell className="font-medium">
                     <div className="max-w-[200px]">
                       <p className="truncate">{city.name}</p>
-                      
+
                     </div>
                   </TableCell>
                   <TableCell>
@@ -193,7 +196,7 @@ export default function DashboardCityPage() {
                       </p>
                     </div>
                   </TableCell> */}
-                
+
                   <TableCell className="text-sm text-gray-600">
                     {formatDate(city.createdAt)}
                   </TableCell>
@@ -207,27 +210,31 @@ export default function DashboardCityPage() {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(city._id)}
-                        title="Edit city"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(city._id)}
-                        disabled={deletingId === city._id}
-                        title="Delete city"
-                      >
-                        {deletingId === city._id ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-destructive" />
-                        ) : (
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        )}
-                      </Button>
+                      {isAdmin && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(city._id)}
+                            title="Edit city"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(city._id)}
+                            disabled={deletingId === city._id}
+                            title="Delete city"
+                          >
+                            {deletingId === city._id ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-destructive" />
+                            ) : (
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            )}
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

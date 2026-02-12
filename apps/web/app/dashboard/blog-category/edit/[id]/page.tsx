@@ -6,6 +6,7 @@ import * as z from "zod";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import RichEditor from "@/components/RichEditor";
 import { useEffect, useState } from "react";
 import {
     Form,
@@ -13,7 +14,8 @@ import {
     FormField,
     FormItem,
     FormMessage,
-    FormLabel} from "@/components/ui/form";
+    FormLabel
+} from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,7 @@ const formSchema = z.object({
     slug: z.string().optional(),
     metaTitle: z.string().optional(),
     metaDescription: z.string().optional(),
+    canonicalUrl: z.string().optional(),
     description: z.string().optional(),
 });
 
@@ -40,6 +43,7 @@ export default function EditCategoryPage() {
             slug: "",
             metaTitle: "",
             metaDescription: "",
+            canonicalUrl: "",
             description: "",
         },
     });
@@ -47,12 +51,16 @@ export default function EditCategoryPage() {
     useEffect(() => {
         const fetchCategory = async () => {
             if (!categoryId) return;
-            
+
             try {
                 setLoading(true);
                 const category = await blogCategoryApi.getCategoryById(categoryId);
                 form.reset({
                     name: category.name || "",
+                    slug: category.slug || "",
+                    metaTitle: category.metaTitle || "",
+                    metaDescription: category.metaDescription || "",
+                    canonicalUrl: category.canonicalUrl || "",
                     description: category.description || "",
                 });
             } catch (error: any) {
@@ -103,7 +111,7 @@ export default function EditCategoryPage() {
                     </p>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <FormField control={form.control} name="name" render={({field}) => (
+                            <FormField control={form.control} name="name" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Category Name *</FormLabel>
                                     <FormControl>
@@ -113,8 +121,8 @@ export default function EditCategoryPage() {
                                 </FormItem>
                             )}
                             />
-                         
-                            <FormField control={form.control} name="slug" render={({field}) => (
+
+                            <FormField control={form.control} name="slug" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Slug</FormLabel>
                                     <FormControl>
@@ -123,18 +131,20 @@ export default function EditCategoryPage() {
                                 </FormItem>
                             )}
                             />
-                            <FormField control={form.control} name="description" render={({field}) => (
+                            <FormField control={form.control} name="description" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Description</FormLabel>
+                                    <FormLabel>Description (Rich Text)</FormLabel>
                                     <FormControl>
-                                        <Textarea placeholder="e.g Property Description" {...field} />
+                                        <RichEditor
+                                            value={field.value || ""}
+                                            onChange={field.onChange}
+                                        />
                                     </FormControl>
                                 </FormItem>
                             )}
-
                             />
 
-                            <FormField control={form.control} name="metaTitle" render={({field}) => (
+                            <FormField control={form.control} name="metaTitle" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Meta Title</FormLabel>
                                     <FormControl>
@@ -143,7 +153,7 @@ export default function EditCategoryPage() {
                                 </FormItem>
                             )}
                             />
-                            <FormField control={form.control} name="metaDescription" render={({field}) => (
+                            <FormField control={form.control} name="metaDescription" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Meta Description</FormLabel>
                                     <FormControl>
@@ -153,8 +163,8 @@ export default function EditCategoryPage() {
                             )}
                             />
                             <div className="flex gap-4 pt-6">
-                                <Button 
-                                    type="submit" 
+                                <Button
+                                    type="submit"
                                     className="flex-1"
                                     disabled={form.formState.isSubmitting}
                                 >

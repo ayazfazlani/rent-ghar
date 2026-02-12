@@ -258,8 +258,8 @@ export class PropertyService {
         try {
           const query: any = {};
           
-          // Role-based filtering: AGENT can only see their own properties in the dashboard
-          if (userRole === 'AGENT' && userId) {
+          // Role-based filtering: AGENT and USER can only see their own properties in the dashboard
+          if (userRole !== 'ADMIN' && userId) {
             query.owner = userId;
           }
           
@@ -386,9 +386,9 @@ export class PropertyService {
             throw new NotFoundException('Property not found');
           }
 
-          // Ownership check for non-admins
-          if (userRole !== 'ADMIN' && property.owner.toString() !== userId) {
-            throw new ForbiddenException('You do not have permission to update this property');
+          // Strict Admin-only check for updates as per user request
+          if (userRole !== 'ADMIN') {
+            throw new ForbiddenException('Only administrators can modify property listings');
           }
 
           // Build update object
@@ -438,9 +438,9 @@ export class PropertyService {
             throw new NotFoundException('Property not found');
           }
 
-          // Ownership check for non-admins
-          if (userRole !== 'ADMIN' && property.owner.toString() !== userId) {
-            throw new ForbiddenException('You do not have permission to delete this property');
+          // Strict Admin-only check for deletions
+          if (userRole !== 'ADMIN') {
+            throw new ForbiddenException('Only administrators can delete property listings');
           }
 
           await this.propertyModel.findByIdAndDelete(id).exec();
@@ -582,5 +582,18 @@ export class PropertyService {
             console.error('Error fetching location stats:', error);
             throw error;
         }
-      }
+    }
+
+    async getPropertyTypes(): Promise<string[]> {
+        try {
+            const types = await this.propertyModel.distinct('propertyType').exec();
+            const defaults = ['house', 'apartment', 'flat', 'commercial'];
+            // Merge defaults and distinct types, remove duplicates
+            const allTypes = Array.from(new Set([...defaults, ...types]));
+            return allTypes.sort();
+        } catch (error) {
+            console.error('Error fetching property types:', error);
+            return ['house', 'apartment', 'flat', 'commercial'];
+        }
+    }
 }

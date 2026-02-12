@@ -172,3 +172,22 @@ a[class*="footerAction"] {
 .filter-tab.active {
   @apply bg-primary text-primary-foreground border-primary;
 }
+
+/* Rich Text Styling */
+.prose {
+  color: var(--foreground);
+}
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  @apply font-bold mt-6 mb-4 text-foreground;
+}
+.prose h1 { @apply text-3xl; }
+.prose h2 { @apply text-2xl; }
+.prose h3 { @apply text-xl; }
+.prose p { @apply mb-4 leading-relaxed; }
+.prose ul { @apply list-disc pl-6 mb-4; }
+.prose ol { @apply list-decimal pl-6 mb-4; }
+.prose li { @apply mb-1; }
+.prose a { @apply text-primary underline; }
+.prose img { @apply rounded-lg my-6 max-w-full h-auto; }
+.prose blockquote { @apply border-l-4 border-primary/20 pl-4 italic my-4; }
+.prose strong { @apply font-bold text-foreground; }

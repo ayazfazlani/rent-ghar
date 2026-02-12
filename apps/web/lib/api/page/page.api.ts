@@ -40,6 +40,11 @@ export const pageApi = {
         return response.data;
     },
 
+    getPageBySlug: async (slug: string) => {
+        const response = await api.get(`/page/slug/${slug}`);
+        return response.data;
+    },
+
     deletePage: async (id: string) => {
         const response = await api.delete(`/page/${id}`);
         return response.data;

@@ -16,8 +16,10 @@ export interface Property {
   features?: string[];
   areaId?: string; // Area ObjectId
   areaName?: string; // Area name
-  latitude?: number;
   longitude?: number;
+  latitude?: number;
+  whatsappNumber?: string;
+  contactNumber?: string;
 }
 
 export interface Hotel {

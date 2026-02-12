@@ -1,7 +1,27 @@
- import Link from 'next/link';
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Home, Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { pageApi } from '@/lib/api/page/page.api';
 
 const Footer = () => {
+  const [pages, setPages] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPublishedPages = async () => {
+      try {
+        const data = await pageApi.getPublishedPages();
+        if (Array.isArray(data)) {
+          setPages(data);
+        }
+      } catch (error) {
+        console.error('Error fetching footer pages:', error);
+      }
+    };
+    fetchPublishedPages();
+  }, []);
+
   return (
     <footer className="bg-foreground text-background">
       <div className="container mx-auto px-4 py-12">
@@ -42,8 +62,14 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link href="/properties" className="text-background/70 hover:text-primary transition-colors">Properties for Rent</Link></li>
               <li><Link href="/properties" className="text-background/70 hover:text-primary transition-colors">Properties for Sale</Link></li>
-              <li><Link href="/hotels" className="text-background/70 hover:text-primary transition-colors">Hotels</Link></li>
               <li><Link href="/about" className="text-background/70 hover:text-primary transition-colors">About Us</Link></li>
+              {pages.map((page) => (
+                <li key={page._id}>
+                  <Link href={`/p/${page.slug}`} className="text-background/70 hover:text-primary transition-colors">
+                    {page.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

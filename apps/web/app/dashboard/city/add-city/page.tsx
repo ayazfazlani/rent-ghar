@@ -6,6 +6,7 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import RichEditor from "@/components/RichEditor";
 
 import {
   Form,
@@ -26,6 +27,10 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "City name must be at least 2 characters" }),
   state: z.string().optional(),
   country: z.string().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  canonicalUrl: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export default function AddCityPage() {
@@ -37,6 +42,10 @@ export default function AddCityPage() {
       name: "",
       state: undefined,
       country: undefined,
+      metaTitle: "",
+      metaDescription: "",
+      canonicalUrl: "",
+      description: "",
     },
   });
 
@@ -48,14 +57,19 @@ export default function AddCityPage() {
       const payload: any = {
         name: values.name.trim(),
       };
-      
+
       if (values.state && values.state.trim()) {
         payload.state = values.state.trim();
       }
-      
+
       if (values.country && values.country.trim()) {
         payload.country = values.country.trim();
       }
+
+      if (values.metaTitle?.trim()) payload.metaTitle = values.metaTitle.trim();
+      if (values.metaDescription?.trim()) payload.metaDescription = values.metaDescription.trim();
+      if (values.canonicalUrl?.trim()) payload.canonicalUrl = values.canonicalUrl.trim();
+      if (values.description?.trim()) payload.description = values.description.trim();
 
       await cityApi.create(payload);
 
@@ -66,13 +80,13 @@ export default function AddCityPage() {
     } catch (error: any) {
       console.error("Create city error:", error);
       console.error("Error response:", error?.response?.data);
-      
+
       // Get validation errors if they exist
       const validationErrors = error?.response?.data?.message;
-      const errorMessage = Array.isArray(validationErrors) 
+      const errorMessage = Array.isArray(validationErrors)
         ? validationErrors.join(', ')
         : validationErrors || error?.message || "Failed to create city. Please try again.";
-      
+
       toast.error("Error", { description: errorMessage });
     }
   }
@@ -134,33 +148,98 @@ export default function AddCityPage() {
                 )}
               />
 
-            {/* Submit Buttons */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Meta Title */}
+                <FormField
+                  control={form.control}
+                  name="metaTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Meta Title (SEO)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="SEO Title" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Canonical URL */}
+                <FormField
+                  control={form.control}
+                  name="canonicalUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Canonical URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://example.com/city" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Meta Description */}
+              <FormField
+                control={form.control}
+                name="metaDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Meta Description (SEO)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="SEO Description" {...field} value={field.value || ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Rich Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City Description (Rich Text)</FormLabel>
+                    <FormControl>
+                      <RichEditor
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Submit Buttons */}
               <div className="flex gap-4 pt-6">
                 <Button
-                type="submit"
-                disabled={isLoading}
+                  type="submit"
+                  disabled={isLoading}
                   className="flex-1 bg-gray-800 hover:bg-gray-900"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Creating...
-                  </>
-                ) : (
+                    </>
+                  ) : (
                     "Add City"
-                )}
+                  )}
                 </Button>
 
                 <Button
-                type="button"
+                  type="button"
                   variant="outline"
                   onClick={() => router.back()}
-                disabled={isLoading}
-              >
-                Cancel
+                  disabled={isLoading}
+                >
+                  Cancel
                 </Button>
-            </div>
-          </form>
+              </div>
+            </form>
           </Form>
         </div>
       </div>

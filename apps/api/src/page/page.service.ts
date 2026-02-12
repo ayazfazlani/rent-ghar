@@ -120,6 +120,13 @@ export class PageService {
         return this.pageModel.findById(id).exec();
     }
 
+    async getBySlug(slug: string): Promise<PageDocument | null> {
+        if (!slug || !slug.trim()) {
+            throw new BadRequestException('Slug is required');
+        }
+        return this.pageModel.findOne({ slug: slug.trim().toLowerCase(), status: 'PUBLISHED' }).exec();
+    }
+
     async update(id: string, updatePageDto: UpdatePageDto): Promise<PageDocument> {
         if (!isValidObjectId(id)) {
             throw new BadRequestException('Invalid page ID');

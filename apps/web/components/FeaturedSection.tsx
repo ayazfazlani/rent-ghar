@@ -34,7 +34,7 @@ type FeaturedProperty = {
 };
 
 const PropertyCard = ({ property }: { property: FeaturedProperty }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+  // const [isFavorite, setIsFavorite] = useState(false);
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
@@ -46,7 +46,7 @@ const PropertyCard = ({ property }: { property: FeaturedProperty }) => {
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
 
-          <button
+          {/* <button
             onClick={(e) => {
               e.preventDefault();
               setIsFavorite(!isFavorite);
@@ -59,7 +59,7 @@ const PropertyCard = ({ property }: { property: FeaturedProperty }) => {
               className={`w-5 h-5 transition-colors duration-300 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
                 }`}
             />
-          </button>
+          </button> */}
         </div>
       </Link>
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { areaApi } from '@/lib/api/area/area.api';
 import { cityApi } from '@/lib/api/city/city.api';
+import { useAuth } from '@/context/auth-context';
 import { toast } from 'sonner';
 
 import { Loader2, Eye, Edit, Trash2, Plus } from 'lucide-react';
@@ -51,6 +52,8 @@ export default function DashboardAreaPage() {
   const [selectedArea, setSelectedArea] = useState<Area | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,7 +63,7 @@ export default function DashboardAreaPage() {
         // Fetch all areas
         const areasData = await areaApi.getAll();
         setAreas(Array.isArray(areasData) ? areasData : []);
-        
+
         // Fetch all cities for display
         const citiesData = await cityApi.getAll();
         setCities(Array.isArray(citiesData) ? citiesData : []);
@@ -205,25 +208,29 @@ export default function DashboardAreaPage() {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(area._id)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(area._id)}
-                        disabled={deletingId === area._id}
-                      >
-                        {deletingId === area._id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        )}
-                      </Button>
+                      {isAdmin && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(area._id)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(area._id)}
+                            disabled={deletingId === area._id}
+                          >
+                            {deletingId === area._id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            )}
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

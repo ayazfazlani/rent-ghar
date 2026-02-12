@@ -12,4 +12,20 @@ export class CreateCityDto {
     @IsOptional()
     @IsString({ message: 'Country must be a string' })
     country?: string;
+
+    @IsOptional()
+    @IsString()
+    metaTitle?: string;
+
+    @IsOptional()
+    @IsString()
+    metaDescription?: string;
+
+    @IsOptional()
+    @IsString()
+    canonicalUrl?: string;
+
+    @IsOptional()
+    @IsString()
+    description?: string;
 }

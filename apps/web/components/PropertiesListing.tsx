@@ -12,7 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { SlidersHorizontal, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PropertyCard from '@/components/PropertyCard';
-import { propertyApi } from '@/lib/api';
+import { propertyApi, cityApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 import { toast } from 'sonner';
@@ -33,19 +33,23 @@ interface PropertiesListingProps {
   city?: string;
   type?: string;
   useCleanUrls?: boolean; // If true, navigate using /properties/rent/city/type format
+  richDescription?: string;
 }
 
 export default function PropertiesListing({
   purpose,
   city: initialCity = '',
   type: initialType = 'all',
-  useCleanUrls = false
+  useCleanUrls = false,
+  richDescription
 }: PropertiesListingProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // STATE: Properties and filters
   const [properties, setProperties] = useState<Property[]>([]);
+  const [allCities, setAllCities] = useState<any[]>([]);
+  const [allPropertyTypes, setAllPropertyTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,21 +75,27 @@ export default function PropertiesListing({
 
   // FETCH PROPERTIES FROM API
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Fetch all approved properties from API
-        const response = await propertyApi.getAll();
-        const backendProperties = response as BackendProperty[];
-        // Transform backend format to frontend format
+        // Fetch properties, cities and types in parallel
+        const [propsResponse, citiesResponse, typesResponse] = await Promise.all([
+          propertyApi.getAll(),
+          cityApi.getAll(),
+          propertyApi.getTypes()
+        ]);
+
+        const backendProperties = propsResponse as BackendProperty[];
         const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
 
         setProperties(transformedProperties);
+        setAllCities(citiesResponse);
+        setAllPropertyTypes(typesResponse);
       } catch (err: any) {
-        console.error('Error fetching properties:', err);
-        const errorMessage = err.response?.data?.message || err.message || 'Failed to load properties';
+        console.error('Error fetching data:', err);
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to load data';
         setError(errorMessage);
         toast.error('Error', {
           description: errorMessage,
@@ -95,7 +105,7 @@ export default function PropertiesListing({
       }
     };
 
-    fetchProperties();
+    fetchData();
   }, []); // Fetch once on mount
 
   // Update state when props change
@@ -106,17 +116,23 @@ export default function PropertiesListing({
     setTempType(initialType);
   }, [initialCity, initialType, purpose]);
 
-  // Extract unique cities and property types from fetched properties
+  // Extract unique cities and property types
   const cities = useMemo(() => {
+    if (allCities && allCities.length > 0) {
+      return allCities.map(c => c.name).sort();
+    }
     const uniqueCities = Array.from(new Set(
       properties
         .map((p: Property) => p.city)
         .filter((c): c is string => typeof c === 'string' && c.length > 0)
     ));
     return uniqueCities.sort();
-  }, [properties]);
+  }, [properties, allCities]);
 
   const propertyTypes = useMemo(() => {
+    if (allPropertyTypes && allPropertyTypes.length > 0) {
+      return allPropertyTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1)).sort();
+    }
     const validTypes: Property['type'][] = ['House', 'Apartment', 'Flat', 'Commercial'];
     const uniqueTypes = Array.from(new Set(
       properties
@@ -124,7 +140,7 @@ export default function PropertiesListing({
         .filter((t): t is Property['type'] => validTypes.includes(t))
     ));
     return uniqueTypes.sort();
-  }, [properties]);
+  }, [properties, allPropertyTypes]);
 
   // Helper function to create slug from city name
   const cityToSlug = (cityName: string): string => {
@@ -148,10 +164,10 @@ export default function PropertiesListing({
     // Try to match by first letters (e.g., "dgk" matches "Dera Ghazi Khan")
     const words = normalizedSlug.split('-');
     if (words.length > 0) {
-      const firstLetters = words.map(w => w[0] || '').join('');
+      const firstLetters = words.map((w: string) => w[0] || '').join('');
       const abbreviationMatch = cities.find(c => {
         const cityWords = c.toLowerCase().split(/\s+/);
-        const cityAbbr = cityWords.map(w => w[0] || '').join('');
+        const cityAbbr = cityWords.map((w: string) => w[0] || '').join('');
         return cityAbbr === firstLetters;
       });
       if (abbreviationMatch) return abbreviationMatch;
@@ -342,6 +358,12 @@ export default function PropertiesListing({
           <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
             Browse Listings in {matchedCity || 'Pakistan'}
           </h1>
+          {richDescription && (
+            <div
+              className="mt-6 prose prose-sm max-w-4xl text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
+              dangerouslySetInnerHTML={{ __html: richDescription }}
+            />
+          )}
         </div>
       </section>
 
@@ -352,14 +374,15 @@ export default function PropertiesListing({
           <div className="flex flex-col lg:flex-row gap-8">
 
             {/* Sidebar - Desktop Only */}
-            <aside className="w-full lg:w-1/4 hidden lg:block">
-              <SearchSidebar
-                city={matchedCity}
-                purpose={purpose}
-                filters={advancedFilters}
-                onFilterChange={handleFilterChange}
-                className="sticky top-24"
-              />
+            <aside className="w-80 shrink-0 hidden lg:block">
+              <div className="sticky top-24">
+                <SearchSidebar
+                  city={matchedCity}
+                  purpose={purpose}
+                  filters={advancedFilters}
+                  onFilterChange={handleFilterChange}
+                />
+              </div>
             </aside>
 
             {/* Main Listing Side */}

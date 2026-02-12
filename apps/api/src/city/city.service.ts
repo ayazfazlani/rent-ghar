@@ -39,6 +39,11 @@ export class CityService {
             if (normalizedCountry) {
                 cityData.country = normalizedCountry;
             }
+
+            if (createCityDto.metaTitle) cityData.metaTitle = createCityDto.metaTitle;
+            if (createCityDto.metaDescription) cityData.metaDescription = createCityDto.metaDescription;
+            if (createCityDto.canonicalUrl) cityData.canonicalUrl = createCityDto.canonicalUrl;
+            if (createCityDto.description) cityData.description = createCityDto.description;
             
             const createdCity = new this.cityModel(cityData);
             return await createdCity.save();
@@ -70,6 +75,14 @@ export class CityService {
         const city = await this.cityModel.findById(id).exec();
         if (!city) {
             throw new NotFoundException('City not found');
+        }
+        return city as CityDocument;
+    }
+
+    async findCityByName(name: string): Promise<CityDocument> {
+        const city = await this.cityModel.findOne({ name: name.toLowerCase().trim() }).exec();
+        if (!city) {
+            throw new NotFoundException(`City ${name} not found`);
         }
         return city as CityDocument;
     }
@@ -110,6 +123,11 @@ export class CityService {
                 const trimmedCountry = updateCityDto.country.trim();
                 updateData.country = trimmedCountry ? trimmedCountry.toLowerCase() : undefined;
             }
+
+            if (updateCityDto.metaTitle !== undefined) updateData.metaTitle = updateCityDto.metaTitle;
+            if (updateCityDto.metaDescription !== undefined) updateData.metaDescription = updateCityDto.metaDescription;
+            if (updateCityDto.canonicalUrl !== undefined) updateData.canonicalUrl = updateCityDto.canonicalUrl;
+            if (updateCityDto.description !== undefined) updateData.description = updateCityDto.description;
 
             const city = await this.cityModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
             if (!city) {

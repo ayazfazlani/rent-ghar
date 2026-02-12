@@ -19,6 +19,9 @@ export class Category {
   metaDescription?: string;
 
   @Prop({ trim: true })
+  canonicalUrl?: string;
+
+  @Prop({ trim: true })
   description?: string;
 
   // Optional: for future parent-child (hierarchical) categories

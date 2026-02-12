@@ -1,14 +1,17 @@
-import { Controller, Get, Post, Body , Param, Put, Delete, UsePipes, ValidationPipe} from '@nestjs/common';
+import { Controller, Get, Post, Body , Param, Put, Delete, UsePipes, ValidationPipe, UseGuards} from '@nestjs/common';
 import { CityService } from './city.service';
 import { CreateCityDto } from '@rent-ghar/dtos/city/createcity.dto';
 import { CityDocument } from '@rent-ghar/db/schemas/city.schema';
 import { UpdateCityDto } from '@rent-ghar/dtos/city/updatecity.dto';
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('cities')
 export class CityController {
     constructor(private readonly cityService: CityService){}
 
     @Post()
+    @UseGuards(JwtAuthGuard)
     async createCity(@Body() createCityDto: CreateCityDto): Promise<CityDocument> {
         try {
             return await this.cityService.createCity(createCityDto);
@@ -33,12 +36,19 @@ export class CityController {
         return this.cityService.findCityById(id);
     }
 
+    @Get('name/:name')
+    async findCityByName(@Param('name') name: string): Promise<CityDocument> {
+        return this.cityService.findCityByName(name);
+    }
+
     @Put(':id')
+    @UseGuards(AdminGuard)
     async updateCity(@Param('id') id: string, @Body() updateCityDto: UpdateCityDto): Promise<CityDocument> {
         return await this.cityService.updateCity(id, updateCityDto);
     }
 
     @Delete(':id')
+    @UseGuards(AdminGuard)
     async deleteCity(@Param('id') id: string): Promise<void> {
         await this.cityService.deleteCity(id);
     }

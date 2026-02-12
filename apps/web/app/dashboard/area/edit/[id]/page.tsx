@@ -6,6 +6,7 @@ import * as z from "zod";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import RichEditor from "@/components/RichEditor";
 import { useEffect, useState } from "react";
 
 import {
@@ -33,6 +34,10 @@ import cityApi from "@/lib/api/city/city.api";
 const formSchema = z.object({
   name: z.string().min(2, { message: "Area name must be at least 2 characters" }),
   city: z.string().min(1, { message: "Please select a city" }),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  canonicalUrl: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export default function EditAreaPage() {
@@ -48,6 +53,10 @@ export default function EditAreaPage() {
     defaultValues: {
       name: "",
       city: "",
+      metaTitle: "",
+      metaDescription: "",
+      canonicalUrl: "",
+      description: "",
     },
   });
 
@@ -79,11 +88,15 @@ export default function EditAreaPage() {
       try {
         setLoading(true);
         const area = await areaApi.getById(areaId);
-        
+
         // Set form values
         form.reset({
           name: area.name || "",
           city: typeof area.city === 'string' ? area.city : area.city?._id || "",
+          metaTitle: area.metaTitle || "",
+          metaDescription: area.metaDescription || "",
+          canonicalUrl: area.canonicalUrl || "",
+          description: area.description || "",
         });
       } catch (error: any) {
         console.error("Error fetching area:", error);
@@ -106,6 +119,10 @@ export default function EditAreaPage() {
       await areaApi.update(areaId, {
         name: values.name,
         city: values.city,
+        metaTitle: values.metaTitle?.trim() || undefined,
+        metaDescription: values.metaDescription?.trim() || undefined,
+        canonicalUrl: values.canonicalUrl?.trim() || undefined,
+        description: values.description?.trim() || undefined,
       });
 
       toast.success("Area updated successfully!");
@@ -176,6 +193,71 @@ export default function EditAreaPage() {
                       <FormLabel>Area Name *</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g. DHA Phase 5" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Meta Title */}
+                  <FormField
+                    control={form.control}
+                    name="metaTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Meta Title (SEO)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="SEO Title" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Canonical URL */}
+                  <FormField
+                    control={form.control}
+                    name="canonicalUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Canonical URL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://example.com/area" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Meta Description */}
+                <FormField
+                  control={form.control}
+                  name="metaDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Meta Description (SEO)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="SEO Description" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Rich Description */}
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Area Description (Rich Text)</FormLabel>
+                      <FormControl>
+                        <RichEditor
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

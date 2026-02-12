@@ -109,8 +109,7 @@ const Navbar = () => {
 
 
               {/* Heart Button - Floating style */}
-              <div className="relative">
-                {/* Floating glow */}
+              {/* <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-red-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                 <Button
@@ -121,10 +120,9 @@ const Navbar = () => {
                   <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-500/0 to-red-500/0 group-hover:from-red-500/10 group-hover:to-red-500/5 transition-all duration-300" />
                   <Heart className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:fill-red-500 group-hover:scale-110" />
 
-                  {/* Pulse effect */}
                   <div className="absolute inset-0 rounded-full border-2 border-red-500/0 group-hover:border-red-500/30 scale-100 group-hover:scale-150 opacity-100 group-hover:opacity-0 transition-all duration-500" />
                 </Button>
-              </div>
+              </div> */}
 
               {/* Auth Buttons - Only render after mount to prevent hydration errors */}
               {mounted && (

@@ -14,6 +14,7 @@ import { PackageModule } from './package/package.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UserModule } from './user/user.module';
 import { StorageModule } from '../../../packages/storage/storage.module';
+import { ImportModule } from './import/import.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { StorageModule } from '../../../packages/storage/storage.module';
     PackageModule,
     SubscriptionModule,
     UserModule,
+    ImportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

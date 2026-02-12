@@ -67,8 +67,9 @@ export default function DashboardSidebar() {
     icon: PlusCircle,
     basePath: "/dashboard/property",
     items: [
-      { title: "All Properties", href: "/dashboard/property" },
+      { title: isAdmin ? "All Properties" : "My Listings", href: "/dashboard/property" },
       { title: "Add New Property", href: "/dashboard/property/add-property" },
+      ...(isAdmin ? [{ title: "Import Properties", href: "/dashboard/import" }] : []),
     ],
   };
 
@@ -256,6 +257,62 @@ export default function DashboardSidebar() {
           </SidebarGroup>
         </Collapsible>
 
+        {/* Locations */}
+        <Collapsible
+          defaultOpen={
+            isSectionActive(citiesSection.basePath) ||
+            isSectionActive(areasSection.basePath)
+          }
+        >
+          <SidebarGroup>
+            <CollapsibleTrigger asChild>
+              <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5" />
+                  <span>Locations</span>
+                </div>
+                <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
+              </SidebarGroupLabel>
+            </CollapsibleTrigger>
+
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                {/* Cities */}
+                <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                  Cities
+                </div>
+                <SidebarMenu className="pl-3 mb-2">
+                  {citiesSection.items.map((item) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                        <Link href={item.href}>
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+
+                {/* Areas */}
+                <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                  Areas
+                </div>
+                <SidebarMenu className="pl-3">
+                  {areasSection.items.map((item) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                        <Link href={item.href}>
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
+
         {/* Packages & Subscriptions - Admin Only */}
         {isAdmin && (
           <>
@@ -326,61 +383,6 @@ export default function DashboardSidebar() {
         {/* Admin Management Sections */}
         {isAdmin && (
           <>
-            {/* Cities & Areas */}
-            <Collapsible
-              defaultOpen={
-                isSectionActive(citiesSection.basePath) ||
-                isSectionActive(areasSection.basePath)
-              }
-            >
-              <SidebarGroup>
-                <CollapsibleTrigger asChild>
-                  <SidebarGroupLabel className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-colors">
-                    <div className="flex items-center gap-3">
-                      <MapPin className="h-5 w-5" />
-                      <span>Locations</span>
-                    </div>
-                    <ChevronDown className="h-4 w-4 transition-transform duration-200 [&[data-state=open]]:rotate-180" />
-                  </SidebarGroupLabel>
-                </CollapsibleTrigger>
-
-                <CollapsibleContent>
-                  <SidebarGroupContent>
-                    {/* Cities */}
-                    <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                      Cities
-                    </div>
-                    <SidebarMenu className="pl-3 mb-2">
-                      {citiesSection.items.map((item) => (
-                        <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                            <Link href={item.href}>
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-
-                    {/* Areas */}
-                    <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                      Areas
-                    </div>
-                    <SidebarMenu className="pl-3">
-                      {areasSection.items.map((item) => (
-                        <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                            <Link href={item.href}>
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </CollapsibleContent>
-              </SidebarGroup>
-            </Collapsible>
 
             {/* Images Gallery */}
             <Collapsible defaultOpen={isSectionActive(imagesGallerySection.basePath)}>

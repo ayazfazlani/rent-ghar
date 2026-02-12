@@ -14,9 +14,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ImagePickerDialog, type GalleryImageItem } from '@/components/ImagePickerDialog'
 import dynamic from 'next/dynamic'
+import RichEditor from '@/components/RichEditor'
 
 // Dynamically import MapPicker as it uses window object
 const MapPicker = dynamic(() => import('@/components/MapPicker'), {
@@ -56,6 +64,7 @@ export default function AddProperty() {
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
   const [contactNumber, setContactNumber] = useState('')
+  const [whatsappNumber, setWhatsappNumber] = useState('')
   const [latitude, setLatitude] = useState<number | undefined>()
   const [longitude, setLongitude] = useState<number | undefined>()
 
@@ -76,10 +85,15 @@ export default function AddProperty() {
   const [mainImageSource, setMainImageSource] = useState<'upload' | 'gallery'>('upload')
   const [mainImageUrl, setMainImageUrl] = useState<string | null>(null)
   const [galleryDialogOpen, setGalleryDialogOpen] = useState(false)
+  const [showAddCityModal, setShowAddCityModal] = useState(false)
+  const [showAddAreaModal, setShowAddAreaModal] = useState(false)
+  const [newCityName, setNewCityName] = useState('')
+  const [newAreaName, setNewAreaName] = useState('')
+  const [isAddingLocation, setIsAddingLocation] = useState(false)
 
   // Fetch cities on component mount
   useEffect(() => {
-    const fetchCities = async () => {
+    const fetchCitiesData = async () => {
       try {
         setLoadingCities(true)
         const data = await cityApi.getAll()
@@ -93,13 +107,12 @@ export default function AddProperty() {
         setLoadingCities(false)
       }
     }
-
-    fetchCities()
+    fetchCitiesData()
   }, [])
 
   // Fetch areas when city changes
   useEffect(() => {
-    const fetchAreas = async () => {
+    const fetchAreasData = async () => {
       if (!cityId) {
         setAreas([])
         setAreaId('') // Reset area when city is cleared
@@ -122,8 +135,44 @@ export default function AddProperty() {
       }
     }
 
-    fetchAreas()
+    fetchAreasData()
   }, [cityId])
+
+  const handleCreateCity = async () => {
+    if (!newCityName.trim()) return
+    try {
+      setIsAddingLocation(true)
+      const data = await cityApi.create({ name: newCityName.trim() })
+      toast.success('City added successfully')
+      const allCities = await cityApi.getAll()
+      setCities(allCities)
+      setCityId(data._id)
+      setShowAddCityModal(false)
+      setNewCityName('')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to add city')
+    } finally {
+      setIsAddingLocation(false)
+    }
+  }
+
+  const handleCreateArea = async () => {
+    if (!newAreaName.trim() || !cityId) return
+    try {
+      setIsAddingLocation(true)
+      const data = await areaApi.create({ name: newAreaName.trim(), city: cityId })
+      toast.success('Area added successfully')
+      const allAreas = await areaApi.getAll(cityId)
+      setAreas(allAreas)
+      setAreaId(data._id)
+      setShowAddAreaModal(false)
+      setNewAreaName('')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to add area')
+    } finally {
+      setIsAddingLocation(false)
+    }
+  }
 
   const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -257,6 +306,7 @@ export default function AddProperty() {
       formData.append('price', price)
       formData.append('description', description)
       formData.append('contactNumber', contactNumber)
+      formData.append('whatsappNumber', whatsappNumber || contactNumber)
 
       if (latitude !== undefined) formData.append('latitude', latitude.toString())
       if (longitude !== undefined) formData.append('longitude', longitude.toString())
@@ -367,20 +417,25 @@ export default function AddProperty() {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   City *
                 </label>
-                <Select
-                  value={cityId}
-                  onValueChange={setCityId}
-                  disabled={isLoading || loadingCities}
-                >
-                  <SelectTrigger>
+                <Select value={cityId} onValueChange={setCityId} disabled={isLoading || loadingCities}>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder={loadingCities ? "Loading cities..." : "Select city"} />
                   </SelectTrigger>
                   <SelectContent>
                     {cities.map((city) => (
                       <SelectItem key={city._id} value={city._id}>
-                        {city.name}{city.state ? `, ${city.state}` : ''}
+                        {city.name}
                       </SelectItem>
                     ))}
+                    <div
+                      className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-primary font-medium hover:bg-gray-100 cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowAddCityModal(true);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" /> Add New City
+                    </div>
                   </SelectContent>
                 </Select>
               </div>
@@ -389,12 +444,8 @@ export default function AddProperty() {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Area *
                 </label>
-                <Select
-                  value={areaId}
-                  onValueChange={setAreaId}
-                  disabled={isLoading || loadingAreas || !cityId}
-                >
-                  <SelectTrigger>
+                <Select value={areaId} onValueChange={setAreaId} disabled={isLoading || loadingAreas || !cityId}>
+                  <SelectTrigger className="w-full">
                     <SelectValue
                       placeholder={
                         !cityId
@@ -411,6 +462,17 @@ export default function AddProperty() {
                         {area.name}
                       </SelectItem>
                     ))}
+                    {cityId && (
+                      <div
+                        className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-primary font-medium hover:bg-gray-100 cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowAddAreaModal(true);
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" /> Add New Area
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
                 {!cityId && (
@@ -717,14 +779,9 @@ export default function AddProperty() {
               <label className="block text-sm font-semibold text-gray-700 mb-3">
                 Property Description *
               </label>
-              <textarea
-                rows={5}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe your property in detail... Include amenities, nearby facilities, and unique features"
-                disabled={isLoading}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+              {/* rich editor */}
+              <RichEditor value={description} onChange={setDescription} />
+
             </div>
 
             {/* Features */}
@@ -768,19 +825,35 @@ export default function AddProperty() {
               </div>
             </div>
 
-            {/* Contact Number */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Contact Number *
-              </label>
-              <input
-                type="tel"
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-                placeholder="03XX XXXXXXX"
-                disabled={isLoading}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+            {/* Contact Number & WhatsApp Number */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Contact Number *
+                </label>
+                <input
+                  type="tel"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                  placeholder="03XX XXXXXXX"
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  WhatsApp Number (Optional)
+                </label>
+                <input
+                  type="tel"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  placeholder="923XX XXXXXXX"
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">If empty, contact number will be used for WhatsApp.</p>
+              </div>
             </div>
 
             {/* Submit Buttons */}
@@ -822,6 +895,66 @@ export default function AddProperty() {
             title="Select Main Property Image"
             description="Choose an existing image from the gallery to use as the main photo for this property."
           />
+
+          {/* Add City Modal */}
+          <Dialog open={showAddCityModal} onOpenChange={setShowAddCityModal}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New City</DialogTitle>
+                <DialogDescription>Enter the name of the new city to add it to the system.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">City Name</label>
+                  <input
+                    type="text"
+                    value={newCityName}
+                    onChange={(e) => setNewCityName(e.target.value)}
+                    placeholder="E.g., Islamabad"
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                </div>
+                <Button
+                  onClick={handleCreateCity}
+                  disabled={isAddingLocation || !newCityName.trim()}
+                  className="w-full"
+                >
+                  {isAddingLocation ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Add City
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Area Modal */}
+          <Dialog open={showAddAreaModal} onOpenChange={setShowAddAreaModal}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Area</DialogTitle>
+                <DialogDescription>Enter the name of the new area for the selected city.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Area Name</label>
+                  <input
+                    type="text"
+                    value={newAreaName}
+                    onChange={(e) => setNewAreaName(e.target.value)}
+                    placeholder="E.g., DHA Phase 1"
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                </div>
+                <Button
+                  onClick={handleCreateArea}
+                  disabled={isAddingLocation || !newAreaName.trim()}
+                  className="w-full"
+                >
+                  {isAddingLocation ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Add Area
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>

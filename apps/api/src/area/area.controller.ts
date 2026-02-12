@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UsePipes, ValidationPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UsePipes, ValidationPipe, Query, UseGuards } from '@nestjs/common';
 import { AreaService } from './area.service';
 import { CreateAreaDto } from '@rent-ghar/dtos/area/createarea.dto';
 import { AreaDocument } from '@rent-ghar/db/schemas/area.schema';
 import { UpdateAreaDto } from '@rent-ghar/dtos/area/updatearea.dto';
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('areas')
+@UseGuards(JwtAuthGuard)
 @UsePipes(new ValidationPipe())
 export class AreaController {
     constructor(private readonly areaService: AreaService) {}
@@ -27,12 +30,19 @@ export class AreaController {
         return this.areaService.findAreaById(id);
     }
 
+    @Get('name/:name')
+    async findAreaByName(@Param('name') name: string, @Query('cityId') cityId?: string): Promise<AreaDocument> {
+        return this.areaService.findAreaByName(name, cityId);
+    }
+
     @Put(':id')
+    @UseGuards(AdminGuard)
     async updateArea(@Param('id') id: string, @Body() updateAreaDto: UpdateAreaDto): Promise<AreaDocument> {
         return this.areaService.updateArea(id, updateAreaDto);
     }
 
     @Delete(':id')
+    @UseGuards(AdminGuard)
     async deleteArea(@Param('id') id: string): Promise<void> {
         await this.areaService.deleteArea(id);
     }

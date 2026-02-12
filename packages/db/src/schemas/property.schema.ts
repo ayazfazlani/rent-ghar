@@ -41,6 +41,9 @@ export class Property extends Document {
   @Prop({ required: true })
   contactNumber: string
 
+  @Prop({ type: String })
+  whatsappNumber?: string
+
   @Prop({ type: [String], default: [] })
   features: string[]
   

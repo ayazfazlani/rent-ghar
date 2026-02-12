@@ -9,6 +9,11 @@ async function bootstrap() {
   // Trigger restart for Cookie fix
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
+  
+  // Increase body limit for large file uploads
+  const { json, urlencoded } = require('express');
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   // Serve static files for local storage
   if (process.env.STORAGE_DISK === 'local' || !process.env.STORAGE_DISK) {

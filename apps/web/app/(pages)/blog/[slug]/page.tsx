@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   try {
     // Fetch blog data for SEO
-    const response = await fetch(`${apiUrl}/blog/slug/${encodeURIComponent(slug)}`, {
+    const response = await fetch(`${apiUrl}/api/blog/slug/${encodeURIComponent(slug)}`, {
       next: { revalidate: 3600 }, // Revalidate every hour
       headers: {
         'Content-Type': 'application/json',
@@ -49,9 +49,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     // Get featured image or default
     const imageUrl = blog.featuredImage
-      ? (blog.featuredImage.startsWith('http') 
-          ? blog.featuredImage 
-          : `${baseUrl}${blog.featuredImage.startsWith('/') ? '' : '/'}${blog.featuredImage}`)
+      ? (blog.featuredImage.startsWith('http')
+        ? blog.featuredImage
+        : `${baseUrl}${blog.featuredImage.startsWith('/') ? '' : '/'}${blog.featuredImage}`)
       : `${baseUrl}/default-blog.jpg`;
 
     // Get canonical URL
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       : undefined;
 
     // Generate keywords array
-    const keywords = blog.tags && blog.tags.length > 0 
+    const keywords = blog.tags && blog.tags.length > 0
       ? [...blog.tags, ...categories]
       : categories;
 
@@ -182,7 +182,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   // Fetch blog data for structured data
   let blog: Blog | null = null;
   try {
-    const response = await fetch(`${apiUrl}/blog/slug/${encodeURIComponent(slug)}`, {
+    const response = await fetch(`${apiUrl}/api/blog/slug/${encodeURIComponent(slug)}`, {
       next: { revalidate: 3600 },
       headers: {
         'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     const authorName = typeof blog.author === 'object' && blog.author !== null && 'name' in blog.author
       ? blog.author.name
       : 'RentGhar Team';
-    
+
     const authorEmail = typeof blog.author === 'object' && blog.author !== null && 'email' in blog.author
       ? blog.author.email
       : 'info@rentghar.com';
@@ -212,9 +212,9 @@ export default async function BlogPostPage({ params }: PageProps) {
       : ['Uncategorized'];
 
     const imageUrl = blog.featuredImage
-      ? (blog.featuredImage.startsWith('http') 
-          ? blog.featuredImage 
-          : `${baseUrl}${blog.featuredImage.startsWith('/') ? '' : '/'}${blog.featuredImage}`)
+      ? (blog.featuredImage.startsWith('http')
+        ? blog.featuredImage
+        : `${baseUrl}${blog.featuredImage.startsWith('/') ? '' : '/'}${blog.featuredImage}`)
       : `${baseUrl}/default-blog.jpg`;
 
     const pageUrl = `${baseUrl}/blog/${blog.slug}`;

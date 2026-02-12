@@ -17,10 +17,17 @@ export class AreaService {
             throw new NotFoundException('Invalid city ID');
         }
 
-        const createdArea = new this.areaModel({
+        const areaData: any = {
             name: createAreaDto.name,
             city: createAreaDto.city,
-        });
+        };
+
+        if (createAreaDto.metaTitle) areaData.metaTitle = createAreaDto.metaTitle;
+        if (createAreaDto.metaDescription) areaData.metaDescription = createAreaDto.metaDescription;
+        if (createAreaDto.canonicalUrl) areaData.canonicalUrl = createAreaDto.canonicalUrl;
+        if (createAreaDto.description) areaData.description = createAreaDto.description;
+
+        const createdArea = new this.areaModel(areaData);
         return await createdArea.save();
     }
 
@@ -35,6 +42,17 @@ export class AreaService {
         const area = await this.areaModel.findById(id).populate('city', 'name state country').exec();
         if (!area) {
             throw new NotFoundException('Area not found');
+        }
+        return area as AreaDocument;
+    }
+
+    async findAreaByName(name: string, cityId?: string): Promise<AreaDocument> {
+        const query: any = { name: name.toLowerCase().trim() };
+        if (cityId) query.city = cityId;
+        
+        const area = await this.areaModel.findOne(query).populate('city', 'name state country').exec();
+        if (!area) {
+            throw new NotFoundException(`Area ${name} not found`);
         }
         return area as AreaDocument;
     }

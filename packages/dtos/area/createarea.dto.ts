@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsMongoId } from "class-validator";
+import {IsOptional, IsNotEmpty, IsString, IsMongoId } from "class-validator";
 
 export class CreateAreaDto {
     @IsNotEmpty()
@@ -8,4 +8,20 @@ export class CreateAreaDto {
     @IsNotEmpty()
     @IsMongoId()
     city: string; // City ID
+
+    @IsOptional()
+    @IsString()
+    metaTitle?: string;
+
+    @IsOptional()
+    @IsString()
+    metaDescription?: string;
+
+    @IsOptional()
+    @IsString()
+    canonicalUrl?: string;
+
+    @IsOptional()
+    @IsString()
+    description?: string;
 }
