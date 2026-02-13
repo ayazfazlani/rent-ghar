@@ -3,6 +3,9 @@ import { BlogService } from './blog.service';
 import { CreateBlogDto } from '@rent-ghar/dtos/blog/createblog.dto';
 import { UpdateBlogDto } from '@rent-ghar/dtos/blog/updateblog.dto';
 import { BlogDocument } from '@rent-ghar/db/schemas/blog.schema';
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
+import { UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 
 @Controller('blog')
 export class BlogController {
@@ -14,6 +17,7 @@ export class BlogController {
     }
     // Create a new blog
     @Post()
+    @UseGuards(JwtAuthGuard, AdminGuard)
     @HttpCode(HttpStatus.CREATED)
     async createBlog(@Body() createBlogDto: CreateBlogDto): Promise<BlogDocument> {
         try {
@@ -50,6 +54,7 @@ export class BlogController {
 
     // Update blog
     @Put(':id')
+    @UseGuards(JwtAuthGuard, AdminGuard)
     async updateBlog(
         @Param('id') id: string,
         @Body() updateBlogDto: UpdateBlogDto
@@ -59,6 +64,7 @@ export class BlogController {
 
     // Delete blog
     @Delete(':id')
+    @UseGuards(JwtAuthGuard, AdminGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteBlog(@Param('id') id: string): Promise<void> {
         return this.blogService.deleteBlog(id);

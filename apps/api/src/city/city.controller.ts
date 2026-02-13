@@ -11,7 +11,7 @@ export class CityController {
     constructor(private readonly cityService: CityService){}
 
     @Post()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, AdminGuard)
     async createCity(@Body() createCityDto: CreateCityDto): Promise<CityDocument> {
         try {
             return await this.cityService.createCity(createCityDto);
@@ -42,13 +42,13 @@ export class CityController {
     }
 
     @Put(':id')
-    @UseGuards(AdminGuard)
+    @UseGuards(JwtAuthGuard, AdminGuard)
     async updateCity(@Param('id') id: string, @Body() updateCityDto: UpdateCityDto): Promise<CityDocument> {
         return await this.cityService.updateCity(id, updateCityDto);
     }
 
     @Delete(':id')
-    @UseGuards(AdminGuard)
+    @UseGuards(JwtAuthGuard, AdminGuard)
     async deleteCity(@Param('id') id: string): Promise<void> {
         await this.cityService.deleteCity(id);
     }

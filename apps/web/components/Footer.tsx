@@ -98,7 +98,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary" />
-                <span className="text-background/70">info@rentghr.com</span>
+                <span className="text-background/70">info@PropertyDealer.com</span>
               </li>
             </ul>
           </div>
@@ -106,7 +106,7 @@ const Footer = () => {
 
         <div className="border-t border-background/10 mt-10 pt-6 text-center">
           <p className="text-background/60 text-sm">
-            © 2025 RentGhr. All rights reserved. Since 2007
+            © 2025 PropertyDealer. All rights reserved. Since 2007
           </p>
         </div>
       </div>

@@ -3,6 +3,9 @@ import { CreateCategoryDto } from '@rent-ghar/dtos/blog-category/create-category
 import { UpdateCategoryDto } from '@rent-ghar/dtos/blog-category/update-category.dto';
 import { CategoryDocument } from '@rent-ghar/db/schemas/category.schema';
 import { CategoryService } from './category.service';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('category')
 export class CategoryController {
@@ -10,6 +13,7 @@ export class CategoryController {
     
     // Create a new category
     @Post()
+    @UseGuards(JwtAuthGuard, AdminGuard)
     @HttpCode(HttpStatus.CREATED)
     async createCategory(@Body() createCategoryDto: CreateCategoryDto): Promise<CategoryDocument> {
         return this.categoryService.createCategory(createCategoryDto);
@@ -35,6 +39,7 @@ export class CategoryController {
 
     // Update category
     @Put(':id')
+    @UseGuards(JwtAuthGuard, AdminGuard)
     async updateCategory(
         @Param('id') id: string,
         @Body() updateCategoryDto: UpdateCategoryDto
@@ -44,6 +49,7 @@ export class CategoryController {
 
     // Delete category
     @Delete(':id')
+    @UseGuards(JwtAuthGuard, AdminGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteCategory(@Param('id') id: string): Promise<void> {
         return this.categoryService.deleteCategory(id);

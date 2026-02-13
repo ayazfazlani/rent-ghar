@@ -19,14 +19,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://rentghar.com'),
   title: {
-    default: "RentGhr - Property Portal Pakistan",
-    template: "%s | RentGhr"
+    default: "PropertyDealer - Property Portal Pakistan",
+    template: "%s | PropertyDealer"
   },
   description: "Pakistan's most trusted property portal since 2007. Find properties for rent and sale in Multan, Lahore, Karachi, and Islamabad.",
   keywords: ["property portal pakistan", "rent ghar", "houses for rent multan", "apartments for sale lahore", "plots karachi", "commercial property islamabad"],
-  authors: [{ name: "RentGhr Team" }],
-  creator: "RentGhr",
-  publisher: "RentGhr",
+  authors: [{ name: "PropertyDealer Team" }],
+  creator: "PropertyDealer",
+  publisher: "PropertyDealer",
   formatDetection: {
     email: false,
     address: true,
@@ -36,21 +36,21 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_PK',
     url: 'https://rentghar.com',
-    siteName: 'RentGhr',
-    title: 'RentGhr - Find Your Dream Property in Pakistan',
+    siteName: 'PropertyDealer',
+    title: 'PropertyDealer - Find Your Dream Property in Pakistan',
     description: "Explore thousands of properties for rent and sale across Pakistan.",
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'RentGhr Property Portal',
+        alt: 'PropertyDealer Property Portal',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RentGhr - Property Portal Pakistan',
+    title: 'PropertyDealer - Property Portal Pakistan',
     description: 'Find properties for rent and sale in Pakistan.',
     images: ['/og-image.jpg'],
   },

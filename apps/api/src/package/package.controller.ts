@@ -24,6 +24,7 @@ export class PackageController {
   }
 
   @Get('all')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async findAllIncludingInactive() {
     return this.packageService.findAllIncludingInactive();
   }
@@ -52,6 +53,7 @@ export class PackageController {
   }
 
   @Post('seed')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async seed() {
     const packages = [
       {

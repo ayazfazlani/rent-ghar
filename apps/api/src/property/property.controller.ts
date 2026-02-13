@@ -237,6 +237,7 @@ export class PropertyController {
 
 
   @Post('upload')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadImage(@Request() req) {
     const files = req.files as Express.Multer.File[];
@@ -254,6 +255,7 @@ export class PropertyController {
   }
 
   @Get('images/list')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async listImages(@Query('folder') folder?: string) {
     try {
       const images = await this.storageService.listFiles(folder || 'properties');
@@ -265,6 +267,7 @@ export class PropertyController {
   }
 
   @Delete('images/:key')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async deleteImage(@Param('key') key: string) {
     try {
       // Decode the key (it might be URL encoded)

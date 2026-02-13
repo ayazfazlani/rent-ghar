@@ -386,7 +386,7 @@ export class PropertyService {
             throw new NotFoundException('Property not found');
           }
 
-          // Strict Admin-only check for updates as per user request
+          // Strict Admin-only check as requested (manual guard revert on backend)
           if (userRole !== 'ADMIN') {
             throw new ForbiddenException('Only administrators can modify property listings');
           }
@@ -438,7 +438,7 @@ export class PropertyService {
             throw new NotFoundException('Property not found');
           }
 
-          // Strict Admin-only check for deletions
+          // Strict Admin-only check as requested
           if (userRole !== 'ADMIN') {
             throw new ForbiddenException('Only administrators can delete property listings');
           }

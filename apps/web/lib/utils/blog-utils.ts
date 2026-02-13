@@ -54,13 +54,13 @@ function getCategoryName(blog: Blog): string {
 
 /**
  * Get author name from blog
- * Returns author name or "RentGhr Team"
+ * Returns author name or "PropertyDealer Team"
  */
 function getAuthorName(blog: Blog): string {
   if (typeof blog.author === 'object' && blog.author !== null && 'name' in blog.author) {
     return blog.author.name;
   }
-  return 'RentGhr Team';
+  return 'PropertyDealer Team';
 }
 
 /**
@@ -93,7 +93,7 @@ export function transformBlogToPost(blog: Blog | null | undefined): BlogPost {
       excerpt: '',
       content: '',
       date: 'Date not available',
-      author: 'RentGhr Team',
+      author: 'PropertyDealer Team',
       image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=500&fit=crop',
       category: 'Uncategorized',
       readTime: '0 min read',

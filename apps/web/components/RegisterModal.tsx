@@ -23,7 +23,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }: RegisterModalProps) =
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success('Registration Successful', {
-      description: 'Welcome to RentGhr! You can now login.',
+      description: 'Welcome to PropertyDealer! You can now login.',
     });
     onClose();
     setFormData({ name: '', email: '', phone: '', password: '' });

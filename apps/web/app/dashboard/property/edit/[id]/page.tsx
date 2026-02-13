@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2, X, Plus } from 'lucide-react'
@@ -84,14 +84,23 @@ export default function EditProperty() {
 
   const params = useParams()
   const propertyId = params.id as string
-  console.log(propertyId)
+  const isFirstLoad = useRef(true)
 
   // Fetch cities on component mount
   useEffect(() => {
     const fetchCities = async () => {
       try {
         const data = await cityApi.getAll()
-        setCities(data)
+        setCities(prev => {
+          // Merge fetched cities with existing (which might have our seeded city)
+          const newCities = [...prev]
+          data.forEach((city: any) => {
+            if (!newCities.find(c => String(c._id) === String(city._id))) {
+              newCities.push(city)
+            }
+          })
+          return newCities
+        })
       } catch (error: any) {
         console.error('Error fetching cities:', error)
         toast.error('Error', {
@@ -108,27 +117,73 @@ export default function EditProperty() {
       try {
         setLoadingProperty(true)
         const property = await propertyApi.getPropertyById({ id: propertyId })
+
         setListingType(property.listingType)
-        setPropertyType(property.propertyType)
-        setCityId(property.cityId)
-        setAreaId(property.areaId)
+
+        // Map backend lowercase type to capitalized frontend type
+        const typeMapping: Record<string, string> = {
+          'house': 'House',
+          'apartment': 'Apartment',
+          'flat': 'Flat',
+          'commercial': 'Commercial',
+          'land': 'Land',
+          'shop': 'Shop',
+          'office': 'Office',
+          'warehouse': 'Warehouse',
+          'factory': 'Factory',
+          'hotel': 'Hotel',
+          'restaurant': 'Restaurant',
+          'plot': 'Plot'
+        }
+        setPropertyType(typeMapping[property.propertyType] || 'House')
+
+        // Handle populated Area and City
+        if (property.area && typeof property.area === 'object') {
+          const areaObj = property.area;
+          const areaIdStr = String(areaObj._id);
+
+          // Seed cities list with the current city if it's populated
+          if (areaObj.city && typeof areaObj.city === 'object') {
+            const cityObj = areaObj.city;
+            const cityIdStr = String(cityObj._id);
+            setCityId(cityIdStr);
+            setCities(prev => {
+              const exists = prev.find(c => String(c._id) === cityIdStr);
+              return exists ? prev : [...prev, cityObj];
+            });
+          } else if (areaObj.city) {
+            setCityId(String(areaObj.city));
+          }
+
+          // Seed areas list with the current area
+          setAreaId(areaIdStr);
+          setAreas(prev => {
+            const exists = prev.find(a => String(a._id) === areaIdStr);
+            return exists ? prev : [...prev, areaObj];
+          });
+        } else if (property.area) {
+          setAreaId(String(property.area));
+        }
+
         setTitle(property.title)
         setLocation(property.location)
-        setBedrooms(property.bedrooms)
-        setBathrooms(property.bathrooms)
-        setAreaSize(property.areaSize)
-        setPrice(property.price)
-        setDescription(property.description)
-        setContactNumber(property.contactNumber)
+        setBedrooms(property.bedrooms?.toString() || '0')
+        setBathrooms(property.bathrooms?.toString() || '0')
+        setAreaSize(property.areaSize?.toString() || '0')
+        setPrice(property.price?.toString() || '0')
+        setDescription(property.description || '')
+        setContactNumber(property.contactNumber || '')
         setWhatsappNumber(property.whatsappNumber || '')
         setLatitude(property.latitude)
         setLongitude(property.longitude)
-        setMainImagePreview(property.mainImage)
-        // Ensure additionalImagePreviews always has 3 elements
-        const additionalImages = property.additionalImages || []
+
+        // Correct field names for images
+        setMainImagePreview(property.mainPhotoUrl || null)
+        const additionalImages = property.additionalPhotosUrls || []
         const paddedImages = [...additionalImages, null, null, null].slice(0, 3)
         setAdditionalImagePreviews(paddedImages)
-        setFeatures(property.features || [''])
+
+        setFeatures(property.features && property.features.length > 0 ? property.features : [''])
       } catch (error: any) {
         console.error('Error fetching property:', error)
         toast.error('Error', {
@@ -138,26 +193,53 @@ export default function EditProperty() {
         setLoadingProperty(false)
       }
     }
-    fetchProperty(propertyId)
-  }, [])
+    if (propertyId) {
+      fetchProperty(propertyId)
+    }
+
+    // Set first load to false after a delay
+    const timer = setTimeout(() => {
+      isFirstLoad.current = false
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [propertyId])
 
   // Fetch areas when city changes
   useEffect(() => {
     const fetchAreas = async () => {
       if (!cityId) {
         setAreas([])
-        setAreaId('') // Reset area when city is cleared
+        // Only clear areaId if cityId is truly empty (manual reset)
+        // If it's the initial load, we want to keep the areaId set by fetchProperty
+        if (!loadingProperty) {
+          setAreaId('')
+        }
         return
       }
 
       try {
         setLoadingAreas(true)
         const data = await areaApi.getAll(cityId)
-        setAreas(data)
-        // Only reset area if cityId changed (not on initial load)
-        // We'll preserve areaId if it's already set from property data
-        if (!areaId || !data.find((a: { _id: string }) => a._id === areaId)) {
-          setAreaId('') // Reset area selection when city changes
+
+        setAreas(prev => {
+          // Merge fetched areas with existing (which might have our seeded area)
+          const newAreas = [...prev]
+          data.forEach((area: any) => {
+            if (!newAreas.find(a => String(a._id) === String(area._id))) {
+              newAreas.push(area)
+            }
+          })
+          return newAreas
+        })
+
+        // Only reset areaId if the current area isn't in the new city's areas
+        // and only if we're not currently in the initial loading state
+        if (!loadingProperty && !isFirstLoad.current) {
+          const currentAreaId = String(areaId)
+          const areaExists = data.find((a: { _id: string }) => String(a._id) === currentAreaId)
+          if (!areaExists && currentAreaId !== '') {
+            setAreaId('')
+          }
         }
       } catch (error: any) {
         console.error('Error fetching areas:', error)
@@ -171,7 +253,7 @@ export default function EditProperty() {
     }
 
     fetchAreas()
-  }, [cityId])
+  }, [cityId, loadingProperty])
 
   const handleCreateCity = async () => {
     if (!newCityName.trim()) return
@@ -444,7 +526,7 @@ export default function EditProperty() {
                   </SelectTrigger>
                   <SelectContent>
                     {cities.map((city) => (
-                      <SelectItem key={city._id} value={city._id}>
+                      <SelectItem key={String(city._id)} value={String(city._id)}>
                         {city.name}
                       </SelectItem>
                     ))}
@@ -483,7 +565,7 @@ export default function EditProperty() {
                   </SelectTrigger>
                   <SelectContent>
                     {areas.map((area) => (
-                      <SelectItem key={area._id} value={area._id}>
+                      <SelectItem key={String(area._id)} value={String(area._id)}>
                         {area.name}
                       </SelectItem>
                     ))}

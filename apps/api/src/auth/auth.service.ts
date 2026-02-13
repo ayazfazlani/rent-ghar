@@ -1,6 +1,7 @@
 import {
   BadGatewayException,
   UnauthorizedException,
+  ForbiddenException,
   Injectable,
 } from '@nestjs/common';
 import { RegisterDto } from './dtos/register.dto';
@@ -12,7 +13,7 @@ import { LoginDto } from './dtos/login.dto';
 
 export interface TokenResponse {
   token: string;
-  user: { name: string; email: string; role: string };
+  user: { name: string; email: string; role: string; isActive: boolean };
   status: number;
   message: string;
 }
@@ -40,6 +41,7 @@ export class AuthService {
         name: user.name || '',
         email: user.email,
         role: user.role || 'user',
+        isActive: user.isActive,
       },
       status: 201,
       message: 'Registered successfully',
@@ -53,6 +55,15 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await user.comparePassword(dto.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (user.isActive === false) {
+      throw new ForbiddenException('Account is pending activation');
     }
     // generate access token and refresh token
     const accessToken = this.generateToken(user);
@@ -73,6 +84,7 @@ export class AuthService {
         name: user.name || '',
         email: user.email,
         role: user.role || 'user',
+        isActive: user.isActive,
       },
       status: 200,
       message: 'Login successful',
@@ -83,6 +95,7 @@ export class AuthService {
       email: user.email,
       sub: user._id.toString(),
       role: user.role,
+      isActive: user.isActive,
     };
 
     return this.jwtService.sign(payload as any);
@@ -106,6 +119,7 @@ export class AuthService {
           name: user.name || '',
           email: user.email,
           role: user.role || 'user',
+          isActive: user.isActive,
         },
         status: 200,
         message: 'Refresh token successful',

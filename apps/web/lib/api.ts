@@ -1,20 +1,20 @@
 // lib/api.ts
-import axios from 'axios';
+import axios from "axios";
 
 const getBaseURL = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  console.log(apiUrl)
-  if (!apiUrl) return '/api';
-  const baseURL = apiUrl.endsWith('/') ? `${apiUrl}api` : `${apiUrl}/api`;
-  console.log('🌐 API BaseURL:', baseURL);
+  console.log(apiUrl);
+  if (!apiUrl) return "/api";
+  const baseURL = apiUrl.endsWith("/") ? `${apiUrl}api` : `${apiUrl}/api`;
+  console.log("🌐 API BaseURL:", baseURL);
   return baseURL;
 };
 
 const api = axios.create({
   baseURL: getBaseURL(),
-  withCredentials: true,        // ← cookie (refresh_token) automatic bhejo
+  withCredentials: true, // ← cookie (refresh_token) automatic bhejo
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -24,30 +24,51 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Skip refresh logic for the refresh endpoint itself or if we're already on the login page
-    const isRefreshRequest = originalRequest.url?.includes('/auth/refresh');
-    const isProfileRequest = originalRequest.url?.includes('/auth/profile');
-    const isOnLoginPage = typeof window !== 'undefined' && window.location.pathname === '/login';
+    // Determine request type
+    const isRefreshRequest = originalRequest.url?.includes("/auth/refresh");
+    const isProfileRequest = originalRequest.url?.includes("/auth/profile");
+    const isAuthRequest = originalRequest.url?.includes("/auth/");
+    const isOnLoginPage =
+      typeof window !== "undefined" && window.location.pathname === "/login";
+    const isOnAuthPage =
+      (typeof window !== "undefined" &&
+        window.location.pathname.includes("/(auth)")) ||
+      window.location.pathname.includes("/login") ||
+      window.location.pathname.includes("/register");
 
-    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest && !isOnLoginPage) {
+    // For 401 errors, attempt refresh only for non-special requests
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isRefreshRequest &&
+      !isProfileRequest &&
+      !isOnAuthPage
+    ) {
       originalRequest._retry = true;
 
       try {
-        await api.post('/auth/refresh');
+        await api.post("/auth/refresh");
         return api(originalRequest);
       } catch (refreshError) {
-        console.warn('Refresh token expired or missing → session ended');
-        
-        // Redirect to login ONLY if it's not a profile check (where we just want to know if logged in or not)
-        if (typeof window !== 'undefined' && !isProfileRequest) {
-          window.location.href = '/login?sessionExpired=true';
+        console.warn("Refresh token expired or missing → session ended");
+
+        // Only redirect if NOT on a public page and NOT an auth request
+        // Public pages don't need auth, so don't redirect for them
+        // Only redirect if user is trying to access an authenticated-only feature
+        const isOnDashboard =
+          typeof window !== "undefined" &&
+          window.location.pathname.includes("/dashboard");
+
+        if (isOnDashboard && typeof window !== "undefined") {
+          window.location.href = "/login?sessionExpired=true";
         }
+
         return Promise.reject(refreshError);
       }
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // Property API functions
@@ -55,33 +76,33 @@ export const propertyApi = {
   // Get all approved properties
   getAll: async (filters?: { cityId?: string; areaId?: string }) => {
     const params = new URLSearchParams();
-    if (filters?.cityId) params.append('cityId', filters.cityId);
-    if (filters?.areaId) params.append('areaId', filters.areaId);
+    if (filters?.cityId) params.append("cityId", filters.cityId);
+    if (filters?.areaId) params.append("areaId", filters.areaId);
     const queryString = params.toString();
-    const url = queryString ? `/properties?${queryString}` : '/properties';
+    const url = queryString ? `/properties?${queryString}` : "/properties";
     const response = await api.get(url);
     return response.data;
   },
 
   // Get dynamic property types
   getTypes: async () => {
-    const response = await api.get('/properties/types');
+    const response = await api.get("/properties/types");
     return response.data;
   },
 
-  // get property by id 
-  getPropertyById: async (params: {id: string}) => {
+  // get property by id
+  getPropertyById: async (params: { id: string }) => {
     const response = await api.get(`/properties/${params.id}`);
     return response.data;
   },
   // Get all properties (for dashboard - includes pending, approved, rejected)
   getAllProperties: async () => {
-    const response = await api.get('/properties/all');
+    const response = await api.get("/properties/all");
     return response.data;
   },
 
   // Get property by slug
-  getPropertyBySlug: async (params: {slug: string}) => {
+  getPropertyBySlug: async (params: { slug: string }) => {
     const response = await api.get(`/properties/slug/${params.slug}`);
     return response.data;
   },
@@ -92,9 +113,9 @@ export const propertyApi = {
   },
   // Create a new property
   create: async (data: FormData) => {
-    const response = await api.post('/properties', data, {
+    const response = await api.post("/properties", data, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -104,7 +125,7 @@ export const propertyApi = {
   update: async (propertyId: string, data: FormData) => {
     const response = await api.put(`/properties/${propertyId}`, data, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -117,23 +138,29 @@ export const propertyApi = {
   },
 
   // Get location statistics
-  getLocationStats: async (city: string, listingType?: string, propertyType?: string) => {
+  getLocationStats: async (
+    city: string,
+    listingType?: string,
+    propertyType?: string,
+  ) => {
     const params = new URLSearchParams();
-    params.append('city', city);
-    if (listingType) params.append('listingType', listingType);
-    if (propertyType) params.append('propertyType', propertyType);
-    
-    const response = await api.get(`/properties/stats/locations?${params.toString()}`);
+    params.append("city", city);
+    if (listingType) params.append("listingType", listingType);
+    if (propertyType) params.append("propertyType", propertyType);
+
+    const response = await api.get(
+      `/properties/stats/locations?${params.toString()}`,
+    );
     return response.data;
   },
 
   // Upload image
   uploadImage: async (file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
-    const response = await api.post('/properties/upload', formData, {
+    formData.append("file", file);
+    const response = await api.post("/properties/upload", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -144,13 +171,13 @@ export const propertyApi = {
 export const blogApi = {
   // Get all published blogs (for public frontend)
   getPublishedBlogs: async () => {
-    const response = await api.get('/blog/published');
+    const response = await api.get("/blog/published");
     return response.data;
   },
 
   // Get all blogs (for admin dashboard - can filter by status)
   getAllBlogs: async (status?: string) => {
-    const url = status ? `/blog?status=${status}` : '/blog';
+    const url = status ? `/blog?status=${status}` : "/blog";
     const response = await api.get(url);
     return response.data;
   },
@@ -176,12 +203,12 @@ export const blogApi = {
 // Package API functions
 export const packageApi = {
   getAll: async () => {
-    const response = await api.get('/packages');
+    const response = await api.get("/packages");
     return response.data;
   },
 
   getAllIncludingInactive: async () => {
-    const response = await api.get('/packages/all');
+    const response = await api.get("/packages/all");
     return response.data;
   },
 
@@ -191,7 +218,7 @@ export const packageApi = {
   },
 
   create: async (dto: any) => {
-    const response = await api.post('/packages', dto);
+    const response = await api.post("/packages", dto);
     return response.data;
   },
 
@@ -209,27 +236,27 @@ export const packageApi = {
 // Subscription API functions
 export const subscriptionApi = {
   purchase: async (packageId: string) => {
-    const response = await api.post('/subscriptions/purchase', { packageId });
+    const response = await api.post("/subscriptions/purchase", { packageId });
     return response.data;
   },
 
   getMySubscriptions: async () => {
-    const response = await api.get('/subscriptions/my-subscriptions');
+    const response = await api.get("/subscriptions/my-subscriptions");
     return response.data;
   },
 
   getActiveSubscription: async () => {
-    const response = await api.get('/subscriptions/active');
+    const response = await api.get("/subscriptions/active");
     return response.data;
   },
 
   canCreateProperty: async () => {
-    const response = await api.get('/subscriptions/can-create-property');
+    const response = await api.get("/subscriptions/can-create-property");
     return response.data;
   },
 
   getAll: async () => {
-    const response = await api.get('/subscriptions');
+    const response = await api.get("/subscriptions");
     return response.data;
   },
 
@@ -251,9 +278,9 @@ export const subscriptionApi = {
 
 export const importApi = {
   importWordPress: async (formData: FormData) => {
-    const response = await api.post('/import/wordpress', formData, {
+    const response = await api.post("/import/wordpress", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data; // { totalFound, imported, skipped, ... }
@@ -263,7 +290,7 @@ export const importApi = {
 // City API functions
 export const cityApi = {
   getAll: async () => {
-    const response = await api.get('/cities');
+    const response = await api.get("/cities");
     return response.data;
   },
   getById: async (id: string) => {
@@ -275,7 +302,7 @@ export const cityApi = {
 // Area API functions
 export const areaApi = {
   getAll: async () => {
-    const response = await api.get('/areas');
+    const response = await api.get("/areas");
     return response.data;
   },
   getAreasByCity: async (cityId: string) => {
@@ -291,7 +318,7 @@ export const areaApi = {
 // User API functions
 export const userApi = {
   getAll: async () => {
-    const response = await api.get('/users');
+    const response = await api.get("/users");
     return response.data;
   },
   getById: async (id: string) => {

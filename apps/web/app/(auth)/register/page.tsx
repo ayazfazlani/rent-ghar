@@ -87,7 +87,7 @@ export default function RegisterPage() {
             Create an account
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your details to get started with RentGhr
+            Enter your details to get started with PropertyDealer
           </CardDescription>
         </CardHeader>
 

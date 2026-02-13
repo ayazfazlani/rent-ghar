@@ -19,7 +19,7 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }: LoginModalProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success('Login Successful', {
-      description: 'Welcome back to RentGhr!',
+      description: 'Welcome back to PropertyDealer!',
     });
     onClose();
     setEmail('');

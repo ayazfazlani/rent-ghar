@@ -14,6 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/auth-context';
 import { toast } from 'sonner';
@@ -232,20 +233,21 @@ export default function DashboardHome() {
                       </Button>
                       {isAdmin && (
                         <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              // TODO: Implement edit functionality
-                              router.push(`/dashboard/property/edit/${property._id}`);
-                            }}
+                          <Link
+                            href={`/dashboard/property/edit/${property._id}`}
+                            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0"
+                            title="Edit Property"
                           >
                             <Edit className="w-4 h-4" />
-                          </Button>
+                            <span className="sr-only">Edit</span>
+                          </Link>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={async () => {
+                            className="h-8 w-8 p-0"
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               if (confirm('Are you sure you want to delete this property? This action cannot be undone.')) {
                                 try {
                                   await propertyApi.delete(property._id);

@@ -68,11 +68,16 @@ export default function LoginPage() {
 
     } catch (err: any) {
       console.error(err)
-      const errorMessage =
-        err.response?.data?.message ||
-        'Invalid credentials or server error. Please try again.'
+
+      const errorMessage = err.response?.data?.message || 'Invalid credentials or server error.'
+
+      if (errorMessage === 'Account is pending activation') {
+        router.push('/pending-activation')
+        return
+      }
 
       toast.error(errorMessage, {
+        description: 'Please check your credentials and try again.'
       })
     } finally {
       setIsLoading(false)

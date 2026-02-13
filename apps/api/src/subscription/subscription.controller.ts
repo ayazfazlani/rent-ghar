@@ -47,6 +47,7 @@ export class SubscriptionController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async findAll() {
     return this.subscriptionService.findAll();
   }
@@ -58,7 +59,7 @@ export class SubscriptionController {
   }
 
   @Put(':id/activate')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async activate(@Param('id') id: string) {
     return this.subscriptionService.activate(id);
   }

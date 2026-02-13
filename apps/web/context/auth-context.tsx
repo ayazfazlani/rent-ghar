@@ -11,6 +11,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   role?: string;
+  isActive: boolean;
   // Add other fields as needed
 }
 
