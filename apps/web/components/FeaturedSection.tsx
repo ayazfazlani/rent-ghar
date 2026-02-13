@@ -119,7 +119,8 @@ const FeaturedSection = () => {
         setLoading(true);
         setError(null);
         const response = await propertyApi.getAll();
-        const backendProperties = response as BackendProperty[];
+        const backendProperties = (response as any).properties || [] as BackendProperty[];
+
         const allProperties = backendProperties.map(mapBackendToFrontendProperty);
 
         // Get approved properties only and limit to 8 for featured section

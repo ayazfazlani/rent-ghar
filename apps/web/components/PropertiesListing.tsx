@@ -58,6 +58,10 @@ export default function PropertiesListing({
   // Local state for filters before applying
   const [tempCity, setTempCity] = useState(initialCity);
   const [tempType, setTempType] = useState(initialType);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
 
   // State for advanced filters
   const [advancedFilters, setAdvancedFilters] = useState<{
@@ -71,52 +75,50 @@ export default function PropertiesListing({
 
   const handleFilterChange = (newFilters: any) => {
     setAdvancedFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
-  // FETCH PROPERTIES FROM API
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
 
-        // Fetch properties, cities and types in parallel
-        const [propsResponse, citiesResponse, typesResponse] = await Promise.all([
-          propertyApi.getAll(),
-          cityApi.getAll(),
-          propertyApi.getTypes()
-        ]);
+  // Helper function to create slug from city name
+  const cityToSlug = (cityName: string): string => {
+    return cityName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
 
-        const backendProperties = propsResponse as BackendProperty[];
-        const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
+  // Helper function to find city name from slug (handles both full slugs and abbreviations)
+  const slugToCity = (slug: string, cityList: string[]): string | null => {
+    const normalizedSlug = slug.toLowerCase().trim();
 
-        setProperties(transformedProperties);
-        setAllCities(citiesResponse);
-        setAllPropertyTypes(typesResponse);
-      } catch (err: any) {
-        console.error('Error fetching data:', err);
-        const errorMessage = err.response?.data?.message || err.message || 'Failed to load data';
-        setError(errorMessage);
-        toast.error('Error', {
-          description: errorMessage,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+    // First try exact slug match
+    const exactMatch = cityList.find(c => cityToSlug(c) === normalizedSlug);
+    if (exactMatch) return exactMatch;
 
-    fetchData();
-  }, []); // Fetch once on mount
+    // Try to match by first letters (e.g., "dgk" matches "Dera Ghazi Khan")
+    const words = normalizedSlug.split('-');
+    if (words.length > 0) {
+      const firstLetters = words.map((w: string) => w[0] || '').join('');
+      const abbreviationMatch = cityList.find(c => {
+        const cityWords = c.toLowerCase().split(/\s+/);
+        const cityAbbr = cityWords.map((w: string) => w[0] || '').join('');
+        return cityAbbr === firstLetters;
+      });
+      if (abbreviationMatch) return abbreviationMatch;
+    }
 
-  // Update state when props change
-  useEffect(() => {
-    setCity(initialCity);
-    setType(initialType);
-    setTempCity(initialCity);
-    setTempType(initialType);
-  }, [initialCity, initialType, purpose]);
+    // Try partial match (e.g., "dgk" might match cities starting with "dera")
+    const partialMatch = cityList.find(c =>
+      cityToSlug(c).startsWith(normalizedSlug) ||
+      normalizedSlug.startsWith(cityToSlug(c).substring(0, 3))
+    );
+    if (partialMatch) return partialMatch;
 
-  // Extract unique cities and property types
+    return null;
+  };
+
+  // Extract unique cities
   const cities = useMemo(() => {
     if (allCities && allCities.length > 0) {
       return allCities.map(c => c.name).sort();
@@ -128,6 +130,22 @@ export default function PropertiesListing({
     ));
     return uniqueCities.sort();
   }, [properties, allCities]);
+
+  // Match city slug to actual city name (for display/filtering)
+  const matchedCity = useMemo(() => {
+    if (!city) return '';
+    // If cities array is not loaded yet, return the city as-is (will be matched later)
+    if (cities.length === 0) return city;
+    // If city is already a valid city name, use it
+    if (cities.includes(city)) return city;
+    // Otherwise, try to match it as a slug
+    const matched = slugToCity(city, cities);
+    // Case-insensitive match against cities list
+    const found = cities.find(c => c.toLowerCase() === city.toLowerCase());
+    if (found) return found;
+    // Otherwise, try to match it as a slug
+    return slugToCity(city, cities) || city;
+  }, [city, cities]);
 
   const propertyTypes = useMemo(() => {
     if (allPropertyTypes && allPropertyTypes.length > 0) {
@@ -142,61 +160,104 @@ export default function PropertiesListing({
     return uniqueTypes.sort();
   }, [properties, allPropertyTypes]);
 
-  // Helper function to create slug from city name
-  const cityToSlug = (cityName: string): string => {
-    return cityName
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
+
+  // FETCH PROPERTIES FROM API
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (currentPage === 1) {
+          setLoading(true);
+        } else {
+          setIsFetchingMore(true);
+        }
+        setError(null);
+
+        const [citiesResponse, typesResponse] = await Promise.all([
+          cityApi.getAll(),
+          propertyApi.getTypes()
+        ]);
+        setAllCities(citiesResponse);
+        setAllPropertyTypes(typesResponse);
+
+        // Fetch properties with filters and pagination
+        const cityToMatch = matchedCity || city;
+        const currentCity = citiesResponse.find((c: any) => c.name.toLowerCase() === cityToMatch.toLowerCase());
+
+        const response = await propertyApi.getAll({
+          cityId: currentCity?._id,
+          cityName: cityToMatch,
+          areaId: searchParams.get('areaId') || undefined,
+
+          priceMin: advancedFilters.priceMin,
+          priceMax: advancedFilters.priceMax,
+          areaMin: advancedFilters.areaMin,
+          areaMax: advancedFilters.areaMax,
+          beds: advancedFilters.beds,
+          baths: advancedFilters.baths,
+          type: type !== 'all' ? type : undefined,
+          purpose: purpose !== 'all' ? purpose : undefined,
+          page: currentPage,
+          limit: 12
+        });
 
 
 
-  // Helper function to find city name from slug (handles both full slugs and abbreviations)
-  const slugToCity = (slug: string): string | null => {
-    const normalizedSlug = slug.toLowerCase().trim();
+        // Handle both pagination object and direct array response
+        let backendProperties: BackendProperty[] = [];
+        let total = 0;
+        let pages = 1;
 
-    // First try exact slug match
-    const exactMatch = cities.find(c => cityToSlug(c) === normalizedSlug);
-    if (exactMatch) return exactMatch;
+        if (Array.isArray(response)) {
+          backendProperties = response;
+          total = response.length;
+          pages = 1;
+        } else if (response && response.properties) {
+          backendProperties = response.properties;
+          total = response.total || 0;
+          pages = response.totalPages || 1;
+        } else {
+          console.error('Unexpected API response format:', response);
+          backendProperties = [];
+        }
 
-    // Try to match by first letters (e.g., "dgk" matches "Dera Ghazi Khan")
-    const words = normalizedSlug.split('-');
-    if (words.length > 0) {
-      const firstLetters = words.map((w: string) => w[0] || '').join('');
-      const abbreviationMatch = cities.find(c => {
-        const cityWords = c.toLowerCase().split(/\s+/);
-        const cityAbbr = cityWords.map((w: string) => w[0] || '').join('');
-        return cityAbbr === firstLetters;
-      });
-      if (abbreviationMatch) return abbreviationMatch;
-    }
+        const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
 
-    // Try partial match (e.g., "dgk" might match cities starting with "dera")
-    const partialMatch = cities.find(c =>
-      cityToSlug(c).startsWith(normalizedSlug) ||
-      normalizedSlug.startsWith(cityToSlug(c).substring(0, 3))
-    );
-    if (partialMatch) return partialMatch;
 
-    return null;
-  };
+        if (currentPage === 1) {
+          setProperties(transformedProperties);
+        } else {
+          setProperties(prev => [...prev, ...transformedProperties]);
+        }
 
-  // Match city slug to actual city name (for display/filtering)
-  const matchedCity = useMemo(() => {
-    if (!city) return '';
-    // If cities array is not loaded yet, return the city as-is (will be matched later)
-    if (cities.length === 0) return city;
-    // If city is already a valid city name, use it
-    if (cities.includes(city)) return city;
-    // Otherwise, try to match it as a slug
-    const matched = slugToCity(city);
-    if (matched) return matched;
-    // If no match found, try case-insensitive match
-    const caseInsensitiveMatch = cities.find(c => c.toLowerCase() === city.toLowerCase());
-    return caseInsensitiveMatch || city;
-  }, [city, cities]);
+        setTotalPages(pages);
+
+      } catch (err: any) {
+        console.error('Error fetching data:', err);
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to load data';
+        setError(errorMessage);
+        toast.error('Error', {
+          description: errorMessage,
+        });
+      } finally {
+        setLoading(false);
+        setIsFetchingMore(false);
+      }
+    };
+
+    fetchData();
+  }, [matchedCity, purpose, type, advancedFilters, searchParams, currentPage]);
+
+
+  // Update state when props change
+  useEffect(() => {
+    setCity(initialCity);
+    setType(initialType);
+    setTempCity(initialCity);
+    setTempType(initialType);
+    setCurrentPage(1); // Reset to first page on URL/filter change
+  }, [initialCity, initialType, purpose, searchParams]);
+
 
   // Match temp city for the filter dropdown
   const matchedTempCity = useMemo(() => {
@@ -204,8 +265,9 @@ export default function PropertiesListing({
     // If tempCity is already a valid city name, use it
     if (cities.includes(tempCity)) return tempCity;
     // Otherwise, try to match it as a slug
-    return slugToCity(tempCity) || tempCity;
+    return slugToCity(tempCity, cities) || tempCity;
   }, [tempCity, cities]);
+
 
   // Normalize type for matching (handle case differences)
   const normalizedType = useMemo(() => {
@@ -223,48 +285,8 @@ export default function PropertiesListing({
   }, [type]);
 
   // Filter properties based on selected filters
-  const filteredProperties = useMemo(() => {
-    const selectedAreaId = searchParams.get('areaId');
-    const searchTerm = searchParams.get('search')?.toLowerCase();
+  const filteredProperties = properties;
 
-    const filtered = properties.filter((property: Property) => {
-      const matchesPurpose = property.purpose === purpose || purpose === 'all';
-      const matchesCity = !matchedCity || property.city === matchedCity;
-      // Case-insensitive type matching
-      const matchesType = !normalizedType ||
-        property.type.toLowerCase() === normalizedType.toLowerCase();
-
-      // Area/Location Filter from Explorer or URL
-      const matchesArea = !selectedAreaId || property.areaId === selectedAreaId;
-
-      // Search term filter (matches title, location, or city)
-      const matchesSearch = !searchTerm ||
-        property.name.toLowerCase().includes(searchTerm) ||
-        property.location.toLowerCase().includes(searchTerm) ||
-        property.city.toLowerCase().includes(searchTerm) ||
-        property.areaName?.toLowerCase().includes(searchTerm);
-
-      // Advanced Filters (Sidebar)
-      const matchesPriceMin = !advancedFilters.priceMin || property.price >= advancedFilters.priceMin;
-      const matchesPriceMax = !advancedFilters.priceMax || property.price <= advancedFilters.priceMax;
-
-      const matchesAreaMin = !advancedFilters.areaMin || property.area >= advancedFilters.areaMin;
-      const matchesAreaMax = !advancedFilters.areaMax || property.area <= advancedFilters.areaMax;
-
-      const matchesBeds = !advancedFilters.beds ||
-        (advancedFilters.beds >= 5 ? property.bedrooms >= 5 : property.bedrooms === advancedFilters.beds);
-
-      const matchesBaths = !advancedFilters.baths ||
-        (advancedFilters.baths >= 4 ? property.bathrooms >= 4 : property.bathrooms === advancedFilters.baths);
-
-      return matchesPurpose && matchesCity && matchesType && matchesArea && matchesSearch &&
-        matchesPriceMin && matchesPriceMax &&
-        matchesAreaMin && matchesAreaMax &&
-        matchesBeds && matchesBaths;
-    });
-
-    return filtered;
-  }, [properties, purpose, matchedCity, normalizedType, advancedFilters, searchParams]);
 
   const currentAreaId = useMemo(() => {
     // If we're filtering by areaId, pass it to explorer
@@ -288,14 +310,15 @@ export default function PropertiesListing({
   }
 
   // ERROR STATE
-  if (error) {
+  if (error && properties.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 pt-32 pb-16 text-center">
           <h1 className="text-4xl font-bold text-foreground mb-4">Error Loading Properties</h1>
           <p className="text-muted-foreground mb-8">{error}</p>
-          <Button onClick={() => typeof window !== 'undefined' && window.location.reload()}>Retry</Button>
+          <Button onClick={() => setCurrentPage(1)}>Retry</Button>
         </div>
+
       </div>
     );
   }
@@ -315,7 +338,8 @@ export default function PropertiesListing({
       params.delete('type');
       params.delete('purpose');
 
-      const purposePath = currentPurpose; // rent or buy
+      // Use 'sale' for path if purpose is 'buy'
+      const purposePath = currentPurpose === 'buy' ? 'sale' : currentPurpose;
       const citySlug = newCity ? cityToSlug(newCity) : '';
       const typeSlug = newType && newType !== 'all'
         ? `/${newType.toLowerCase()}`
@@ -344,6 +368,7 @@ export default function PropertiesListing({
       router.push(queryString ? `/properties?${queryString}` : '/properties');
     }
   };
+
 
 
   return (
@@ -379,9 +404,12 @@ export default function PropertiesListing({
                 <SearchSidebar
                   city={matchedCity}
                   purpose={purpose}
+                  type={type}
+                  useCleanUrls={useCleanUrls}
                   filters={advancedFilters}
                   onFilterChange={handleFilterChange}
                 />
+
               </div>
             </aside>
 
@@ -393,22 +421,61 @@ export default function PropertiesListing({
                 city={matchedCity}
                 purpose={purpose}
                 currentAreaId={currentAreaId}
+                currentType={type}
+
                 onAreaSelect={(areaId) => {
                   // Standardize navigation to preserve current filters
                   const params = new URLSearchParams(searchParams.toString());
-                  params.set('areaId', areaId);
+
+                  // Toggle logic: if clicking already selected area, clear it
+                  if (params.get('areaId') === areaId) {
+                    params.delete('areaId');
+                  } else {
+                    params.set('areaId', areaId);
+                  }
 
                   // Use standardized updateFilters logic for navigation
-                  // This ensures we stay on /properties/rent/city/type if we are already there
                   const queryString = params.toString();
                   const currentPath = window.location.pathname;
-                  router.push(`${currentPath}?${queryString}`);
+                  router.push(`${currentPath}${queryString ? `?${queryString}` : ''}`);
                 }}
                 onTypeSelect={(newType) => {
-                  // Use standardized updateFilters
-                  updateFilters(matchedCity, newType);
+                  // When selecting from summary (city-wide context), clear areaId
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.delete('areaId');
+
+                  const currentPurpose = purpose;
+                  const shouldUseCleanUrl = useCleanUrls && currentPurpose !== 'all';
+
+                  if (shouldUseCleanUrl) {
+                    const purposePath = currentPurpose === 'buy' ? 'sale' : currentPurpose;
+                    const citySlug = cityToSlug(matchedCity);
+                    const typeSlug = newType && newType !== 'all' ? `/${newType.toLowerCase()}` : '';
+
+                    params.delete('city');
+                    params.delete('type');
+                    params.delete('purpose');
+
+                    const queryString = params.toString();
+                    const suffix = queryString ? `?${queryString}` : '';
+                    router.push(`/properties/${purposePath}/${citySlug}${typeSlug}${suffix}`);
+                  } else {
+                    if (currentPurpose !== 'all') params.set('purpose', currentPurpose);
+                    if (matchedCity) params.set('city', matchedCity);
+                    if (newType && newType !== 'all') params.set('type', newType);
+                    else params.delete('type');
+
+                    const queryString = params.toString();
+                    router.push(queryString ? `/properties?${queryString}` : '/properties');
+                  }
+                }}
+                onPurposeChange={(newPurpose) => {
+                  // Switch between rent and buy while keeping city and type
+                  updateFilters(matchedCity, type, newPurpose);
                 }}
               />
+
+
 
               {/* Properties Grid */}
               <div className="pt-4">
@@ -434,11 +501,14 @@ export default function PropertiesListing({
                           <SearchSidebar
                             city={matchedCity}
                             purpose={purpose}
+                            type={type}
+                            useCleanUrls={useCleanUrls}
                             filters={advancedFilters}
                             onFilterChange={(newFilters) => {
                               handleFilterChange(newFilters);
                             }}
                           />
+
                         </div>
                       </SheetContent>
                     </Sheet>
@@ -446,19 +516,42 @@ export default function PropertiesListing({
                 </div>
 
                 {filteredProperties.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {filteredProperties.map((property, index) => (
-                      <div
-                        key={`${property.id}-${index}`}
-                        className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-                        style={{
-                          animationDelay: `${index * 50}ms`,
-                          animationFillMode: 'backwards'
-                        }}
-                      >
-                        <PropertyCard property={property} />
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {filteredProperties.map((property, index) => (
+                        <div
+                          key={`${property.id}-${index}`}
+                          className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                          style={{
+                            animationDelay: `${index * 50}ms`,
+                            animationFillMode: 'backwards'
+                          }}
+                        >
+                          <PropertyCard property={property} />
+                        </div>
+                      ))}
+                    </div>
+
+                    {currentPage < totalPages && (
+                      <div className="flex justify-center pt-4">
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          onClick={() => setCurrentPage(prev => prev + 1)}
+                          disabled={isFetchingMore}
+                          className="min-w-[200px] rounded-full border-primary text-primary hover:bg-primary/5"
+                        >
+                          {isFetchingMore ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Loading...
+                            </>
+                          ) : (
+                            'Load More Properties'
+                          )}
+                        </Button>
                       </div>
-                    ))}
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-16 animate-in fade-in zoom-in-95 duration-500 bg-secondary/30 rounded-xl">
@@ -486,6 +579,7 @@ export default function PropertiesListing({
                     </div>
                   </div>
                 )}
+
               </div>
             </div>
           </div>

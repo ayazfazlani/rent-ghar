@@ -104,10 +104,11 @@ export class ImportService {
         if (cityId) {
             // Usually area is another category, but in this XML it might be complex
             // For now, we'll try to find any category that isn't city/type/purpose
-            const areaCat = categories.find(c => !['listivo_9508', 'listivo_14', 'listivo_5495'].includes(c['@_domain']));
+            const areaCat = categories.find(c => !['listivo_9508', 'listivo_14', 'listivo_5495', 'listivo_4661'].includes(c['@_domain']));
             if (areaCat) {
                 areaId = await this.resolveArea(areaCat['@_nicename'], areaCat['#text'], cityId);
             }
+
         }
 
         const priceStr = String(metadata['listivo_130_listivo_13'] || '0');

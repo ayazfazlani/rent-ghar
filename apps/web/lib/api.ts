@@ -74,10 +74,39 @@ api.interceptors.response.use(
 // Property API functions
 export const propertyApi = {
   // Get all approved properties
-  getAll: async (filters?: { cityId?: string; areaId?: string }) => {
+  // Get all approved properties with pagination and filters
+  getAll: async (filters?: {
+    cityId?: string;
+    cityName?: string;
+    areaId?: string;
+
+    page?: number;
+    limit?: number;
+    priceMin?: number;
+    priceMax?: number;
+    areaMin?: number;
+    areaMax?: number;
+    beds?: number;
+    baths?: number;
+    type?: string;
+    purpose?: string;
+  }) => {
     const params = new URLSearchParams();
     if (filters?.cityId) params.append("cityId", filters.cityId);
+    if (filters?.cityName) params.append("city", filters.cityName);
+
     if (filters?.areaId) params.append("areaId", filters.areaId);
+    if (filters?.page) params.append("page", filters.page.toString());
+    if (filters?.limit) params.append("limit", filters.limit.toString());
+    if (filters?.priceMin) params.append("priceMin", filters.priceMin.toString());
+    if (filters?.priceMax) params.append("priceMax", filters.priceMax.toString());
+    if (filters?.areaMin) params.append("areaMin", filters.areaMin.toString());
+    if (filters?.areaMax) params.append("areaMax", filters.areaMax.toString());
+    if (filters?.beds) params.append("beds", filters.beds.toString());
+    if (filters?.baths) params.append("baths", filters.baths.toString());
+    if (filters?.type && filters.type !== 'all') params.append("type", filters.type);
+    if (filters?.purpose && filters.purpose !== 'all') params.append("purpose", filters.purpose);
+
     const queryString = params.toString();
     const url = queryString ? `/properties?${queryString}` : "/properties";
     const response = await api.get(url);

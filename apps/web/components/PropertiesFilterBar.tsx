@@ -78,11 +78,12 @@ export default function PropertiesFilterBar() {
           propertyApi.getTypes()
         ]);
 
-        const backendProperties = propsResponse as BackendProperty[];
+        const backendProperties = (propsResponse as any).properties || [] as BackendProperty[];
         const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
         setProperties(transformedProperties);
         setAllCities(citiesResponse);
         setAllPropertyTypes(typesResponse);
+
       } catch (err) {
         console.error('Error fetching data for filters:', err);
       } finally {

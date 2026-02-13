@@ -19,6 +19,8 @@ import Link from 'next/link';
 interface SearchSidebarProps {
   city?: string;
   purpose: 'rent' | 'buy' | 'all';
+  type?: string;
+  useCleanUrls?: boolean;
   filters: {
     priceMin?: number;
     priceMax?: number;
@@ -30,6 +32,7 @@ interface SearchSidebarProps {
   onFilterChange: (newFilters: any) => void;
   className?: string;
 }
+
 
 interface LocationStat {
   name: string;
@@ -47,10 +50,13 @@ interface StatsData {
 export default function SearchSidebar({
   city,
   purpose,
+  type = 'all',
+  useCleanUrls = false,
   filters,
   onFilterChange,
   className = ""
 }: SearchSidebarProps) {
+
   // Local state for filters to avoid excessive API calls while typing
   const [localFilters, setLocalFilters] = useState(filters);
   const [stats, setStats] = useState<StatsData | null>(null);
@@ -105,6 +111,15 @@ export default function SearchSidebar({
       [key]: value
     }));
   };
+
+  const toSlug = (value: string): string => {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -230,9 +245,19 @@ export default function SearchSidebar({
                   {stats.locations.map((loc) => (
                     <li key={loc.id}>
                       <Link
-                        href={`/properties?city=${city}&areaId=${loc.id}&purpose=${purpose}`}
+                        href={(() => {
+                          const query = `areaId=${loc.id}${purpose !== 'all' ? `&purpose=${purpose}` : ''}`;
+                          if (useCleanUrls && city && purpose !== 'all') {
+                            const purposePath = purpose === 'buy' ? 'sale' : purpose;
+                            const citySlug = toSlug(city);
+                            const typeSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
+                            return `/properties/${purposePath}/${citySlug}${typeSlug}?areaId=${loc.id}`;
+                          }
+                          return `/properties?city=${city}&areaId=${loc.id}&purpose=${purpose}`;
+                        })()}
                         className="flex justify-between items-center py-3 px-4 hover:bg-muted/50 transition-colors text-sm group"
                       >
+
                         <div className="flex items-center gap-2">
                           <MapPin className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
                           <span className="text-foreground group-hover:text-primary transition-colors">{loc.name}</span>

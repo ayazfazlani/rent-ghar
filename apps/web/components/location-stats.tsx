@@ -98,7 +98,7 @@ export function LocationStats({ city = 'Multan', purpose }: LocationStatsProps) 
             : 'bg-white text-gray-600 hover:bg-gray-100'
             }`}
         >
-          All Homes ({stats.total})
+          Total ({stats.total})
         </button>
         {Object.entries(stats.summary).map(([type, count]) => (
           <button

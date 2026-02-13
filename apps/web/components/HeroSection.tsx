@@ -57,7 +57,9 @@ const HeroSection = () => {
         setCityList(sortedCities);
 
         // Process Properties for suggestions
-        const backendProperties = propertiesData as BackendProperty[];
+        // Process Properties for suggestions
+        const backendProperties = (propertiesData as any).properties || [] as BackendProperty[];
+
         const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
         setAllProperties(transformedProperties);
 

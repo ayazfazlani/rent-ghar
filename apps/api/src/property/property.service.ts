@@ -137,7 +137,9 @@ export class PropertyService {
     
       async findAllApproved(filters?: { 
         cityId?: string; 
+        cityName?: string;
         areaId?: string;
+
         priceMin?: number;
         priceMax?: number;
         areaMin?: number;
@@ -146,7 +148,10 @@ export class PropertyService {
         baths?: number;
         type?: string;
         purpose?: string;
+        page?: number;
+        limit?: number;
       }) {
+
         try {
           const query: any = { status: 'approved' };
           
@@ -155,20 +160,36 @@ export class PropertyService {
               return [];
             }
             query.area = filters.areaId;
-          } else if (filters?.cityId) {
-            if (!this.isValidObjectId(filters.cityId)) {
-              return [];
+          } else if (filters?.cityId || filters?.cityName) {
+            const orConditions: any[] = [];
+
+            // 1. Relational match via cityId -> areaIds
+            if (filters.cityId && this.isValidObjectId(filters.cityId)) {
+                // If filtering by city, find all areas in that city first
+                const areas = await this.areaModel.find({ city: filters.cityId }).select('_id').lean();
+                const areaIds = areas.map(a => a._id);
+                if (areaIds.length > 0) {
+                    orConditions.push({ area: { $in: areaIds } });
+                }
             }
-            // If filtering by city, find all areas in that city first
-            const areas = await this.areaModel.find({ city: filters.cityId }).select('_id').lean();
-            const areaIds = areas.map(a => a._id);
-            if (areaIds.length > 0) {
-              query.area = { $in: areaIds };
-            } else {
-              // No areas in this city, return empty result
-              return [];
+
+            // 2. String match via cityName
+            if (filters.cityName) {
+                 // Case-insensitive match for city string field
+                 const cityRegex = new RegExp(`^${filters.cityName}$`, 'i');
+                 const locationRegex = new RegExp(`${filters.cityName}`, 'i');
+                 orConditions.push({ city: cityRegex });
+                 orConditions.push({ location: locationRegex });
+            }
+
+            if (orConditions.length > 0) {
+                query.$or = orConditions;
+            } else if (filters.cityId) {
+                 // If cityId was provided but no areas found and no cityName provided, return empty
+                 return [];
             }
           }
+
 
           // Price Range Filter
           if (filters?.priceMin !== undefined || filters?.priceMax !== undefined) {
@@ -216,7 +237,18 @@ export class PropertyService {
              query.listingType = mappedPurpose;
           }
           
-      const properties = await this.propertyModel.find(query).sort({ createdAt: -1 }).exec();
+          const page = filters?.page || 1;
+          const limit = filters?.limit || 12;
+          const skip = (page - 1) * limit;
+
+          const [properties, total] = await Promise.all([
+            this.propertyModel.find(query)
+              .sort({ createdAt: -1 })
+              .skip(skip)
+              .limit(limit)
+              .exec(),
+            this.propertyModel.countDocuments(query)
+          ]);
       
       try {
         await this.ensureSlugForProperties(properties);
@@ -225,31 +257,34 @@ export class PropertyService {
       }
       
       // Populate area and city - handle cases where area might be null
-      if (properties.length === 0) {
-        return [];
-      }
-      
-      // Only populate if area exists
-      const propertiesWithArea = properties.filter(p => this.isValidAreaRef(p.area));
-      if (propertiesWithArea.length > 0) {
-        try {
-          await this.propertyModel.populate(propertiesWithArea, {
-            path: 'area',
-            select: 'name',
-            populate: { 
-              path: 'city', 
-              select: 'name state country'
-            }
-          });
-        } catch (populateError: any) {
-          console.warn('⚠️ Non-critical: Error populating properties:', populateError.message);
-          // Return properties anyway, even if population fails
+      if (properties.length > 0) {
+        // Only populate if area exists
+        const propertiesWithArea = properties.filter(p => this.isValidAreaRef(p.area));
+        if (propertiesWithArea.length > 0) {
+          try {
+            await this.propertyModel.populate(propertiesWithArea, {
+              path: 'area',
+              select: 'name',
+              populate: { 
+                path: 'city', 
+                select: 'name state country'
+              }
+            });
+          } catch (populateError: any) {
+            console.warn('⚠️ Non-critical: Error populating properties:', populateError.message);
+          }
         }
       }
       
-      return properties;
+      return {
+        properties,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      };
     } catch (error) {
-      console.error('❌ Critical: Error in findAllApproved:', error);
+      console.error('Error in findAllApproved:', error);
       throw error;
     }
   }
@@ -456,7 +491,7 @@ export class PropertyService {
 
       async getLocationStats(city: string, listingType?: string, propertyType?: string): Promise<any> {
         try {
-            const cityRegex = new RegExp(`^${city}$`, 'i');
+            const cityRegex = new RegExp(`${city}`, 'i');
             
             const matchStage: any = { status: 'approved' };
             if (listingType) {
@@ -466,37 +501,44 @@ export class PropertyService {
                 matchStage.propertyType = propertyType;
             }
             
-            console.log(`[DEBUG] getLocationStats city: "${city}", listingType: "${listingType}"`);
-            console.log(`[DEBUG] matchStage:`, JSON.stringify(matchStage));
-            
-            const initialCount = await this.propertyModel.countDocuments(matchStage);
-            console.log(`[DEBUG] Total approved properties matching type: ${initialCount}`);
-            
-            if (initialCount > 0) {
-                const samples = await this.propertyModel.find(matchStage).limit(3).lean();
-                // console.log(`[DEBUG] Sample Properties for city search:`, JSON.stringify(samples.map(p => ({
-                //     id: p._id,
-                //     city: p.city,
-                //     area: p.area,
-                //     areaType: typeof p.area
-                // }))));
-            }
-    
             const stats = await this.propertyModel.aggregate([
+
                 { $match: matchStage },
+                {
+                    $addFields: {
+                        areaIdObj: {
+                            $cond: {
+                                if: { $eq: [{ $type: '$area' }, 'string'] },
+                                then: { $toObjectId: '$area' },
+                                else: '$area'
+                            }
+                        }
+                    }
+                },
                 {
                     $lookup: {
                         from: 'areas',
-                        localField: 'area',
+                        localField: 'areaIdObj',
                         foreignField: '_id',
                         as: 'areaDetails'
                     }
                 },
                 { $unwind: { path: '$areaDetails', preserveNullAndEmptyArrays: true } },
                 {
+                    $addFields: {
+                        cityIdObj: {
+                            $cond: {
+                                if: { $eq: [{ $type: '$areaDetails.city' }, 'string'] },
+                                then: { $toObjectId: '$areaDetails.city' },
+                                else: '$areaDetails.city'
+                            }
+                        }
+                    }
+                },
+                {
                     $lookup: {
                         from: 'cities',
-                        localField: 'areaDetails.city',
+                        localField: 'cityIdObj',
                         foreignField: '_id',
                         as: 'cityDetails'
                     }
@@ -511,20 +553,28 @@ export class PropertyService {
                 },
                 {
                     $match: {
-                        computedCityName: cityRegex
+                        $or: [
+                            { computedCityName: cityRegex },
+                            { location: cityRegex },
+                            { title: cityRegex }
+                        ]
                     }
                 },
-                {
-                    $addFields: {
-                        debug: 'match_city'
-                    }
-                },
-                // Add a temporary stage to log intermediate results if needed, 
-                // but for now let's just log the count after aggregation
+
                 {
                     $facet: {
                         locations: [
-                            { $match: { 'areaDetails.name': { $exists: true, $ne: null } } },
+                            { 
+                                $match: { 
+                                    'areaDetails.name': { 
+                                        $exists: true, 
+                                        $ne: null,
+                                        $nin: ['balcony', 'kitchen', 'furnished', 'laundry', 'parking', 'garage', 'swimming pool', 'garden']
+                                    },
+                                    'cityDetails.name': cityRegex
+                                } 
+                            },
+
                             {
                                 $group: {
                                     _id: { name: '$areaDetails.name', id: '$areaDetails._id' },
@@ -541,6 +591,7 @@ export class PropertyService {
                                 }
                             }
                         ],
+
                         summary: [
                             {
                                 $group: {
@@ -565,11 +616,7 @@ export class PropertyService {
             ]).exec();
     
             const result = stats[0];
-            console.log(`[DEBUG] Final Stats for ${city}:`, JSON.stringify({
-                locationsCount: result.locations.length,
-                summary: result.summary,
-                total: result.total[0]?.count || 0
-            }));
+
 
             return {
                 locations: result.locations,

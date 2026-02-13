@@ -48,18 +48,21 @@ function toSlug(value: string): string {
 // Map backend property to frontend property format
 export function mapBackendToFrontendProperty(backend: BackendProperty): Property {
   // Map propertyType to frontend format (capitalize first letter)
-  const typeMap: Record<string, 'House' | 'Apartment' | 'Flat' | 'Commercial'> = {
+  const typeMap: Record<string, string> = {
     house: 'House',
     apartment: 'Apartment',
     flat: 'Flat',
     commercial: 'Commercial',
+    plot: 'Plot',
+    other: 'Other'
   };
 
   // Map listingType to purpose
-  const purposeMap: Record<'rent' | 'sale', 'rent' | 'buy'> = {
+  const purposeMap: Record<string, 'rent' | 'buy'> = {
     rent: 'rent',
     sale: 'buy',
   };
+
 
   // Extract city name from area.city or fallback to legacy city field
   let cityName = backend.city || '';

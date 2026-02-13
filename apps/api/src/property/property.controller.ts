@@ -115,7 +115,9 @@ export class PropertyController {
   @Get()
   async findAll(
     @Query('cityId') cityId?: string, 
+    @Query('city') city?: string,
     @Query('areaId') areaId?: string,
+
     @Query('priceMin') priceMin?: string,
     @Query('priceMax') priceMax?: string,
     @Query('areaMin') areaMin?: string,
@@ -123,8 +125,11 @@ export class PropertyController {
     @Query('beds') beds?: string,
     @Query('baths') baths?: string,
     @Query('type') type?: string,
-    @Query('purpose') purpose?: string
+    @Query('purpose') purpose?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
   ) {
+
     try {
       const filters: any = {};
       if (cityId) filters.cityId = cityId;
@@ -137,6 +142,11 @@ export class PropertyController {
       if (baths) filters.baths = Number(baths);
       if (type) filters.type = type;
       if (purpose) filters.purpose = purpose;
+      if (page) filters.page = Number(page);
+      if (limit) filters.limit = Number(limit);
+      if (city) filters.cityName = city; // Pass derived city name if explicit cityId is not enough
+
+
 
       return await this.propertyService.findAllApproved(filters);
     } catch (error) {

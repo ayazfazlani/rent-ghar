@@ -284,7 +284,13 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                     <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">{property.name}</h1>
                     <div className="flex items-center gap-2 text-muted-foreground mb-4">
                       <MapPin className="w-5 h-5 text-primary" />
-                      <span className="text-lg">{property.location}, {property.city}</span>
+                      <span className="text-lg capitalize">
+                        {property.areaName || property.location}
+                        {property.city && property.city.toLowerCase() !== (property.areaName || property.location).toLowerCase()
+                          ? `, ${property.city}`
+                          : ''}
+                      </span>
+
                       {property.latitude && property.longitude && (
                         <button
                           onClick={() => document.getElementById('property-location')?.scrollIntoView({ behavior: 'smooth' })}
@@ -583,8 +589,19 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">City:</span>
-                        <span className="font-semibold">{property.city}</span>
+                        <span className="font-semibold capitalize">{property.city}</span>
                       </div>
+                      {property.areaName && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Area:</span>
+                          <span className="font-semibold capitalize">{property.areaName}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Location:</span>
+                        <span className="font-semibold capitalize">{property.location}</span>
+                      </div>
+
                     </div>
                   </CardContent>
                 </Card>

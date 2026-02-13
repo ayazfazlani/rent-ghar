@@ -52,9 +52,10 @@ export default function SearchBar() {
       try {
         setLoading(true);
         const response = await propertyApi.getAll();
-        const backendProperties = response as BackendProperty[];
+        const backendProperties = (response as any).properties || [] as BackendProperty[];
+
         const allProperties = backendProperties.map(mapBackendToFrontendProperty);
-        
+
         const searchTerm = query.toLowerCase().trim();
         const matchedSuggestions: SearchSuggestion[] = [];
         const suggestionMap = new Map<string, SearchSuggestion>();
@@ -70,7 +71,7 @@ export default function SearchBar() {
 
           if (cityMatch || typeMatch || locationMatch || titleMatch) {
             const key = `${property.city}-${property.type}-${property.purpose}`;
-            
+
             if (!suggestionMap.has(key)) {
               let matchType: 'city' | 'type' | 'location' | 'title' = 'city';
               let matchText = property.city;
@@ -148,7 +149,7 @@ export default function SearchBar() {
 
     // Navigate to clean URL: /properties/rent/[city]/[type]
     router.push(`/properties/${purpose}/${citySlug}/${typeSlug}`);
-    
+
     setQuery('');
     setShowSuggestions(false);
   };
