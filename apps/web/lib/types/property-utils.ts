@@ -92,7 +92,7 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
     id: backend._id,
     name: backend.title,
     slug: backend.slug || toSlug(backend.title),
-    type: typeMap[backend.propertyType] || 'House',
+    type: (typeMap[backend.propertyType] || 'House') as Property['type'],
     city: cityName,
     location: backend.location,
     price: backend.price,

@@ -1,5 +1,6 @@
 // lib/api.ts
 import axios from "axios";
+import { BackendProperty } from "./types/property-utils";
 
 const getBaseURL = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -71,6 +72,14 @@ api.interceptors.response.use(
   },
 );
 
+// Property API types
+export interface PropertyResponse {
+  properties: BackendProperty[];
+  total: number;
+  totalPages: number;
+  currentPage: number;
+}
+
 // Property API functions
 export const propertyApi = {
   // Get all approved properties
@@ -90,7 +99,7 @@ export const propertyApi = {
     baths?: number;
     type?: string;
     purpose?: string;
-  }) => {
+  }): Promise<PropertyResponse | BackendProperty[]> => {
     const params = new URLSearchParams();
     if (filters?.cityId) params.append("cityId", filters.cityId);
     if (filters?.cityName) params.append("city", filters.cityName);

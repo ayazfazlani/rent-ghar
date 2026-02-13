@@ -119,13 +119,15 @@ const FeaturedSection = () => {
         setLoading(true);
         setError(null);
         const response = await propertyApi.getAll();
-        const backendProperties = (response as any).properties || [] as BackendProperty[];
+        const backendProperties: BackendProperty[] = Array.isArray(response)
+          ? response
+          : (response as any).properties || [];
 
         const allProperties = backendProperties.map(mapBackendToFrontendProperty);
 
         // Get approved properties only and limit to 8 for featured section
         const approvedProperties = allProperties
-          .filter(p => p) // Filter out any invalid properties
+          .filter((p: Property) => p) // Filter out any invalid properties
           .slice(0, 8); // Limit to 8 properties
 
         // Map to FeaturedProperty format

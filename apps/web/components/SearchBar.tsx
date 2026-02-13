@@ -52,7 +52,9 @@ export default function SearchBar() {
       try {
         setLoading(true);
         const response = await propertyApi.getAll();
-        const backendProperties = (response as any).properties || [] as BackendProperty[];
+        const backendProperties: BackendProperty[] = Array.isArray(response)
+          ? response
+          : (response as any).properties || [];
 
         const allProperties = backendProperties.map(mapBackendToFrontendProperty);
 
