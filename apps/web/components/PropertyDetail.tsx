@@ -300,15 +300,22 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                         </button>
                       )}
                     </div>
-                    {/* Short Excerpt */}
-                    <p className="text-muted-foreground text-lg leading-relaxed">
-                      {(backendProperty as any)?.excerpt ||
-                        (property.description && property.description.length > 150
-                          ? property.description.substring(0, 150) + '...'
-                          : property.description) ||
-                        `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${property.location}, ${property.city}. 
-                        Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort.`}
-                    </p>
+                    {/* Short Excerpt make it like render heml also */}
+                   <p
+                      className="text-muted-foreground text-lg leading-relaxed"
+                    // Prefer excerpt → truncated description → fallback plain text
+                    dangerouslySetInnerHTML={{
+                     __html:
+                    (backendProperty as any)?.excerpt?.trim() ||
+                    (property.description
+                      ? property.description.length > 320
+                        ? // Rough char limit — adjust based on average HTML → visible length
+                          property.description.substring(0, 320).replace(/<[^>]*>?/gm, '').trim() + '…'
+                        : property.description
+                      : `This beautiful ${(property.type ?? 'property').toLowerCase()} is located in the prime area of ${property.location ?? ''}, ${property.city ?? ''}. 
+                        Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort.`.replace(/\s+/g, ' ').trim()),
+                }}
+              />
                   </div>
                   <div className="flex gap-2 ml-4">
                     {/* <Button
