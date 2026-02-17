@@ -83,7 +83,7 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
   const getVisibleTestimonials = () => {
     const first = defaultTestimonials[currentIndex];
     const second = defaultTestimonials[(currentIndex + 1) % defaultTestimonials.length];
-    return [first, second];
+    return [first, second].filter((t): t is Testimonial => !!t);
   };
 
   const getInitials = (name: string) => {
