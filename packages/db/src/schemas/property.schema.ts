@@ -5,16 +5,16 @@ import { Area } from './area.schema'
 
 @Schema({ timestamps: true })
 export class Property extends Document {
-  @Prop({ required: true, enum: ['rent', 'sale'] })
+  @Prop({ required: true, enum: ['rent', 'sale'], index: true })
   listingType: 'rent' | 'sale'
 
-  @Prop({ required: true, enum: ['house', 'apartment', 'flat', 'commercial'] })
+  @Prop({ required: true, enum: ['house', 'apartment', 'flat', 'commercial'], index: true })
   propertyType: 'house' | 'apartment' | 'flat' | 'commercial'
 
   // @Prop({ required: true })
   // city: string
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true, index: true })
   slug: string
 
   @Prop({ required: true })
@@ -69,7 +69,7 @@ export class Property extends Document {
   @Prop({ default: false })
   isFeatured: boolean
 
-  @Prop({ default: 'pending' })
+  @Prop({ default: 'pending', index: true })
   status: 'pending' | 'approved' | 'rejected'
 
   @Prop({ type: Number })
@@ -80,3 +80,9 @@ export class Property extends Document {
 }
 
 export const PropertySchema = SchemaFactory.createForClass(Property)
+
+// Search Optimization: Text index for title and location
+PropertySchema.index({ title: 'text', location: 'text' });
+
+// Compound index for common listing queries
+PropertySchema.index({ status: 1, listingType: 1, propertyType: 1 });
