@@ -40,7 +40,7 @@ export default function AgentSignupSection() {
         <div className="text-center max-w-3xl mx-auto mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary font-bold text-sm mb-6 animate-fade-in">
             <Users className="w-4 h-4" />
-            Become a Partner
+            <Link href="/register?role=agent"> Become a Partner</Link>
           </div>
           <h2 className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-8 tracking-tight leading-[1.1]">
             List Your Property & <br />
@@ -69,7 +69,7 @@ export default function AgentSignupSection() {
                   {step.description}
                 </p>
                 <div className="mt-8 flex items-center gap-2 text-primary font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <span>Get Started</span>
+                  <Link href="/register?role=agent">Get Started</Link>
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
@@ -120,7 +120,7 @@ export default function AgentSignupSection() {
                 {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-4 h-4 fill-current text-white" />)}
               </div>
               <p className="text-lg font-bold leading-relaxed italic mb-6">
-                "Rent Ghar has transformed how I manage my property portfolio. The leads are high-quality and the platform is incredibly intuitive."
+                "Property Dealer has transformed how I manage my property portfolio. The leads are high-quality and the platform is incredibly intuitive."
               </p>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg">
@@ -136,12 +136,12 @@ export default function AgentSignupSection() {
         </div>
 
         {/* Brand Banner (Social Proof) */}
-        <div className="mt-24 pt-12 border-t border-gray-100 flex flex-wrap justify-between items-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+        {/* <div className="mt-24 pt-12 border-t border-gray-100 flex flex-wrap justify-between items-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
           <div className="text-2xl font-black tracking-tighter text-gray-900 italic">ELITE REALTY</div>
           <div className="text-2xl font-black tracking-tighter text-gray-900 italic">NEST FINDER</div>
           <div className="text-2xl font-black tracking-tighter text-gray-900 italic">URBAN PROS</div>
           <div className="text-2xl font-black tracking-tighter text-gray-900 italic">PAK ESTATE</div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

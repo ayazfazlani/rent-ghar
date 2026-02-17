@@ -119,15 +119,18 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden;
   }
 }
+
 /* Hide Clerk development mode badge */
 .cl-internal-1w8t6xl {
   display: none !important;
 }
- /* Hide only Clerk footer text (Secured by Clerk & Development mode) */
+
+/* Hide only Clerk footer text (Secured by Clerk & Development mode) */
 .cl-footer,
 .cl-footerAction,
 .cl-internal-b3fm6y,
@@ -146,6 +149,7 @@
 .cl-card footer {
   display: none !important;
 }
+
 /* Force hide Clerk footer - MOST IMPORTANT */
 .cl-footer,
 .cl-footerAction,
@@ -161,6 +165,7 @@ a[class*="footerAction"] {
   overflow: hidden !important;
   pointer-events: none !important;
 }
+
 .property-card {
   @apply bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300;
 }
@@ -177,17 +182,54 @@ a[class*="footerAction"] {
 .prose {
   color: var(--foreground);
 }
-.prose h1, .prose h2, .prose h3, .prose h4 {
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
   @apply font-bold mt-6 mb-4 text-foreground;
 }
-.prose h1 { @apply text-3xl; }
-.prose h2 { @apply text-2xl; }
-.prose h3 { @apply text-xl; }
-.prose p { @apply mb-4 leading-relaxed; }
-.prose ul { @apply list-disc pl-6 mb-4; }
-.prose ol { @apply list-decimal pl-6 mb-4; }
-.prose li { @apply mb-1; }
-.prose a { @apply text-primary underline; }
-.prose img { @apply rounded-lg my-6 max-w-full h-auto; }
-.prose blockquote { @apply border-l-4 border-primary/20 pl-4 italic my-4; }
-.prose strong { @apply font-bold text-foreground; }
+
+.prose h1 {
+  @apply text-3xl;
+}
+
+.prose h2 {
+  @apply text-2xl;
+}
+
+.prose h3 {
+  @apply text-xl;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.prose ol {
+  @apply list-decimal pl-6 mb-4;
+}
+
+.prose li {
+  @apply mb-1;
+}
+
+.prose a {
+  @apply text-primary underline;
+}
+
+.prose img {
+  @apply rounded-lg my-6 max-w-full h-auto;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-primary/20 pl-4 italic my-4;
+}
+
+.prose strong {
+  @apply font-bold text-foreground;
+}

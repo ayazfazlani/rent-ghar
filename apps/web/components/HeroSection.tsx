@@ -12,6 +12,8 @@ interface HeroSectionProps {
   initialTypes?: string[];
 }
 
+const CITY_ORDER = ['lahore', 'islamabad', 'karachi', 'multan', 'gujranwala', 'faisalabad'];
+
 const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialProperties, initialTypes }) => {
   const router = useRouter();
   const [purpose, setPurpose] = useState<'rent' | 'buy'>('rent');
@@ -59,7 +61,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
           propertyApi.getTypes()
         ]);
 
-        const sortedCities = (citiesData as any[]).sort((a, b) => a.name.localeCompare(b.name));
+        const sortedCities = (citiesData as any[]).sort((a: any, b: any) => {
+          const aIndex = CITY_ORDER.indexOf(a.name.toLowerCase());
+          const bIndex = CITY_ORDER.indexOf(b.name.toLowerCase());
+
+          // If both are in CITY_ORDER, use their specific order
+          if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+
+          // If only one is in CITY_ORDER, it comes first
+          if (aIndex !== -1) return -1;
+          if (bIndex !== -1) return 1;
+
+          // Otherwise, sort alphabetically
+          return a.name.localeCompare(b.name);
+        });
         setCityList(sortedCities);
 
         const backendProperties = (propertiesData as any).properties || [] as BackendProperty[];
@@ -180,7 +195,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
   };
 
   return (
-    <div className="relative min-h-[600px] flex items-center justify-center overflow-hidden bg-white">
+    <div className="relative min-h-[400px] flex items-center justify-center overflow-hidden bg-white">
       {/* Animated Mesh Gradient Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 opacity-40">
@@ -200,7 +215,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
       {/* Content */}
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 md:py-20 lg:py-24">
         {/* Main Heading with Premium Typography */}
-        <div className="text-center mb-10 md:mb-16">
+        {/* <div className="text-center mb-10 md:mb-16">
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-gray-900 mb-6 drop-shadow-sm">
             Find Your Perfect{' '}
             <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900">
@@ -213,7 +228,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-medium opacity-80">
             Premium properties, verified listings, and seamless experiences.
           </p>
-        </div>
+        </div> */}
 
         {/* Search Box with Glassmorphism */}
         <div className="max-w-4xl mx-auto">
@@ -315,7 +330,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
                   >
                     <option value="">All Cities</option>
                     {cityList.map((c) => (
-                      <option key={c._id} value={c.name}>{c.name}</option>
+                      <option key={c._id} value={c.name} className="capitalize">{c.name}</option>
                     ))}
                   </select>
                   <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-hover/select:text-black transition-colors" />

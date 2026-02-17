@@ -19,7 +19,7 @@ export default function PendingActivationPage() {
             Account Pending Activation
           </CardTitle>
           <CardDescription>
-            Thank you for registering with Rent Ghar!
+            Thank you for registering with Property Dealer!
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 text-center">

@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { propertyApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
+import { toTitleCase } from '../lib/utils';
 
 const toSlug = (value: string) =>
   value
@@ -124,7 +125,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ initialProperties }) 
           id: property.id || `property-${index}-${Date.now()}`,
           image: property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
           title: property.name,
-          location: `${property.location}, ${property.city}`,
+          location: `${property.location}, ${toTitleCase(property.city)}`,
           price: `Rs. ${property.price.toLocaleString('en-PK')}`,
           priceLabel: property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent',
           beds: property.bedrooms,

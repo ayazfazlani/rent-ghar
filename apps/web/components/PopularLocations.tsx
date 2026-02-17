@@ -28,6 +28,8 @@ interface PopularLocationsProps {
   initialCities?: any[];
 }
 
+const CITY_ORDER = ['lahore', 'islamabad', 'karachi', 'multan', 'gujranwala', 'faisalabad'];
+
 const PopularLocations: React.FC<PopularLocationsProps> = ({ initialCities }) => {
   const [cities, setCities] = useState<any[]>(initialCities || []);
   const [loading, setLoading] = useState(!initialCities);
@@ -40,8 +42,12 @@ const PopularLocations: React.FC<PopularLocationsProps> = ({ initialCities }) =>
         setLoading(true);
         const cityList = await cityApi.getAll();
 
-        // Limit to 6 major cities for the home page
-        const topCities = cityList.slice(0, 6);
+        // Filter and sort according to CITY_ORDER
+        const topCities = cityList
+          .filter((city: any) => CITY_ORDER.includes(city.name.toLowerCase()))
+          .sort((a: any, b: any) => {
+            return CITY_ORDER.indexOf(a.name.toLowerCase()) - CITY_ORDER.indexOf(b.name.toLowerCase());
+          });
 
         // Fetch stats for each city to get property counts
         const citiesWithStats = await Promise.all(
@@ -65,8 +71,7 @@ const PopularLocations: React.FC<PopularLocationsProps> = ({ initialCities }) =>
           })
         );
 
-        // Sort by property count descending
-        citiesWithStats.sort((a, b) => b.count - a.count);
+        // Property count sorting removed to respect CITY_ORDER
         setCities(citiesWithStats);
       } catch (error) {
         console.error('Error fetching cities:', error);
@@ -117,7 +122,7 @@ const PopularLocations: React.FC<PopularLocationsProps> = ({ initialCities }) =>
                     <MapPin className="w-4 h-4" />
                     <span>Pakistan</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-1">{city.name}</h3>
+                  <h3 className="text-2xl font-bold text-white mb-1 capitalize">{city.name}</h3>
                   <p className="text-white/90 text-sm font-semibold">{city.count} Properties</p>
                 </div>
               </Link>

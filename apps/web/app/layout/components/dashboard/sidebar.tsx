@@ -132,7 +132,7 @@ export default function DashboardSidebar() {
             <Building className="h-5 w-5" />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-semibold tracking-tight">Rent Ghar</span>
+            <span className="text-lg font-semibold tracking-tight">Property Dealer</span>
             <span className="text-xs text-muted-foreground font-medium">
               {isAdmin ? 'Admin Panel' : 'Agent Panel'}
             </span>

@@ -44,6 +44,10 @@ export const serverApi = {
     return this.get('/cities', { next: { revalidate: 86400 } }); // Cache cities for 24 hours
   },
 
+  async getCityByName(name: string): Promise<any> {
+    return this.get(`/cities/name/${name}`, { next: { revalidate: 86400 } });
+  },
+
   // Property API
   async getProperties(params: string = ''): Promise<any> {
     const path = params ? `/properties?${params}` : '/properties';

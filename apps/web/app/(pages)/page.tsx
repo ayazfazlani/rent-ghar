@@ -92,10 +92,11 @@ export default async function Home() {
         <FeaturedSection initialProperties={featuredProperties} />
         <WhyChooseUs />
         <AgentSignupSection />
-        <BlogSection initialPosts={processedBlogs} />
-        <FAQSection />
         <ExploreTools />
         <TestimonialSection />
+        <BlogSection initialPosts={processedBlogs} />
+        <FAQSection />
+
       </>
     );
   } catch (error) {
@@ -108,10 +109,10 @@ export default async function Home() {
         <FeaturedSection />
         <WhyChooseUs />
         <AgentSignupSection />
-        <BlogSection />
-        <FAQSection />
         <ExploreTools />
         <TestimonialSection />
+        <BlogSection />
+        <FAQSection />
       </>
     );
   }

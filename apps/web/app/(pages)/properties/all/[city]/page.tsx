@@ -1,7 +1,7 @@
 import PropertiesListing from '@/components/PropertiesListing';
 import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
-import { cityApi } from '@/lib/api/city/city.api';
+import { serverApi } from '@/lib/server-api';
 
 interface PageProps {
   params: Promise<{
@@ -16,7 +16,7 @@ export async function generateMetadata(
   const { city: citySlug } = await props.params;
 
   try {
-    const cityData = await cityApi.getByName(citySlug);
+    const cityData = await serverApi.getCityByName(citySlug);
 
     if (!cityData) return { title: `All Properties in ${citySlug} | RENT-GHAR` };
 
@@ -39,7 +39,7 @@ export default async function AllCityPage(props: PageProps) {
   let cityDetails = null;
 
   try {
-    cityDetails = await cityApi.getByName(city);
+    cityDetails = await serverApi.getCityByName(city);
   } catch (error) {
     console.error('Error fetching city details:', error);
   }

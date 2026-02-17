@@ -10,18 +10,21 @@ export class CityService {
     constructor(
         @InjectModel(City.name) private cityModel: Model<CityDocument>
     ) {}
+    private toTitleCase(str: string): string {
+        return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
     
     // implement crud operations for city - check for duplicate by name only (name must be unique globally)
     async createCity(createCityDto: CreateCityDto): Promise<CityDocument> {
         try {
-            const normalizedName = createCityDto.name.toLowerCase().trim();
+            const normalizedName = this.toTitleCase(createCityDto.name.trim());
             // Convert empty strings to undefined
-            const normalizedState = createCityDto.state?.trim() ? createCityDto.state.toLowerCase().trim() : undefined;
-            const normalizedCountry = createCityDto.country?.trim() ? createCityDto.country.toLowerCase().trim() : undefined;
+            const normalizedState = createCityDto.state?.trim() ? this.toTitleCase(createCityDto.state.trim()) : undefined;
+            const normalizedCountry = createCityDto.country?.trim() ? this.toTitleCase(createCityDto.country.trim()) : undefined;
             
-            // Check if city with this name already exists (name must be unique)
+            // Check if city with this name already exists (name must be unique, check case-insensitively)
             const existingCity = await this.cityModel.findOne({ 
-                name: normalizedName
+                name: { $regex: new RegExp(`^${normalizedName}$`, 'i') }
             }).exec();
             
             if (existingCity){
@@ -65,7 +68,7 @@ export class CityService {
 
     async findAllCities(): Promise<CityDocument[]> {
         try {
-            return await this.cityModel.find().sort({ createdAt: -1 }).exec();
+            return await this.cityModel.find().sort({ name: 1 }).exec(); // Sort alphabetically by default
         } catch (error) {
             console.error('Error in findAllCities:', error);
             throw error;
@@ -81,7 +84,9 @@ export class CityService {
     }
 
     async findCityByName(name: string): Promise<CityDocument> {
-        const city = await this.cityModel.findOne({ name: name.toLowerCase().trim() }).exec();
+        const city = await this.cityModel.findOne({ 
+            name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } 
+        }).exec();
         if (!city) {
             throw new NotFoundException(`City ${name} not found`);
         }
@@ -96,14 +101,14 @@ export class CityService {
                 throw new NotFoundException('City not found');
             }
 
-            // If updating name, check for duplicates by name only (name must be unique globally)
+            // If updating name, check for duplicates by name only (name must be unique globally, case-insensitive)
             const updateData: any = {};
             
             if (updateCityDto.name) {
-                const newName = updateCityDto.name.toLowerCase().trim();
+                const newName = this.toTitleCase(updateCityDto.name.trim());
                 // Check if another city with this name exists (excluding current city)
                 const duplicateCity = await this.cityModel.findOne({
-                    name: newName,
+                    name: { $regex: new RegExp(`^${newName}$`, 'i') },
                     _id: { $ne: id } // Exclude current city
                 }).exec();
 
@@ -116,13 +121,13 @@ export class CityService {
             // Handle state - allow setting to empty string to clear it
             if (updateCityDto.state !== undefined) {
                 const trimmedState = updateCityDto.state.trim();
-                updateData.state = trimmedState ? trimmedState.toLowerCase() : undefined;
+                updateData.state = trimmedState ? this.toTitleCase(trimmedState) : undefined;
             }
             
             // Handle country - allow setting to empty string to clear it
             if (updateCityDto.country !== undefined) {
                 const trimmedCountry = updateCityDto.country.trim();
-                updateData.country = trimmedCountry ? trimmedCountry.toLowerCase() : undefined;
+                updateData.country = trimmedCountry ? this.toTitleCase(trimmedCountry) : undefined;
             }
 
             if (updateCityDto.metaTitle !== undefined) updateData.metaTitle = updateCityDto.metaTitle;

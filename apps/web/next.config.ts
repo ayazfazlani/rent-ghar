@@ -18,6 +18,18 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'plus.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ptcptourism.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'english.news.cn',
       }
     ],
   },

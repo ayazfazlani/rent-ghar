@@ -23,7 +23,7 @@ const defaultTestimonials: Testimonial[] = [
   {
     id: 1,
     title: "Seamless Selling Experience",
-    text: "Working with Rent Ghar was an absolute pleasure. Their professional team guided me through every step of the selling process. The attention to detail and commitment to finding the right buyer exceeded my expectations.",
+    text: "Working with Property Dealer was an absolute pleasure. Their professional team guided me through every step of the selling process. The attention to detail and commitment to finding the right buyer exceeded my expectations.",
     name: "Ayesha Khan",
     role: "Marketing Director",
     rating: 5,
@@ -32,7 +32,7 @@ const defaultTestimonials: Testimonial[] = [
   {
     id: 2,
     title: "Efficiency at its Best",
-    text: "The entire process was seamless from start to finish. The team at Rent Ghar demonstrated exceptional professionalism and market knowledge. They sold our apartment quickly and at a great price. Highly recommended!",
+    text: "The entire process was seamless from start to finish. The team at Property Dealer demonstrated exceptional professionalism and market knowledge. They sold our apartment quickly and at a great price. Highly recommended!",
     name: "Ahmad Raees",
     role: "Legal Consultant",
     rating: 5,
@@ -41,7 +41,7 @@ const defaultTestimonials: Testimonial[] = [
   {
     id: 3,
     title: "Found Our Dream Home",
-    text: "Rent Ghar helped us find our dream home in Multan. Their expertise in the local market and dedication to understanding our needs made all the difference. Always available and provided valuable insights.",
+    text: "Property Dealer helped us find our dream home in Multan. Their expertise in the local market and dedication to understanding our needs made all the difference. Always available and provided valuable insights.",
     name: "Ismail Butt",
     role: "Tech Entrepreneur",
     rating: 5,
@@ -50,7 +50,7 @@ const defaultTestimonials: Testimonial[] = [
   {
     id: 4,
     title: "Unmatched Professionalism",
-    text: "I've worked with several real estate agencies, but Rent Ghar stands out for their integrity and results-driven approach. They understood exactly what I was looking for and delivered beyond expectations.",
+    text: "I've worked with several real estate agencies, but Property Dealer stands out for their integrity and results-driven approach. They understood exactly what I was looking for and delivered beyond expectations.",
     name: "Humna Khan",
     role: "Design Lead",
     rating: 5,
@@ -61,7 +61,7 @@ const defaultTestimonials: Testimonial[] = [
 const TestimonialSection: React.FC<TestimonialSectionProps> = ({
   heading = "Customer Success Stories",
   subheading = "Testimonials",
-  description = "Join hundreds of satisfied homeowners and investors who trust Rent Ghar for their real estate journey in Pakistan."
+  description = "Join hundreds of satisfied homeowners and investors who trust Property Dealer for their real estate journey in Pakistan."
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);

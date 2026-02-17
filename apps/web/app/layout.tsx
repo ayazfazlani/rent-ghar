@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s | PropertyDealer"
   },
   description: "Pakistan's most trusted property portal since 2007. Find properties for rent and sale in Multan, Lahore, Karachi, and Islamabad.",
-  keywords: ["property portal pakistan", "rent ghar", "houses for rent multan", "apartments for sale lahore", "plots karachi", "commercial property islamabad"],
+  keywords: ["property portal pakistan", "Property Dealer", "houses for rent multan", "apartments for sale lahore", "plots karachi", "commercial property islamabad"],
   authors: [{ name: "PropertyDealer Team" }],
   creator: "PropertyDealer",
   publisher: "PropertyDealer",
