@@ -30,9 +30,9 @@ export default async function Home() {
       'karachi': 'https://images.unsplash.com/photo-1570533113000-67623306634d?w=800&q=80',
       'lahore': 'https://images.unsplash.com/photo-1596422846543-75c6fc18a5ce?w=800&q=80',
       'islamabad': 'https://images.unsplash.com/photo-1621538356947-f495bf847683?w=800&q=80',
-      'rawalpindi': 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
       'faisalabad': 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
-      'peshawar': 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&q=80',
+      'multan': 'https://images.unsplash.com/photo-1570533113000-67623306634d?w=800&q=80',
+      'gujranwala': 'https://images.unsplash.com/photo-1596422846543-75c6fc18a5ce?w=800&q=80',
     };
     const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&q=80';
 
@@ -40,11 +40,21 @@ export default async function Home() {
 
     // Filter cities based on CITY_ORDER first, then process
     const filteredCities = citiesData
-      .filter((city: any) => CITY_ORDER.includes(city.name.toLowerCase()))
+      .filter((city: any) => {
+        const cityName = city.name.trim().toLowerCase();
+        return CITY_ORDER.includes(cityName) || cityName === 'faislabad';
+      })
       .sort((a: any, b: any) => {
-        const indexA = CITY_ORDER.indexOf(a.name.toLowerCase());
-        const indexB = CITY_ORDER.indexOf(b.name.toLowerCase());
-        return indexA - indexB;
+        const nameA = a.name.trim().toLowerCase();
+        const nameB = b.name.trim().toLowerCase();
+
+        // Handle spelling fallback for index lookup
+        const getIndex = (name: string) => {
+          if (name === 'faislabad') return CITY_ORDER.indexOf('faisalabad');
+          return CITY_ORDER.indexOf(name);
+        };
+
+        return getIndex(nameA) - getIndex(nameB);
       });
 
     const processedCities = await Promise.all(
@@ -55,14 +65,14 @@ export default async function Home() {
             ...city,
             count: stats.total || 0,
             slug: cityToSlug(city.name),
-            image: city.thumbnail || DEFAULT_CITY_IMAGES[city.name.toLowerCase()] || FALLBACK_IMAGE
+            image: city.thumbnail || DEFAULT_CITY_IMAGES[city.name.trim().toLowerCase()] || DEFAULT_CITY_IMAGES['faisalabad'] || FALLBACK_IMAGE
           };
         } catch (err) {
           return {
             ...city,
             count: 0,
             slug: cityToSlug(city.name),
-            image: city.thumbnail || DEFAULT_CITY_IMAGES[city.name.toLowerCase()] || FALLBACK_IMAGE
+            image: city.thumbnail || DEFAULT_CITY_IMAGES[city.name.trim().toLowerCase()] || DEFAULT_CITY_IMAGES['faisalabad'] || FALLBACK_IMAGE
           };
         }
       })

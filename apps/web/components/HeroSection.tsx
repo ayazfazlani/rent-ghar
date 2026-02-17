@@ -215,7 +215,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
       {/* Content */}
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 md:py-20 lg:py-24">
         {/* Main Heading with Premium Typography */}
-        {/* <div className="text-center mb-10 md:mb-16">
+        <div className="text-center mb-10 md:mb-16">
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-gray-900 mb-6 drop-shadow-sm">
             Find Your Perfect{' '}
             <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900">
@@ -225,10 +225,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
             <br className="hidden md:block" />
             {' '}in Pakistan
           </h2>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-medium opacity-80">
+          {/* <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-medium opacity-80">
             Premium properties, verified listings, and seamless experiences.
-          </p>
-        </div> */}
+          </p> */}
+        </div>
 
         {/* Search Box with Glassmorphism */}
         <div className="max-w-4xl mx-auto">
