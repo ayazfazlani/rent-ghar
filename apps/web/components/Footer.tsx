@@ -33,8 +33,8 @@ const Footer = () => {
                 <Home className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-xl font-bold">
-                <span className="text-primary">Rent</span>
-                <span className="text-background">Ghr</span>
+                <span className="text-background">Property</span>
+                <span className="text-background">Dealer</span>
               </span>
             </Link>
             <p className="text-background/70 text-sm mb-4">
