@@ -36,8 +36,19 @@ export default async function Home() {
     };
     const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&q=80';
 
+    const CITY_ORDER = ['lahore', 'islamabad', 'karachi', 'multan', 'gujranwala', 'faisalabad'];
+
+    // Filter cities based on CITY_ORDER first, then process
+    const filteredCities = citiesData
+      .filter((city: any) => CITY_ORDER.includes(city.name.toLowerCase()))
+      .sort((a: any, b: any) => {
+        const indexA = CITY_ORDER.indexOf(a.name.toLowerCase());
+        const indexB = CITY_ORDER.indexOf(b.name.toLowerCase());
+        return indexA - indexB;
+      });
+
     const processedCities = await Promise.all(
-      citiesData.slice(0, 6).map(async (city: any) => {
+      filteredCities.map(async (city: any) => {
         try {
           const stats = await serverApi.getLocationStats(city.name);
           return {
@@ -56,7 +67,6 @@ export default async function Home() {
         }
       })
     );
-    processedCities.sort((a, b) => b.count - a.count);
 
     // 3. Pre-process Properties for FeaturedSection and Hero suggestions
     const backendProperties = Array.isArray(propertiesData) ? propertiesData : (propertiesData as any).properties || [];

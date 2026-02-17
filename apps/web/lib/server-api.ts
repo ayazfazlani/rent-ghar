@@ -41,11 +41,11 @@ export const serverApi = {
 
   // City API
   async getCities(): Promise<any[]> {
-    return this.get('/cities', { next: { revalidate: 86400 } }); // Cache cities for 24 hours
+    return this.get('/cities', { next: { revalidate: 900, tags: ['cities'] } }); // Cache cities for 15 minutes
   },
 
   async getCityByName(name: string): Promise<any> {
-    return this.get(`/cities/name/${name}`, { next: { revalidate: 86400 } });
+    return this.get(`/cities/name/${name}`, { next: { revalidate: 900, tags: ['cities'] } });
   },
 
   // Property API
@@ -55,12 +55,12 @@ export const serverApi = {
   },
 
   async getTypes(): Promise<string[]> {
-    return this.get('/properties/types', { next: { revalidate: 86400 } }); // Cache types for 24 hours
+    return this.get('/properties/types', { next: { revalidate: 3600 } }); // Cache types for 1 hour
   },
 
   async getLocationStats(city: string): Promise<any> {
     return this.get(`/properties/stats/locations?city=${encodeURIComponent(city)}`, { 
-      next: { revalidate: 3600 } 
+      next: { revalidate: 900 } 
     });
   },
 
