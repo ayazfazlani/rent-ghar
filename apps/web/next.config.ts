@@ -1,6 +1,26 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'plus.unsplash.com',
+      }
+    ],
+  },
   async rewrites() {
     // Only rewrite if NEXT_PUBLIC_API_URL is explicitly set
     // Otherwise, use relative paths (same domain) - no rewriting needed

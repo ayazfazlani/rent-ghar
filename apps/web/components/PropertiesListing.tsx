@@ -251,6 +251,7 @@ export default function PropertiesListing({
 
   // Update state when props change
   useEffect(() => {
+    setProperties([]); // Clear old results to prevent stale display during loading
     setCity(initialCity);
     setType(initialType);
     setTempCity(initialCity);
@@ -327,7 +328,7 @@ export default function PropertiesListing({
     const currentPurpose = newPurpose || purpose;
 
     // Always use clean URLs when forceCleanUrl is true (from Apply button) or when useCleanUrls is true
-    const shouldUseCleanUrl = (forceCleanUrl || useCleanUrls) && currentPurpose !== 'all';
+    const shouldUseCleanUrl = (forceCleanUrl || useCleanUrls);
 
     // Get existing parameters to preserve
     const params = new URLSearchParams(searchParams.toString());
@@ -445,7 +446,7 @@ export default function PropertiesListing({
                   params.delete('areaId');
 
                   const currentPurpose = purpose;
-                  const shouldUseCleanUrl = useCleanUrls && currentPurpose !== 'all';
+                  const shouldUseCleanUrl = useCleanUrls; // Allow clean URLs for all purposes including 'all'
 
                   if (shouldUseCleanUrl) {
                     const purposePath = currentPurpose === 'buy' ? 'sale' : currentPurpose;

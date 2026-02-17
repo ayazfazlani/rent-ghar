@@ -25,6 +25,9 @@ export class City {
   @Prop({ trim: true })
   description?: string; // Rich Text
 
+  @Prop({ trim: true })
+  thumbnail?: string; // City Image URL
+
   // Areas are optional - a city can exist without areas initially
   // Areas will reference the city, not the other way around
 }

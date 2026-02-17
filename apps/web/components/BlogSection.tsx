@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, User, ArrowRight, Loader2 } from 'lucide-react';
 import { blogApi } from '@/lib/api';
 import { transformBlogsToPosts, BlogPost } from '@/lib/utils/blog-utils';
@@ -14,26 +15,25 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 
-const BlogSection = () => {
-  // STATE: Store blogs fetched from API
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+interface BlogSectionProps {
+  initialPosts?: BlogPost[];
+}
 
-  // FETCH BLOGS ON MOUNT
-  // ====================
+const BlogSection: React.FC<BlogSectionProps> = ({ initialPosts }) => {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(initialPosts || []);
+  const [loading, setLoading] = useState(!initialPosts);
+
   useEffect(() => {
+    if (initialPosts) return;
+
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        // Fetch published blogs from API
         const response = await blogApi.getPublishedBlogs();
-        // Transform backend format to frontend format
         const transformed = transformBlogsToPosts(response as Blog[]);
-        // Take only first 6 for homepage preview
         setBlogPosts(transformed.slice(0, 6));
       } catch (error) {
         console.error('Error fetching blogs:', error);
-        // On error, set empty array (component will show nothing)
         setBlogPosts([]);
       } finally {
         setLoading(false);
@@ -41,41 +41,43 @@ const BlogSection = () => {
     };
 
     fetchBlogs();
-  }, []); // Run once on mount
+  }, [initialPosts]);
 
-  // LOADING STATE
   if (loading) {
     return (
-      <section className="py-16 bg-secondary/30">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      <section className="py-24 bg-gray-50/50">
+        <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-gray-300" />
           </div>
         </div>
       </section>
     );
   }
 
-  // DON'T RENDER IF NO BLOGS
   if (blogPosts.length === 0) {
     return null;
   }
 
   return (
-    <section className="py-16 bg-secondary/30">
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
-        <div className="mb-12">
-          <h2 className="text-4xl font-bold text-foreground mb-3">
-            Latest Property News
-          </h2>
-          <p className="text-muted-foreground text-lg">
-            Stay updated with the latest trends and insights from Pakistan's property market
-          </p>
+    <section className="py-24 bg-gray-50/50">
+      <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+          <div className="max-w-2xl">
+            <Badge text="Market Insights" />
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mt-4 mb-6 leading-tight">
+              Latest from Our Blog
+            </h2>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              Stay ahead with expert advice on real estate trends, investment tips, and home improvement guides.
+            </p>
+          </div>
+          <Link href="/blog" className="px-8 py-4 bg-white border border-gray-200 rounded-2xl font-bold text-gray-900 hover:border-black transition-all shadow-sm hover:shadow-xl flex items-center gap-2 mb-2">
+            Explore All Articles <ArrowRight size={20} />
+          </Link>
         </div>
 
-        {/* Blog Cards with Navigation */}
-        <div className="relative sm:px-12">
+        <div className="relative">
           <Carousel
             opts={{
               align: "start",
@@ -83,57 +85,52 @@ const BlogSection = () => {
             }}
             className="w-full"
           >
-            <CarouselContent className="-ml-2 md:-ml-4">
+            <CarouselContent className="-ml-6 md:-ml-8">
               {blogPosts.map((post, index) => (
                 <CarouselItem
                   key={post.id || index}
-                  className="pl-2 md:pl-4 sm:basis-1/2 lg:basis-1/3"
+                  className="pl-6 md:pl-8 sm:basis-1/2 lg:basis-1/3"
                 >
-                  <Link href={`/blog/${post.slug}`}>
-                    <article
-                      className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group h-full flex flex-col"
-                    >
-                      {/* Image */}
-                      <div className="relative overflow-hidden h-48 w-full">
-                        <img
+                  <Link href={`/blog/${post.slug}`} className="group h-full block">
+                    <article className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:border-black/5 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all duration-500 h-full flex flex-col">
+                      <div className="relative overflow-hidden h-64 w-full">
+                        <Image
                           src={post.image}
                           alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          sizes="(max-w-768px) 100vw, (max-w-1200px) 50vw, 33vw"
                         />
-                        {/* Category Badge */}
-                        <span className="absolute top-3 left-3 bg-primary/90 text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
-                          {post.category}
-                        </span>
+                        <div className="absolute top-4 left-4">
+                          <span className="bg-white/90 backdrop-blur-md text-gray-900 px-4 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider shadow-xl">
+                            {post.category}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Content */}
-                      <div className="p-5 flex flex-col flex-1">
-                        {/* Meta Info */}
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                          <span className="flex items-center gap-1">
-                            <Calendar size={14} />
+                      <div className="p-8 flex flex-col flex-1">
+                        <div className="flex items-center gap-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-50 pb-6">
+                          <span className="flex items-center gap-2">
+                            <Calendar size={14} className="text-gray-300" />
                             {post.date}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <User size={14} />
+                          <span className="flex items-center gap-2">
+                            <User size={14} className="text-gray-300" />
                             {post.author}
                           </span>
                         </div>
 
-                        {/* Title */}
-                        <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                        <h3 className="text-2xl font-extrabold text-gray-900 mb-4 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                           {post.title}
                         </h3>
 
-                        {/* Excerpt */}
-                        <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                        <p className="text-gray-500 leading-relaxed mb-8 line-clamp-3 text-sm">
                           {post.excerpt}
                         </p>
 
-                        {/* Read More */}
-                        <div className="mt-auto flex items-center gap-2 text-primary text-sm font-semibold group-hover:gap-3 transition-all">
-                          Read More
-                          <ArrowRight size={16} />
+                        <div className="mt-auto flex items-center gap-2 text-black font-extrabold text-xs uppercase tracking-[0.2em] group-hover:gap-4 transition-all pb-2">
+                          Read Full Article
+                          <ArrowRight size={16} className="text-primary" />
                         </div>
                       </div>
                     </article>
@@ -141,13 +138,23 @@ const BlogSection = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="hidden sm:flex" />
-            <CarouselNext className="hidden sm:flex" />
+            <div className="hidden lg:flex absolute top-1/2 -left-20 -translate-y-1/2">
+              <CarouselPrevious className="h-14 w-14 rounded-2xl shadow-xl border-none bg-white hover:bg-black hover:text-white transition-all" />
+            </div>
+            <div className="hidden lg:flex absolute top-1/2 -right-20 -translate-y-1/2">
+              <CarouselNext className="h-14 w-14 rounded-2xl shadow-xl border-none bg-white hover:bg-black hover:text-white transition-all" />
+            </div>
           </Carousel>
         </div>
       </div>
     </section>
   );
 };
+
+const Badge = ({ text }: { text: string }) => (
+  <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-black text-white text-[10px] font-extrabold uppercase tracking-[0.2em] shadow-sm">
+    {text}
+  </span>
+);
 
 export default BlogSection;

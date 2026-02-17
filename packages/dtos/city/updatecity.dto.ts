@@ -28,4 +28,8 @@ export class UpdateCityDto {
     @IsOptional()
     @IsString()
     description?: string;
+
+    @IsOptional()
+    @IsString()
+    thumbnail?: string;
 }

@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ImagePickerDialog } from "@/components/ImagePickerDialog";
+import { Image as ImageIcon, X } from "lucide-react";
 
 import cityApi from "@/lib/api/city/city.api";
 
@@ -31,6 +33,7 @@ const formSchema = z.object({
   metaDescription: z.string().optional(),
   canonicalUrl: z.string().optional(),
   description: z.string().optional(),
+  thumbnail: z.string().optional(),
 });
 
 export default function EditCityPage() {
@@ -38,6 +41,7 @@ export default function EditCityPage() {
   const params = useParams();
   const cityId = params.id as string;
   const [loading, setLoading] = useState(true);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,6 +53,7 @@ export default function EditCityPage() {
       metaDescription: "",
       canonicalUrl: "",
       description: "",
+      thumbnail: "",
     },
   });
 
@@ -68,6 +73,7 @@ export default function EditCityPage() {
           metaDescription: city.metaDescription || "",
           canonicalUrl: city.canonicalUrl || "",
           description: city.description || "",
+          thumbnail: city.thumbnail || "",
         });
       } catch (error: any) {
         console.error("Error fetching city:", error);
@@ -134,31 +140,86 @@ export default function EditCityPage() {
                 )}
               />
 
-              {/* State / Province */}
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State / Province *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Sindh" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* State / Province */}
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State / Province *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Sindh" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Country */}
+                {/* Country */}
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Pakistan" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* City Thumbnail */}
               <FormField
                 control={form.control}
-                name="country"
+                name="thumbnail"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Country *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Pakistan" {...field} />
-                    </FormControl>
+                    <FormLabel>City Thumbnail (Optional)</FormLabel>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <FormControl>
+                          <Input
+                            placeholder="Image URL or choose from gallery"
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setImageDialogOpen(true)}
+                        >
+                          <ImageIcon className="h-4 w-4 mr-2" />
+                          Gallery
+                        </Button>
+                      </div>
+
+                      {field.value && (
+                        <div className="relative w-full h-48 rounded-lg overflow-hidden border bg-gray-50">
+                          <img
+                            src={field.value}
+                            alt="City thumbnail preview"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Invalid+Image+URL';
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                            onClick={() => field.onChange("")}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -227,6 +288,17 @@ export default function EditCityPage() {
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+
+              {/* Image Picker Dialog */}
+              <ImagePickerDialog
+                open={imageDialogOpen}
+                onOpenChange={setImageDialogOpen}
+                onSelect={(image) => {
+                  form.setValue("thumbnail", image.url);
+                }}
+                title="Select City Thumbnail"
+                description="Choose an image for the city card on the home page."
               />
 
               {/* Submit Buttons */}

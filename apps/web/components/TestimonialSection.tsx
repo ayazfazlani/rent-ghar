@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Quote, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Quote, Star, User } from 'lucide-react';
 
 interface Testimonial {
   id: number;
@@ -10,6 +10,7 @@ interface Testimonial {
   name: string;
   role: string;
   rating: number;
+  color: string;
 }
 
 interface TestimonialSectionProps {
@@ -21,69 +22,68 @@ interface TestimonialSectionProps {
 const defaultTestimonials: Testimonial[] = [
   {
     id: 1,
-    title: "It was the first time I ever sold a property",
-    text: "Working with Rent Ghar was an absolute pleasure. Their professional team guided me through every step of the selling process. The attention to detail and commitment to finding the right buyer exceeded my expectations. I couldn't have asked for a better experience.",
+    title: "Seamless Selling Experience",
+    text: "Working with Rent Ghar was an absolute pleasure. Their professional team guided me through every step of the selling process. The attention to detail and commitment to finding the right buyer exceeded my expectations.",
     name: "Ayesha Khan",
-    role: "Marketing Specialist",
-    rating: 5
+    role: "Marketing Director",
+    rating: 5,
+    color: "from-blue-500 to-indigo-600"
   },
   {
     id: 2,
-    title: "Thank you very much for selling our apartment",
-    text: "The entire process was seamless from start to finish. The team at Rent Ghar demonstrated exceptional professionalism and market knowledge. They sold our apartment quickly and at a great price. I highly recommend their services to anyone looking to buy or sell property.",
+    title: "Efficiency at its Best",
+    text: "The entire process was seamless from start to finish. The team at Rent Ghar demonstrated exceptional professionalism and market knowledge. They sold our apartment quickly and at a great price. Highly recommended!",
     name: "Ahmad Raees",
-    role: "Office Assistant",
-    rating: 5
+    role: "Legal Consultant",
+    rating: 5,
+    color: "from-emerald-500 to-teal-600"
   },
   {
     id: 3,
-    title: "Outstanding service and excellent results",
-    text: "Rent Ghar helped us find our dream home in Multan. Their expertise in the local market and dedication to understanding our needs made all the difference. The team was always available to answer questions and provided valuable insights throughout our search.",
+    title: "Found Our Dream Home",
+    text: "Rent Ghar helped us find our dream home in Multan. Their expertise in the local market and dedication to understanding our needs made all the difference. Always available and provided valuable insights.",
     name: "Ismail Butt",
-    role: "Business Owner",
-    rating: 5
+    role: "Tech Entrepreneur",
+    rating: 5,
+    color: "from-orange-500 to-red-600"
   },
   {
     id: 4,
-    title: "Professional and reliable property consultants",
-    text: "I've worked with several real estate agencies, but Rent Ghar stands out for their integrity and results-driven approach. They understood exactly what I was looking for and delivered beyond expectations. A truly trustworthy partner in real estate.",
+    title: "Unmatched Professionalism",
+    text: "I've worked with several real estate agencies, but Rent Ghar stands out for their integrity and results-driven approach. They understood exactly what I was looking for and delivered beyond expectations.",
     name: "Humna Khan",
-    role: "Real Estate Investor",
-    rating: 5
+    role: "Design Lead",
+    rating: 5,
+    color: "from-purple-500 to-pink-600"
   }
 ];
 
 const TestimonialSection: React.FC<TestimonialSectionProps> = ({
-  heading = "Testimonials",
-  subheading = "What Our Clients Say",
-  description = "See what our satisfied clients have to say about their experience with Rent Ghar."
+  heading = "Customer Success Stories",
+  subheading = "Testimonials",
+  description = "Join hundreds of satisfied homeowners and investors who trust Rent Ghar for their real estate journey in Pakistan."
 }) => {
-  const testimonials = defaultTestimonials; // ← always use this
-
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // No need for length check since we know there are 4 items
-  // But keeping it for future-proofing if array becomes empty somehow
-  if (testimonials.length === 0) {
-    return null;
-  }
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const nextTestimonial = () => {
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev + 1) % defaultTestimonials.length);
+    setTimeout(() => setIsAnimating(false), 500);
   };
 
   const prevTestimonial = () => {
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev - 1 + defaultTestimonials.length) % defaultTestimonials.length);
+    setTimeout(() => setIsAnimating(false), 500);
   };
 
   const getVisibleTestimonials = () => {
-    const visible: Testimonial[] = [];
-    const itemsToShow = Math.min(2, testimonials.length);
-
-    for (let i = 0; i < itemsToShow; i++) {
-      visible.push(testimonials[(currentIndex + i) % testimonials.length]!);
-    }
-    return visible;
+    const first = defaultTestimonials[currentIndex];
+    const second = defaultTestimonials[(currentIndex + 1) % defaultTestimonials.length];
+    return [first, second];
   };
 
   const getInitials = (name: string) => {
@@ -96,170 +96,116 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({
   };
 
   return (
-    <section className="bg-white py-12 px-4 sm:py-16 lg:py-20">
-      <div className="max-w-6xl mx-auto">
-        <style jsx global>{`
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(30px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
+    <section className="relative bg-white py-24 overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-gray-50 rounded-full blur-3xl opacity-50" />
+      <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-gray-50 rounded-full blur-3xl opacity-50" />
 
-          @keyframes slideInLeft {
-            from {
-              opacity: 0;
-              transform: translateX(-30px);
-            }
-            to {
-              opacity: 1;
-              transform: translateX(0);
-            }
-          }
-        `}</style>
-
+      <div className="max-w-[1440px] mx-auto px-4 lg:px-8 relative z-10">
         {/* Header Section */}
-        <div className="mb-10 lg:mb-12" style={{ animation: 'slideInLeft 0.8s ease-out' }}>
-          <p className="text-gray-500 text-xs font-semibold mb-2 uppercase tracking-wider">
-            {subheading}
+        <div className="max-w-3xl mb-16">
+          <Badge text={subheading} />
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mt-4 mb-6 leading-tight">
+            {heading}
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl leading-relaxed">
+            {description}
           </p>
-
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-3 hover:text-gray-700 transition-colors duration-300">
-                {heading}
-              </h2>
-              <p className="text-gray-600 text-sm md:text-base max-w-xl">
-                {description}
-              </p>
-            </div>
-
-            {testimonials.length > 2 && (
-              <div className="hidden sm:flex gap-2 flex-shrink-0">
-                <button
-                  onClick={prevTestimonial}
-                  className="w-11 h-11 rounded-lg border border-gray-300 hover:border-black hover:bg-black hover:text-white hover:scale-110 hover:rotate-12 transition-all duration-300 flex items-center justify-center text-black active:scale-95"
-                  aria-label="Previous testimonial"
-                >
-                  <ChevronLeft size={20} strokeWidth={2.5} />
-                </button>
-                <button
-                  onClick={nextTestimonial}
-                  className="w-11 h-11 rounded-lg bg-black hover:bg-gray-800 hover:scale-110 hover:-rotate-12 transition-all duration-300 flex items-center justify-center text-white active:scale-95"
-                  aria-label="Next testimonial"
-                >
-                  <ChevronRight size={20} strokeWidth={2.5} />
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Testimonial Cards Grid */}
-        <div className="grid md:grid-cols-2 gap-5 lg:gap-6">
-          {getVisibleTestimonials().map((testimonial, index) => (
-            <article
-              key={testimonial.id}
-              className="bg-white rounded-xl p-6 border border-gray-200 hover:border-black transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group"
-              style={{
-                animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
-              }}
-            >
-              <h3 className="text-lg sm:text-xl font-bold text-black mb-3 leading-tight group-hover:text-gray-700 transition-colors duration-300">
-                {testimonial.title}
-              </h3>
-
-              <div className="flex gap-0.5 mb-5" aria-label={`${testimonial.rating} out of 5 stars`}>
-                {[...Array(5)].map((_, starIndex) => (
-                  <Star
-                    key={starIndex}
-                    size={16}
-                    className={`${starIndex < testimonial.rating
-                      ? 'fill-black stroke-black group-hover:scale-110'
-                      : 'fill-gray-200 stroke-gray-200'
-                      } transition-all duration-300`}
-                    style={{
-                      transitionDelay: `${starIndex * 50}ms`
-                    }}
-                  />
-                ))}
-              </div>
-
-              <p className="text-gray-600 leading-relaxed mb-6 text-sm group-hover:text-gray-700 transition-colors duration-300">
-                {testimonial.text}
-              </p>
-
-              <div className="flex items-center justify-between pt-5 border-t border-gray-100 group-hover:border-gray-200 transition-colors duration-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm group-hover:scale-110 group-hover:bg-gray-800 transition-all duration-300">
-                    {getInitials(testimonial.name)}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-black text-sm group-hover:translate-x-1 transition-transform duration-300">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-gray-500 text-xs group-hover:translate-x-1 transition-transform duration-300">
-                      {testimonial.role}
-                    </p>
-                  </div>
+        <div className="relative">
+          {/* Main Content Area */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {getVisibleTestimonials().map((testimonial, idx) => (
+              <div
+                key={`${testimonial.id}-${idx}`}
+                className={`group relative bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-2xl hover:border-black/5 transition-all duration-500 transform ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+              >
+                {/* Quote Icon Background */}
+                <div className="absolute top-8 right-8 text-gray-50 group-hover:text-gray-100 transition-colors duration-500">
+                  <Quote size={80} strokeWidth={1} />
                 </div>
 
-                <Quote
-                  className="text-gray-300 flex-shrink-0 group-hover:text-black group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
-                  size={36}
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
+                <div className="relative z-10">
+                  {/* Rating */}
+                  <div className="flex gap-1 mb-6">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={18}
+                        className={i < testimonial.rating ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Testimonial Text */}
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-black transition-colors">
+                    "{testimonial.title}"
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed min-h-[100px] mb-8 italic">
+                    {testimonial.text}
+                  </p>
+
+                  {/* Author Profile */}
+                  <div className="flex items-center gap-4 pt-6 border-t border-gray-50">
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${testimonial.color} flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                      {getInitials(testimonial.name)}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-lg">{testimonial.name}</h4>
+                      <p className="text-gray-500 font-medium">{testimonial.role}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </article>
-          ))}
-        </div>
-
-        {/* Navigation Buttons - Mobile */}
-        {testimonials.length > 2 && (
-          <div className="flex sm:hidden justify-center gap-2 mt-6">
-            <button
-              onClick={prevTestimonial}
-              className="w-11 h-11 rounded-lg border border-gray-300 hover:border-black hover:bg-black hover:text-white hover:scale-110 transition-all duration-300 flex items-center justify-center text-black active:scale-95"
-              aria-label="Previous testimonial"
-            >
-              <ChevronLeft size={20} strokeWidth={2.5} />
-            </button>
-            <button
-              onClick={nextTestimonial}
-              className="w-11 h-11 rounded-lg bg-black hover:bg-gray-800 hover:scale-110 hover:-rotate-12 transition-all duration-300 flex items-center justify-center text-white active:scale-95"
-              aria-label="Next testimonial"
-            >
-              <ChevronRight size={20} strokeWidth={2.5} />
-            </button>
-          </div>
-        )}
-
-        {/* Pagination Dots */}
-        {testimonials.length > 2 && (
-          <div className="flex justify-center gap-1.5 mt-6" role="tablist" aria-label="Testimonial navigation">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-1.5 rounded-full transition-all duration-300 hover:scale-125 ${index === currentIndex
-                  ? 'w-6 bg-black'
-                  : 'w-1.5 bg-gray-300 hover:bg-gray-400'
-                  }`}
-                aria-label={`Go to testimonial ${index + 1}`}
-                aria-selected={index === currentIndex}
-                role="tab"
-              />
             ))}
           </div>
-        )}
+
+          {/* Controls Overlay */}
+          <div className="flex items-center justify-between mt-12">
+            {/* Pagination Dots */}
+            <div className="flex gap-2">
+              {defaultTestimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    if (isAnimating) return;
+                    setIsAnimating(true);
+                    setCurrentIndex(i);
+                    setTimeout(() => setIsAnimating(false), 500);
+                  }}
+                  className={`h-2 rounded-full transition-all duration-500 ${i === currentIndex ? 'w-8 bg-black' : 'w-2 bg-gray-200 hover:bg-gray-300'}`}
+                  aria-label={`Go to testimonial ${i + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex gap-4">
+              <button
+                onClick={prevTestimonial}
+                className="w-14 h-14 rounded-2xl border border-gray-100 bg-white flex items-center justify-center text-gray-400 hover:text-black hover:border-black hover:shadow-xl transition-all duration-300 group active:scale-90"
+              >
+                <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
+              </button>
+              <button
+                onClick={nextTestimonial}
+                className="w-14 h-14 rounded-2xl bg-black flex items-center justify-center text-white hover:bg-gray-800 hover:shadow-xl transition-all duration-300 group active:scale-90"
+              >
+                <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
 };
+
+const Badge = ({ text }: { text: string }) => (
+  <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-black text-white text-xs font-bold uppercase tracking-widest shadow-sm">
+    {text}
+  </span>
+);
 
 export default TestimonialSection;

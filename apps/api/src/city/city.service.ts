@@ -44,6 +44,7 @@ export class CityService {
             if (createCityDto.metaDescription) cityData.metaDescription = createCityDto.metaDescription;
             if (createCityDto.canonicalUrl) cityData.canonicalUrl = createCityDto.canonicalUrl;
             if (createCityDto.description) cityData.description = createCityDto.description;
+            if (createCityDto.thumbnail) cityData.thumbnail = createCityDto.thumbnail;
             
             const createdCity = new this.cityModel(cityData);
             return await createdCity.save();
@@ -128,6 +129,7 @@ export class CityService {
             if (updateCityDto.metaDescription !== undefined) updateData.metaDescription = updateCityDto.metaDescription;
             if (updateCityDto.canonicalUrl !== undefined) updateData.canonicalUrl = updateCityDto.canonicalUrl;
             if (updateCityDto.description !== undefined) updateData.description = updateCityDto.description;
+            if (updateCityDto.thumbnail !== undefined) updateData.thumbnail = updateCityDto.thumbnail;
 
             const city = await this.cityModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
             if (!city) {

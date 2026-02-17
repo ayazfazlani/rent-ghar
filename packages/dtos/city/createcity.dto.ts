@@ -28,4 +28,8 @@ export class CreateCityDto {
     @IsOptional()
     @IsString()
     description?: string;
+
+    @IsOptional()
+    @IsString()
+    thumbnail?: string;
 }

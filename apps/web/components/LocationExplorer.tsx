@@ -89,7 +89,9 @@ export default function LocationExplorer({
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b pb-6">
         <div className="flex-1 min-w-0">
           <h2 className="text-xl md:text-3xl font-bold text-foreground mb-4 leading-tight capitalize">
-            {stats?.total.toLocaleString() || 0} Properties for {purpose === 'buy' ? 'Sale' : 'Rent'} in {city}
+            {stats?.total.toLocaleString() || 0} Properties for {
+              purpose === 'all' ? 'Rent & Sale' : (purpose === 'buy' ? 'Sale' : 'Rent')
+            } in {city}
           </h2>
 
           <div className="flex flex-wrap gap-2 items-center">
@@ -139,9 +141,12 @@ export default function LocationExplorer({
             variant="ghost"
             size="sm"
             className="text-primary h-9 font-semibold text-sm hover:bg-primary/5 px-4 rounded-full"
-            onClick={() => onPurposeChange?.(purpose === 'buy' ? 'rent' : 'buy')}
+            onClick={() => {
+              if (purpose === 'all') onPurposeChange?.('rent');
+              else onPurposeChange?.(purpose === 'buy' ? 'rent' : 'buy');
+            }}
           >
-            {city} for {purpose === 'buy' ? 'Rent' : 'Sale'}
+            {city} for {purpose === 'all' ? 'Rent' : (purpose === 'buy' ? 'Rent' : 'Sale')}
           </Button>
         </div>
       </div>

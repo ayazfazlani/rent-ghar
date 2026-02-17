@@ -176,10 +176,10 @@ export class PropertyService {
             // 2. String match via cityName
             if (filters.cityName) {
                  // Case-insensitive match for city string field
-                 const cityRegex = new RegExp(`^${filters.cityName}$`, 'i');
-                 const locationRegex = new RegExp(`${filters.cityName}`, 'i');
+                 const cityRegex = new RegExp(`${filters.cityName}`, 'i');
                  orConditions.push({ city: cityRegex });
-                 orConditions.push({ location: locationRegex });
+                 orConditions.push({ location: cityRegex });
+                 orConditions.push({ title: cityRegex });
             }
 
             if (orConditions.length > 0) {

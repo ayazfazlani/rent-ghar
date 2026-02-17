@@ -6,22 +6,28 @@ import { propertyApi, cityApi, areaApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  initialCities?: any[];
+  initialProperties?: any[];
+  initialTypes?: string[];
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialProperties, initialTypes }) => {
   const router = useRouter();
   const [purpose, setPurpose] = useState<'rent' | 'buy'>('rent');
-  const [city, setCity] = useState('');
-  const [cityId, setCityId] = useState('');
+  const [city, setCity] = useState(initialCities?.[0]?.name || '');
+  const [cityId, setCityId] = useState(initialCities?.[0]?._id || '');
   const [area, setArea] = useState('');
   const [areaId, setAreaId] = useState('');
   const [type, setType] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<Property[]>([]);
-  const [allProperties, setAllProperties] = useState<Property[]>([]);
-  const [cityList, setCityList] = useState<{ _id: string; name: string }[]>([]);
+  const [allProperties, setAllProperties] = useState<Property[]>(initialProperties || []);
+  const [cityList, setCityList] = useState<{ _id: string; name: string }[]>(initialCities || []);
   const [areaList, setAreaList] = useState<{ _id: string; name: string }[]>([]);
-  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [propertyTypes, setPropertyTypes] = useState<string[]>(initialTypes || []);
+  const [loading, setLoading] = useState(!initialCities || !initialProperties || !initialTypes);
   const [loadingAreas, setLoadingAreas] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -39,34 +45,29 @@ const HeroSection = () => {
     return typeName.toLowerCase().trim();
   };
 
-  // Fetch initial data (cities and types)
+  // Fetch initial data if not provided via props
   useEffect(() => {
+    if (initialCities && initialProperties && initialTypes) return;
+
     const fetchInitialData = async () => {
       try {
         setLoading(true);
 
-        // Fetch cities and properties in parallel
         const [citiesData, propertiesData, typesData] = await Promise.all([
           cityApi.getAll(),
           propertyApi.getAll(),
           propertyApi.getTypes()
         ]);
 
-        // Set Cities
         const sortedCities = (citiesData as any[]).sort((a, b) => a.name.localeCompare(b.name));
         setCityList(sortedCities);
 
-        // Process Properties for suggestions
-        // Process Properties for suggestions
         const backendProperties = (propertiesData as any).properties || [] as BackendProperty[];
-
         const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
         setAllProperties(transformedProperties);
 
-        // Set Property Types (capitalize for display)
         setPropertyTypes(typesData.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1)).sort());
 
-        // Set default city if available
         if (sortedCities.length > 0 && !city) {
           setCity(sortedCities[0].name);
           setCityId(sortedCities[0]._id);
@@ -79,7 +80,7 @@ const HeroSection = () => {
     };
 
     fetchInitialData();
-  }, []);
+  }, [initialCities, initialProperties, initialTypes]);
 
   // Fetch areas when city changes
   useEffect(() => {
@@ -146,7 +147,6 @@ const HeroSection = () => {
     const purposeSlug = purpose === 'buy' ? 'sale' : 'rent';
     const typeSlug = type ? typeToSlug(type) : 'all';
 
-    // Build query parameters
     const params = new URLSearchParams();
     if (areaId) params.set('areaId', areaId);
     if (searchQuery) params.set('search', searchQuery);
@@ -161,7 +161,6 @@ const HeroSection = () => {
 
     const citySlug = cityToSlug(city);
 
-    // Navigate to clean URL: /properties/rent/[city]/[type]?areaId=...
     if (typeSlug === 'all') {
       router.push(`/properties/${purposeSlug}/${citySlug}${suffix}`);
     } else {
@@ -170,7 +169,6 @@ const HeroSection = () => {
   };
 
   const handlePropertyClick = (property: Property) => {
-    // Navigate to property detail page using slug
     router.push(`/properties/${property.slug}`);
     setShowSuggestions(false);
     setSearchQuery('');

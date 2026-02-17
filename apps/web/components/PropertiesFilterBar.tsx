@@ -36,6 +36,12 @@ export default function PropertiesFilterBar() {
 
   // Extract current filters from URL
   const currentPurpose = useMemo(() => {
+    if (!pathname) return 'all';
+    const pathParts = pathname.split('/').filter(Boolean);
+    if (pathParts[1] === 'rent') return 'rent';
+    if (pathParts[1] === 'sale' || pathParts[1] === 'buy') return 'sale';
+    if (pathParts[1] === 'all') return 'all';
+
     const purpose = searchParams.get('purpose');
     if (purpose === 'buy' || purpose === 'sale') return 'sale';
     if (purpose === 'rent') return 'rent';
@@ -46,7 +52,7 @@ export default function PropertiesFilterBar() {
     if (!pathname) return '';
     // Extract from pathname if on clean URL
     const pathParts = pathname.split('/').filter(Boolean);
-    if (pathParts.length >= 3 && (pathParts[1] === 'rent' || pathParts[1] === 'sale')) {
+    if (pathParts.length >= 3 && (pathParts[1] === 'rent' || pathParts[1] === 'sale' || pathParts[1] === 'all')) {
       return pathParts[2]; // City slug
     }
     return searchParams.get('city') || '';
@@ -56,7 +62,7 @@ export default function PropertiesFilterBar() {
     if (!pathname) return 'all';
     // Extract from pathname if on clean URL
     const pathParts = pathname.split('/').filter(Boolean);
-    if (pathParts.length >= 4 && (pathParts[1] === 'rent' || pathParts[1] === 'sale')) {
+    if (pathParts.length >= 4 && (pathParts[1] === 'rent' || pathParts[1] === 'sale' || pathParts[1] === 'all')) {
       return pathParts[3]; // Type
     }
     return searchParams.get('type') || 'all';
@@ -162,7 +168,7 @@ export default function PropertiesFilterBar() {
 
   // Navigate to clean URL based on filters
   const applyFilters = () => {
-    const purpose = tempPurpose === 'all' ? 'rent' : tempPurpose; // Default to rent if all
+    const purpose = tempPurpose;
     const citySlug = tempCity ? cityToSlug(tempCity) : '';
     const typeSlug = tempType && tempType !== 'all' ? `/${tempType.toLowerCase()}` : '';
 
@@ -184,7 +190,7 @@ export default function PropertiesFilterBar() {
 
   // Navigate to purpose page
   const navigateToPurpose = (newPurpose: 'rent' | 'sale' | 'all') => {
-    const purpose = newPurpose === 'all' ? 'rent' : newPurpose;
+    const purpose = newPurpose;
     const citySlug = tempCity ? cityToSlug(tempCity) : '';
     const typeSlug = tempType && tempType !== 'all' ? `/${tempType.toLowerCase()}` : '';
 
@@ -218,8 +224,8 @@ export default function PropertiesFilterBar() {
     // Properties root
     if (parts.length === 1) return false;
 
-    // /properties/rent or /properties/sale
-    if (parts.length >= 2 && (parts[1] === 'rent' || parts[1] === 'sale')) {
+    // /properties/rent or /properties/sale or /properties/all
+    if (parts.length >= 2 && (parts[1] === 'rent' || parts[1] === 'sale' || parts[1] === 'all')) {
       return false;
     }
 
@@ -264,6 +270,15 @@ export default function PropertiesFilterBar() {
                 }`}
             >
               For Sale
+            </button>
+            <button
+              onClick={() => setTempPurpose('all')}
+              className={`flex-1 relative px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${tempPurpose === 'all'
+                ? 'bg-black text-white shadow-lg'
+                : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                }`}
+            >
+              All
             </button>
           </div>
         </div>
@@ -359,6 +374,18 @@ export default function PropertiesFilterBar() {
                 }`}
             >
               <span className="relative z-10">For Sale</span>
+            </button>
+            <button
+              onClick={() => {
+                setTempPurpose('all');
+                navigateToPurpose('all');
+              }}
+              className={`relative px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 overflow-hidden group whitespace-nowrap ${tempPurpose === 'all'
+                ? 'bg-black text-white shadow-lg'
+                : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                }`}
+            >
+              <span className="relative z-10">All</span>
             </button>
           </div>
 

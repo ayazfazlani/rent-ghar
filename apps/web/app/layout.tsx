@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Providers } from "./providers";
 import { AuthProvider } from "@/context/auth-context";
+import StructuredData from "@/components/StructuredData";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,6 +72,7 @@ export default function RootLayout({
         <Providers>
           <AuthProvider>
             <TooltipProvider>
+              <StructuredData />
               {children}
               <Sonner />
             </TooltipProvider>

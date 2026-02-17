@@ -1,18 +1,18 @@
 import PropertyDetail from '@/components/PropertyDetail';
 
-interface PageProps {
-  params: {
-    slug: string;
-  };
+type PageProps = {
+  params: Promise<{ slug: string }>
 }
 
-export default function PropertyDetailPage({ params }: PageProps) {
-  return <PropertyDetail slug={params.slug} />;
+export default async function PropertyDetailPage({ params }: PageProps) {
+  const { slug } = await params;
+  return <PropertyDetail slug={slug} />;
 }
 
 export async function generateMetadata({ params }: PageProps) {
+  const { slug } = await params;
   return {
-    title: `Property Details - ${params.slug}`,
+    title: `Property Details - ${slug}`,
     description: 'View property details',
   };
 }

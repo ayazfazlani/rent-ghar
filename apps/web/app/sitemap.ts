@@ -1,8 +1,7 @@
 import { MetadataRoute } from 'next';
-import { cities, propertyTypes } from '@/lib/data';
+import { serverApi } from '@/lib/server-api';
 
-const BASE_URL = process.env.APP_URL || 'http://localhost:3000';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://rentghar.com';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
@@ -22,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/properties',
     '/properties/rent',
     '/properties/sale',
+    '/properties/all',
     '/hotels',
   ].map((route) => ({
     url: `${BASE_URL}${route}`,
@@ -30,53 +30,56 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : 0.8,
   }));
 
-  // 2. Category Pages
+  // 2. Fetch Dynamic Data for Categories
   const categoryPages: MetadataRoute.Sitemap = [];
-  cities.forEach(city => {
-    const citySlug = toSlug(city);
-    categoryPages.push({
-      url: `${BASE_URL}/properties/rent/${citySlug}`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    });
-    categoryPages.push({
-      url: `${BASE_URL}/properties/sale/${citySlug}`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    });
+  try {
+    const [cities, types] = await Promise.all([
+      serverApi.getCities(),
+      serverApi.getTypes()
+    ]);
 
-    propertyTypes.forEach(type => {
-      const typeSlug = type.toLowerCase();
-      categoryPages.push({
-        url: `${BASE_URL}/properties/rent/${citySlug}/${typeSlug}`,
-        lastModified: currentDate,
-        changeFrequency: 'weekly',
-        priority: 0.6,
-      });
-      categoryPages.push({
-        url: `${BASE_URL}/properties/sale/${citySlug}/${typeSlug}`,
-        lastModified: currentDate,
-        changeFrequency: 'weekly',
-        priority: 0.6,
+    const purposes = ['rent', 'sale', 'all'];
+
+    cities.forEach((city: any) => {
+      const citySlug = toSlug(city.name);
+      
+      purposes.forEach(purpose => {
+        // City Pages (/properties/rent/karachi)
+        categoryPages.push({
+          url: `${BASE_URL}/properties/${purpose}/${citySlug}`,
+          lastModified: currentDate,
+          changeFrequency: 'weekly',
+          priority: 0.7,
+        });
+
+        // City + Type Pages (/properties/rent/karachi/house)
+        types.forEach(type => {
+          const typeSlug = type.toLowerCase();
+          categoryPages.push({
+            url: `${BASE_URL}/properties/${purpose}/${citySlug}/${typeSlug}`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly',
+            priority: 0.6,
+          });
+        });
       });
     });
-  });
+  } catch (error) {
+    console.error('Sitemap Categories Fetch Error:', error);
+  }
 
   // 3. Dynamic Properties
   let dynamicProperties: MetadataRoute.Sitemap = [];
   try {
-    const response = await fetch(`${API_URL}/api/properties`, { next: { revalidate: 3600 } });
-    if (response.ok) {
-      const properties = await response.json();
-      dynamicProperties = (properties || []).map((prop: any) => ({
-        url: `${BASE_URL}/properties/${prop.slug}`,
-        lastModified: new Date(prop.updatedAt || prop.createdAt || currentDate),
-        changeFrequency: 'weekly',
-        priority: 0.6,
-      }));
-    }
+    const response = await serverApi.getProperties('limit=1000'); // Fetch all approved
+    const properties = response.properties || response || [];
+    
+    dynamicProperties = properties.map((prop: any) => ({
+      url: `${BASE_URL}/properties/${prop.slug}`,
+      lastModified: new Date(prop.updatedAt || prop.createdAt || currentDate),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    }));
   } catch (error) {
     console.error('Sitemap Properties Fetch Error:', error);
   }
@@ -84,16 +87,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 4. Dynamic Blogs
   let dynamicBlogs: MetadataRoute.Sitemap = [];
   try {
-    const response = await fetch(`${API_URL}/api/blog/published`, { next: { revalidate: 3600 } });
-    if (response.ok) {
-      const blogs = await response.json();
-      dynamicBlogs = (blogs || []).map((blog: any) => ({
-        url: `${BASE_URL}/blog/${blog.slug}`,
-        lastModified: new Date(blog.updatedAt || blog.createdAt || currentDate),
-        changeFrequency: 'monthly',
-        priority: 0.5,
-      }));
-    }
+    const blogs = await serverApi.getPublishedBlogs();
+    dynamicBlogs = (blogs || []).map((blog: any) => ({
+      url: `${BASE_URL}/blog/${blog.slug}`,
+      lastModified: new Date(blog.updatedAt || blog.createdAt || currentDate),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    }));
   } catch (error) {
     console.error('Sitemap Blogs Fetch Error:', error);
   }

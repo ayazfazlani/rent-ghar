@@ -267,6 +267,18 @@ export default function DashboardCityPage() {
                 <label className="text-sm font-medium text-gray-500">Country</label>
                 <p className="text-lg font-semibold mt-1">{selectedCity.country || 'N/A'}</p>
               </div>
+              {selectedCity.thumbnail && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Thumbnail</label>
+                  <div className="mt-1 w-full h-40 rounded-lg overflow-hidden border">
+                    <img
+                      src={selectedCity.thumbnail}
+                      alt={selectedCity.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="text-sm font-medium text-gray-500">Created At</label>
                 <p className="text-sm text-gray-600 mt-1">{formatDate(selectedCity.createdAt)}</p>
