@@ -27,6 +27,24 @@ export class User {
   @Prop()
   phone?: string;
 
+  @Prop()
+  whatsappNumber?: string;
+
+  @Prop()
+  avatarUrl?: string;
+
+  @Prop()
+  bio?: string;
+
+  @Prop()
+  companyName?: string;
+
+  @Prop()
+  experienceYears?: number;
+
+  @Prop()
+  address?: string;
+
   @Prop({ default: true })
   isActive: boolean;
 

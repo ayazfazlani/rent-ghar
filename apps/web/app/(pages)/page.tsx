@@ -6,6 +6,7 @@ import ExploreTools from "@/components/ExploreTools";
 import AboutBrief from "@/components/AboutBrief";
 import PopularLocations from "@/components/PopularLocations";
 import WhyChooseUs from "@/components/WhyChooseUs";
+import AgentSignupSection from "@/components/AgentSignupSection";
 import FAQSection from "@/components/FAQSection";
 import { serverApi } from "@/lib/server-api";
 import { mapBackendToFrontendProperty } from "@/lib/types/property-utils";
@@ -90,6 +91,7 @@ export default async function Home() {
         <PopularLocations initialCities={processedCities} />
         <FeaturedSection initialProperties={featuredProperties} />
         <WhyChooseUs />
+        <AgentSignupSection />
         <BlogSection initialPosts={processedBlogs} />
         <FAQSection />
         <ExploreTools />
@@ -105,6 +107,7 @@ export default async function Home() {
         <PopularLocations />
         <FeaturedSection />
         <WhyChooseUs />
+        <AgentSignupSection />
         <BlogSection />
         <FAQSection />
         <ExploreTools />
