@@ -9,7 +9,7 @@ const steps = [
   {
     icon: <UserPlus className="w-10 h-10" />,
     title: "Create Account",
-    description: "Sign up as an agent in minutes. It's free and easy to get started with your personal dashboard.",
+    description: "Sign up as an agent in minutes. Start with your first listing for free and manage your inventory with our professional dashboard.",
     color: "bg-blue-50 text-blue-600 border-blue-100",
   },
   {

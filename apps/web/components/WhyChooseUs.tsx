@@ -16,8 +16,8 @@ const features = [
     color: 'bg-indigo-50 text-indigo-600'
   },
   {
-    title: 'Free Consultation',
-    description: 'Get free professional advice on property valuation, legal documentation, and market trends.',
+    title: "Expert Consultation",
+    description: "Our licensed dealers provide specialized advice on property valuation, documentation, and market investment trends.",
     icon: PhoneCall,
     color: 'bg-purple-50 text-purple-600'
   },

@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     question: "Can I list my property for sale or rent for free?",
-    answer: "Yes, you can list your first property for free on our platform. For additional listings or to boost your property's visibility, we offer various package options."
+    answer: "Yes, you can list your first property for free on our platform. For additional listings or to increase your agency's reach, we offer professional dealer packages tailored to your needs."
   },
   {
     question: "Which cities in Pakistan do you cover?",
