@@ -5,12 +5,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Category } from '@rent-ghar/db/schemas/category.schema';
 import { CreateBlogDto } from '@rent-ghar/dtos/blog/createblog.dto';
 import { UpdateBlogDto } from '@rent-ghar/dtos/blog/updateblog.dto';
+import { IndexNowService } from '../indexnow/indexnow.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class BlogService {
     constructor(
         @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
-        @InjectModel(Category.name) private categoryModel: Model<any>
+        @InjectModel(Category.name) private categoryModel: Model<any>,
+        private indexNowService: IndexNowService,
+        private configService: ConfigService,
     ){}
 
 
@@ -98,8 +102,17 @@ export class BlogService {
 
             console.log('💾 Creating blog in database with data:', JSON.stringify(blogData, null, 2));
             const blog = await this.blogModel.create(blogData);
-            console.log('✅ Blog created successfully with ID:', blog._id);
-            return blog;
+        console.log('✅ Blog created successfully with ID:', blog._id);
+
+        if (blog.status === 'published' && blog.slug) {
+            const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+            const url = `https://${host}/blog/${blog.slug}`;
+            this.indexNowService.submitUrl(url).catch(err => {
+                console.error('Failed to submit URL to IndexNow:', err);
+            });
+        }
+
+        return blog;
         } catch (error: any) {
             console.error('❌ Error in createBlog service:', error.message);
             console.error('Error stack:', error.stack);
@@ -199,6 +212,15 @@ export class BlogService {
         if (!blog) {
             throw new NotFoundException('Blog not found');
         }
+
+        if (blog.status === 'published' && blog.slug) {
+            const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+            const url = `https://${host}/blog/${blog.slug}`;
+            this.indexNowService.submitUrl(url).catch(err => {
+                console.error('Failed to submit URL to IndexNow:', err);
+            });
+        }
+
         return blog;
     }
 

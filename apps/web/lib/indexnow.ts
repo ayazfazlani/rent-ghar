@@ -1,5 +1,5 @@
-const INDEXNOW_API_KEY = '5b2a3c4d5e6f7a8b9c0d1e2f3a4b5c6d';
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://rentghar.com';
+const INDEXNOW_API_KEY = process.env.NEXT_PUBLIC_INDEXNOW_KEY || 'AIzaSyDRl4TlB2VyavKQWg5f_3u-t5bMamPDaE0';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk';
 
 /**
  * Utility to proactively notify search engines of new or updated content via IndexNow.

@@ -14,10 +14,15 @@ function generateSlug(text: string): string {
         .replace(/^-+|-+$/g, '') || `page-${Date.now()}`;
 }
 
+import { IndexNowService } from '../indexnow/indexnow.service';
+import { ConfigService } from '@nestjs/config';
+
 @Injectable()
 export class PageService {
     constructor(
-        @InjectModel(Page.name) private readonly pageModel: Model<PageDocument>
+        @InjectModel(Page.name) private readonly pageModel: Model<PageDocument>,
+        private indexNowService: IndexNowService,
+        private configService: ConfigService,
     ) {}
 
     async create(createPageDto: CreatePageDto): Promise<PageDocument> {
@@ -52,6 +57,15 @@ export class PageService {
             // Try to save, handle duplicate slug by appending a number
             try {
                 const savedPage = await page.save();
+                
+                if (savedPage.status === 'PUBLISHED' && savedPage.slug) {
+                    const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+                    const url = `https://${host}/${savedPage.slug}`;
+                    this.indexNowService.submitUrl(url).catch(err => {
+                        console.error('Failed to submit URL to IndexNow:', err);
+                    });
+                }
+
                 return savedPage;
             } catch (saveError: any) {
                 // If duplicate slug error, try to generate a unique one
@@ -153,6 +167,15 @@ export class PageService {
         if (!page) {
             throw new NotFoundException(`Page with ID ${id} not found`);
         }
+
+        if (page.status === 'PUBLISHED' && page.slug) {
+            const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+            const url = `https://${host}/${page.slug}`;
+            this.indexNowService.submitUrl(url).catch(err => {
+                console.error('Failed to submit URL to IndexNow:', err);
+            });
+        }
+
         return page;
     }
 

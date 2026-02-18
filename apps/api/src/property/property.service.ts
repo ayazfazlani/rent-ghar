@@ -5,6 +5,8 @@ import { Model, Types } from 'mongoose';
 import { CreatePropertyDto } from '@rent-ghar/types/property';
 import { Area } from '@rent-ghar/db/schemas/area.schema';
 import { SubscriptionService } from '../subscription/subscription.service';
+import { IndexNowService } from '../indexnow/indexnow.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PropertyService {
@@ -12,6 +14,8 @@ export class PropertyService {
         @InjectModel(Property.name) private propertyModel: Model<Property>,
         @InjectModel(Area.name) private areaModel: Model<Area>,
         private subscriptionService: SubscriptionService,
+        private indexNowService: IndexNowService,
+        private configService: ConfigService,
     ) {}
 
     private toSlug(value: string): string {
@@ -407,10 +411,19 @@ export class PropertyService {
 
       async updateStatus(id: string) {
         const property = await this.propertyModel.findByIdAndUpdate(id, { status: 'approved' }, { new: true }).exec();
+        
+        if (property && property.status === 'approved' && property.slug) {
+            const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+            const url = `https://${host}/p/${property.slug}`;
+            this.indexNowService.submitUrl(url).catch(err => {
+                console.error('Failed to submit URL to IndexNow:', err);
+            });
+        }
+
         return {
-          success: true,
-          message: 'Property status updated successfully',
-          property: property
+            success: true,
+            message: 'Property status updated successfully',
+            property: property
         }
       }
 

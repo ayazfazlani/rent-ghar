@@ -13,6 +13,8 @@ import { StorageService } from '../../../../packages/storage/storage.service';
 import axios from 'axios';
 import * as fs from 'fs';
 import * as os from 'os';
+import { IndexNowService } from '../indexnow/indexnow.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ImportService {
@@ -23,6 +25,8 @@ export class ImportService {
     @InjectModel('Area') private areaModel: Model<Area>,
     @InjectModel('City') private cityModel: Model<City>,
     private readonly storageService: StorageService,
+    private readonly indexNowService: IndexNowService,
+    private readonly configService: ConfigService,
   ) {}
 
   async importWordPress(xmlData: string, ownerId: string, zipFile?: Express.Multer.File, imagesXmlData?: string): Promise<any> {
@@ -82,6 +86,8 @@ export class ImportService {
 
     let importedCount = 0;
     let skippedCount = 0;
+    const importedUrls: string[] = [];
+    const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
 
     for (const item of listings) {
       try {
@@ -147,10 +153,17 @@ export class ImportService {
         );
 
         importedCount++;
+        importedUrls.push(`https://${host}/p/${propertyData.slug}`);
       } catch (err: any) {
         this.logger.error(`Failed to import item: ${item.title || 'Unknown'}`, err instanceof Error ? (err.stack || String(err)) : String(err));
         skippedCount++;
       }
+    }
+
+    if (importedUrls.length > 0) {
+      this.indexNowService.submitUrls(importedUrls).catch(err => {
+        this.logger.error('Failed to submit URLs to IndexNow during import', err);
+      });
     }
 
     return {

@@ -15,6 +15,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { UserModule } from './user/user.module';
 import { StorageModule } from '../../../packages/storage/storage.module';
 import { ImportModule } from './import/import.module';
+import { IndexNowModule } from './indexnow/indexnow.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { ImportModule } from './import/import.module';
     SubscriptionModule,
     UserModule,
     ImportModule,
+    IndexNowModule,
   ],
   controllers: [AppController],
   providers: [AppService],
