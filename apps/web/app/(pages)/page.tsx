@@ -17,12 +17,18 @@ import { transformBlogsToPosts } from "@/lib/utils/blog-utils";
 export default async function Home() {
   try {
     // 1. Fetch data on the server with Next.js caching
-    const [citiesData, propertiesData, typesData, blogsData] = await Promise.all([
+    // Use Promise.allSettled so one failing API doesn't crash the entire homepage
+    const [citiesResult, propertiesResult, typesResult, blogsResult] = await Promise.allSettled([
       serverApi.getCities(),
       serverApi.getProperties('limit=8'),
       serverApi.getTypes(),
       serverApi.getPublishedBlogs(),
     ]);
+
+    const citiesData = citiesResult.status === 'fulfilled' ? citiesResult.value : [];
+    const propertiesData = propertiesResult.status === 'fulfilled' ? propertiesResult.value : [];
+    const typesData = typesResult.status === 'fulfilled' ? typesResult.value : [];
+    const blogsData = blogsResult.status === 'fulfilled' ? blogsResult.value : [];
 
     // 2. Pre-process Cities for PopularLocations
     const cityToSlug = (name: string) => name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');

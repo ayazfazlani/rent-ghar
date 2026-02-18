@@ -168,7 +168,7 @@ export default function AddBlogPage() {
                                                         .replace(/^-+|-+$/g, '');
                                                     form.setValue('slug', slug);
                                                     if (slug) {
-                                                        form.setValue('canonicalUrl', `https://pro.adca.pk/blog/${slug}`);
+                                                        form.setValue('canonicalUrl', `https://propertydealer.pk/blog/${slug}`);
                                                     }
                                                 }}
                                             />
@@ -189,7 +189,7 @@ export default function AddBlogPage() {
                                             />
                                         </FormControl>
                                         <p className="text-xs text-gray-500 mt-1">
-                                            URL: https://pro.adca.pk/blog/{field.value || 'slug'}
+                                            URL: https://propertydealer.pk/blog/{field.value || 'slug'}
                                         </p>
                                         <FormMessage />
                                     </FormItem>
@@ -370,7 +370,7 @@ export default function AddBlogPage() {
                                         <FormLabel>Canonical URL (Auto-generated)</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="https://pro.adca.pk/blog/auto-generated"
+                                                placeholder="https://propertydealer.pk/blog/auto-generated"
                                                 {...field}
                                                 className="bg-gray-50 text-gray-600"
                                                 readOnly

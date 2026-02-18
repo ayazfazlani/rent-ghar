@@ -33,8 +33,8 @@ async function bootstrap() {
     process.env.APP_URL || 'http://localhost:3000',
     'http://localhost:3002',
     'http://localhost:3005',
-    'https://pro.adca.pk',
-    'http://pro.adca.pk',
+    'https://propertydealer.pk',
+    'http://propertydealer.pk',
   ];
 
   // Add Vercel deployment URL for production

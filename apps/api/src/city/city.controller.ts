@@ -31,14 +31,14 @@ export class CityController {
         }
     }
 
-    @Get(':id')
-    async findCityById(@Param('id') id: string): Promise<CityDocument> {
-        return this.cityService.findCityById(id);
-    }
-
     @Get('name/:name')
     async findCityByName(@Param('name') name: string): Promise<CityDocument> {
         return this.cityService.findCityByName(name);
+    }
+
+    @Get(':id')
+    async findCityById(@Param('id') id: string): Promise<CityDocument> {
+        return this.cityService.findCityById(id);
     }
 
     @Put(':id')

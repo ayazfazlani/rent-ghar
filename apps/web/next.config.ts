@@ -30,6 +30,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'english.news.cn',
+      },
+      {
+        protocol: 'https',
+        hostname: 'popertydealer.pk',
       }
     ],
   },
