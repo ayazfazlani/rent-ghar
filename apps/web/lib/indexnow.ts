@@ -1,4 +1,4 @@
-const INDEXNOW_API_KEY = process.env.NEXT_PUBLIC_INDEXNOW_KEY || 'AIzaSyDRl4TlB2VyavKQWg5f_3u-t5bMamPDaE0';
+const INDEXNOW_API_KEY = process.env.NEXT_PUBLIC_INDEXNOW_KEY || '8837ca2e8f774e069922248ec058f3ae';
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk';
 
 /**
