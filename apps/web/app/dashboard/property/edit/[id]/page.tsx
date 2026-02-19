@@ -310,6 +310,11 @@ export default function EditProperty() {
     }
   }
 
+  const removeMainImage = () => {
+    setMainImageFile(null)
+    setMainImagePreview(null)
+  }
+
   const handleAddImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files && files.length > 0) {
@@ -382,13 +387,6 @@ export default function EditProperty() {
       if (mainImageFile) {
         formData.append('mainPhoto', mainImageFile)
       }
-
-      // Add additional photos (only non-null files)
-      additionalImageFiles.forEach((file) => {
-        if (file) {
-          formData.append('additionalPhotos', file)
-        }
-      })
 
       // Add JSON data as separate fields (backend expects these in the body)
       formData.append('listingType', listingType)

@@ -299,7 +299,6 @@ export default function AddProperty() {
       formData.append('location', location)
       formData.append('bedrooms', bedrooms)
       formData.append('bathrooms', bathrooms)
-      formData.append('bathrooms', bathrooms)
       formData.append('areaSize', areaSize) // Property size in sq ft
       formData.append('price', price)
       if (marla) formData.append('marla', marla)
