@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import BlogPostClient from './BlogPostClient';
 import { Blog } from '@/lib/types/blog';
+import { serverApi } from '@/lib/server-api';
 
 interface PageProps {
   params: Promise<{
@@ -12,30 +13,13 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   // Next.js 15: params is now a Promise, must await it
   const { slug } = await params;
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rentghar.com';
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk';
 
   try {
-    // Fetch blog data for SEO
-    const response = await fetch(`${apiUrl}/api/blog/slug/${encodeURIComponent(slug)}`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    // Fetch blog data for SEO using serverApi
+    const blog: Blog = await serverApi.get(`/blog/slug/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 3600 }
     });
-
-    if (!response.ok) {
-      return {
-        title: 'Blog Post Not Found | RentGhar',
-        description: 'The blog post you are looking for does not exist.',
-        robots: {
-          index: false,
-          follow: false,
-        },
-      };
-    }
-
-    const blog: Blog = await response.json();
 
     // Get author name
     const authorName = typeof blog.author === 'object' && blog.author !== null && 'name' in blog.author
@@ -176,21 +160,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function BlogPostPage({ params }: PageProps) {
   // Next.js 15: params is now a Promise, must await it
   const { slug } = await params;
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rentghar.com';
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk';
 
-  // Fetch blog data for structured data
+  // Fetch blog data for structured data using serverApi
   let blog: Blog | null = null;
   try {
-    const response = await fetch(`${apiUrl}/api/blog/slug/${encodeURIComponent(slug)}`, {
-      next: { revalidate: 3600 },
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    blog = await serverApi.get(`/blog/slug/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 3600 }
     });
-    if (response.ok) {
-      blog = await response.json();
-    }
   } catch (error) {
     console.error('Error fetching blog for structured data:', error);
   }

@@ -58,6 +58,10 @@ export const serverApi = {
     return this.get('/properties/types', { next: { revalidate: 3600 } }); // Cache types for 1 hour
   },
 
+  async getPropertyBySlug(slug: string): Promise<any> {
+    return this.get(`/properties/slug/${slug}`, { next: { revalidate: 1800 } });
+  },
+
   async getLocationStats(city: string): Promise<any> {
     return this.get(`/properties/stats/locations?city=${encodeURIComponent(city)}`, { 
       next: { revalidate: 900 } 
@@ -67,5 +71,10 @@ export const serverApi = {
   // Blog API
   async getPublishedBlogs(): Promise<Blog[]> {
     return this.get('/blog/published', { next: { revalidate: 1800 } }); // Cache blogs for 30 minutes
+  },
+
+  // Page API
+  async getPageBySlug(slug: string): Promise<any> {
+    return this.get(`/page/slug/${slug}`, { next: { revalidate: 1800 } });
   },
 };

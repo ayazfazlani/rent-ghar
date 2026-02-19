@@ -8,7 +8,7 @@ const GA_MEASUREMENT_ID = 'G-GFGWSFNVDS';
  * Component for injecting JSON-LD Structured Data for SEO
  */
 export default function StructuredData() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rentghar.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk';
 
   const organizationData = {
     '@context': 'https://schema.org',

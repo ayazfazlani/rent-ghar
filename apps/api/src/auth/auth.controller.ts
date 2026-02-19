@@ -65,7 +65,7 @@ export class AuthController {
     if (token) {
       res.cookie('access_token', token, {
         ...cookieOpts,
-        maxAge: 1000 * 60 * 15, // 15 minutes (matches JWT expiry usually)
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days (matches increased JWT expiry)
       });
     }
 
@@ -98,7 +98,7 @@ export class AuthController {
     // Update access token cookie
     res.cookie('access_token', result.token, {
         ...cookieOpts,
-        maxAge: 1000 * 60 * 15, // 15 minutes
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     });
 
     return result;

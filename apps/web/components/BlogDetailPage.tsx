@@ -16,31 +16,31 @@ const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
   const sharePost = (platform: string) => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
     const text = post.title;
-    
+
     const shareUrls: Record<string, string> = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
       twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
     };
-    
+
     if (typeof window !== 'undefined' && shareUrls[platform]) {
       window.open(shareUrls[platform], '_blank', 'width=600,height=400');
     }
   };
 
   // Get base URL for structured data
-  const baseUrl = typeof window !== 'undefined' 
-    ? window.location.origin 
-    : 'https://rentghar.com';
-  
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://propertydealer.pk';
+
   // Get full image URL
   const fullImageUrl = post.image?.startsWith('http')
     ? post.image
     : `${baseUrl}${post.image?.startsWith('/') ? '' : '/'}${post.image || '/default-blog.jpg'}`;
-  
+
   // Get page URL
   const pageUrl = `${baseUrl}/blog/${post.slug}`;
-  
+
   // Parse date for structured data
   const publishedDate = post.date ? new Date(post.date).toISOString() : new Date().toISOString();
 
@@ -112,12 +112,12 @@ const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
               {post.category}
             </span>
           )}
-          
+
           {/* Title */}
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
             {post.title}
           </h1>
-          
+
           {/* Meta Info */}
           <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-8">
             <span className="flex items-center gap-2">
@@ -137,8 +137,8 @@ const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
 
           {/* Featured Image */}
           <div className="rounded-2xl overflow-hidden mb-12 shadow-2xl">
-            <img 
-              src={post.image} 
+            <img
+              src={post.image}
               alt={post.title}
               className="w-full h-[400px] md:h-[500px] object-cover"
             />
@@ -152,7 +152,7 @@ const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
           <div className="grid md:grid-cols-12 gap-8">
             {/* Main Content */}
             <div className="md:col-span-8">
-              <div 
+              <div
                 className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
@@ -225,8 +225,8 @@ const BlogDetailPage = ({ post, relatedPosts = [] }: BlogDetailPageProps) => {
                   <Link href={`/blog/${relatedPost.slug}`} key={relatedPost.id}>
                     <article className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group">
                       <div className="relative overflow-hidden h-48">
-                        <img 
-                          src={relatedPost.image} 
+                        <img
+                          src={relatedPost.image}
                           alt={relatedPost.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />

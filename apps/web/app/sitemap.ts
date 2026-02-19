@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { serverApi } from '@/lib/server-api';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://rentghar.com';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;

@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'popertydealer.pk',
+        hostname: 'propertydealer.pk',
       }
     ],
   },

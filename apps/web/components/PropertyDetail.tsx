@@ -19,13 +19,16 @@ const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
   loading: () => <div className="h-[350px] w-full bg-secondary animate-pulse rounded-xl flex items-center justify-center text-muted-foreground">Loading Map...</div>
 });
 
-const PropertyDetail = ({ slug }: { slug?: string }) => {
+const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialProperty?: BackendProperty | null }) => {
   const router = useRouter();
   const params = useParams();
   const resolvedSlug = (slug || (params?.slug as string) || (params?.id as string))?.trim();
-  const [property, setProperty] = useState<Property | null>(null);
-  const [backendProperty, setBackendProperty] = useState<BackendProperty | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  const [property, setProperty] = useState<Property | null>(
+    initialProperty ? mapBackendToFrontendProperty(initialProperty) : null
+  );
+  const [backendProperty, setBackendProperty] = useState<BackendProperty | null>(initialProperty || null);
+  const [loading, setLoading] = useState(!initialProperty);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   // const [isLiked, setIsLiked] = useState(false);
@@ -60,6 +63,11 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
         setLoading(false);
       }
     };
+
+    if (initialProperty && (initialProperty.slug === resolvedSlug || initialProperty._id === resolvedSlug)) {
+      setLoading(false);
+      return;
+    }
 
     if (!resolvedSlug) {
       setError('Property slug is missing');
@@ -302,21 +310,21 @@ const PropertyDetail = ({ slug }: { slug?: string }) => {
                       )}
                     </div>
                     {/* Short Excerpt make it like render heml also */}
-                   <p
+                    <p
                       className="text-muted-foreground text-lg leading-relaxed"
-                    // Prefer excerpt → truncated description → fallback plain text
-                    dangerouslySetInnerHTML={{
-                     __html:
-                    (backendProperty as any)?.excerpt?.trim() ||
-                    (property.description
-                      ? property.description.length > 320
-                        ? // Rough char limit — adjust based on average HTML → visible length
-                          property.description.substring(0, 320).replace(/<[^>]*>?/gm, '').trim() + '…'
-                        : property.description
-                      : `This beautiful ${(property.type ?? 'property').toLowerCase()} is located in the prime area of ${property.location ?? ''}, ${property.city ?? ''}. 
+                      // Prefer excerpt → truncated description → fallback plain text
+                      dangerouslySetInnerHTML={{
+                        __html:
+                          (backendProperty as any)?.excerpt?.trim() ||
+                          (property.description
+                            ? property.description.length > 320
+                              ? // Rough char limit — adjust based on average HTML → visible length
+                              property.description.substring(0, 320).replace(/<[^>]*>?/gm, '').trim() + '…'
+                              : property.description
+                            : `This beautiful ${(property.type ?? 'property').toLowerCase()} is located in the prime area of ${property.location ?? ''}, ${property.city ?? ''}. 
                         Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort.`.replace(/\s+/g, ' ').trim()),
-                }}
-              />
+                      }}
+                    />
                   </div>
                   <div className="flex gap-2 ml-4">
                     {/* <Button

@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://rentghar.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk'),
   title: {
     default: "PropertyDealer - Property Portal Pakistan",
     template: "%s | PropertyDealer"
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_PK',
-    url: 'https://rentghar.com',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk',
     siteName: 'PropertyDealer',
     title: 'PropertyDealer - Find Your Dream Property in Pakistan',
     description: "Explore thousands of properties for rent and sale across Pakistan.",

@@ -192,7 +192,7 @@ export default function BlogPostClient({ slug: slugProp }: BlogPostClientProps) 
       'name': 'RentGhar',
       'logo': {
         '@type': 'ImageObject',
-        'url': `${typeof window !== 'undefined' ? window.location.origin : 'https://rentghar.com'}/logo.png`
+        'url': `${typeof window !== 'undefined' ? window.location.origin : 'https://propertydealer.pk'}/logo.png`
       }
     }
   } : null;

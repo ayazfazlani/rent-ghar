@@ -16,7 +16,7 @@ import { User, UserSchema } from '@rent-ghar/db/schemas/user.schema';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET') || 'default-secret-key',
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: configService.get('JWT_EXPIRES_IN') || '1h' },
       }),
     }),
   ],
