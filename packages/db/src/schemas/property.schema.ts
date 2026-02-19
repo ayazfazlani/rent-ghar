@@ -35,6 +35,12 @@ export class Property extends Document {
   @Prop({ required: true })
   price: number // PKR
 
+  @Prop({ type: Number, default: 0 })
+  marla?: number
+
+  @Prop({ type: Number, default: 0 })
+  kanal?: number
+
   @Prop({ required: true })
   description: string
 

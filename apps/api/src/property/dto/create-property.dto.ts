@@ -76,6 +76,18 @@ export class CreatePropertyDto {
   @Min(0)
   price: number;
 
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  marla?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  kanal?: number;
+
   @IsString()
   description: string;
 
@@ -100,4 +112,8 @@ export class CreatePropertyDto {
   @Type(() => Number)
   @IsNumber()
   longitude?: number;
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  existingPhotos?: string[];
 }

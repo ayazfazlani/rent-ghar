@@ -8,10 +8,10 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "node dist/main",
+    "start": "node dist/apps/api/src/main",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/apps/api/src/main",
     "seed:packages": "ts-node -r tsconfig-paths/register src/scripts/seed-packages.ts",
     "import:wp": "ts-node -r tsconfig-paths/register src/scripts/import-wp.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

@@ -75,11 +75,18 @@ export default function EditProperty() {
   const [newAreaName, setNewAreaName] = useState('')
   const [isAddingLocation, setIsAddingLocation] = useState(false)
 
-  // Image state - store both File objects and preview URLs
+  // Image state
   const [mainImageFile, setMainImageFile] = useState<File | null>(null)
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null)
-  const [additionalImageFiles, setAdditionalImageFiles] = useState<(File | null)[]>([null, null, null])
-  const [additionalImagePreviews, setAdditionalImagePreviews] = useState<(string | null)[]>([null, null, null])
+
+  // Separate state for existing and new additional images
+  const [existingImages, setExistingImages] = useState<string[]>([])
+  const [newImages, setNewImages] = useState<{ file: File, preview: string }[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [marla, setMarla] = useState('')
+  const [kanal, setKanal] = useState('')
+
   const [features, setFeatures] = useState<string[]>([''])
 
   const params = useParams()
@@ -171,6 +178,8 @@ export default function EditProperty() {
         setBathrooms(property.bathrooms?.toString() || '0')
         setAreaSize(property.areaSize?.toString() || '0')
         setPrice(property.price?.toString() || '0')
+        setMarla(property.marla?.toString() || '')
+        setKanal(property.kanal?.toString() || '')
         setDescription(property.description || '')
         setContactNumber(property.contactNumber || '')
         setWhatsappNumber(property.whatsappNumber || '')
@@ -179,9 +188,7 @@ export default function EditProperty() {
 
         // Correct field names for images
         setMainImagePreview(property.mainPhotoUrl || null)
-        const additionalImages = property.additionalPhotosUrls || []
-        const paddedImages = [...additionalImages, null, null, null].slice(0, 3)
-        setAdditionalImagePreviews(paddedImages)
+        setExistingImages(property.additionalPhotosUrls || [])
 
         setFeatures(property.features && property.features.length > 0 ? property.features : [''])
       } catch (error: any) {
@@ -303,36 +310,26 @@ export default function EditProperty() {
     }
   }
 
-  const handleAdditionalImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const newFiles = [...additionalImageFiles]
-      newFiles[index] = file
-      setAdditionalImageFiles(newFiles)
-
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const newPreviews = [...additionalImagePreviews]
-        newPreviews[index] = reader.result as string
-        setAdditionalImagePreviews(newPreviews)
-      }
-      reader.readAsDataURL(file)
+  const handleAddImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setNewImages(prev => [...prev, { file, preview: reader.result as string }])
+        }
+        reader.readAsDataURL(file)
+      })
     }
   }
 
-  const removeMainImage = () => {
-    setMainImageFile(null)
-    setMainImagePreview(null)
-  }
-
-  const removeAdditionalImage = (index: number) => {
-    const newFiles = [...additionalImageFiles]
-    newFiles[index] = null
-    setAdditionalImageFiles(newFiles)
-
-    const newPreviews = [...additionalImagePreviews]
-    newPreviews[index] = null
-    setAdditionalImagePreviews(newPreviews)
+  const removeImage = (index: number) => {
+    if (index < existingImages.length) {
+      setExistingImages(prev => prev.filter((_, i) => i !== index))
+    } else {
+      const newImageIndex = index - existingImages.length
+      setNewImages(prev => prev.filter((_, i) => i !== newImageIndex))
+    }
   }
 
   const addFeature = () => {
@@ -403,9 +400,21 @@ export default function EditProperty() {
       formData.append('bathrooms', bathrooms)
       formData.append('areaSize', areaSize) // Property size in sq ft
       formData.append('price', price)
+      if (marla) formData.append('marla', marla)
+      if (kanal) formData.append('kanal', kanal)
       formData.append('description', description)
       formData.append('contactNumber', contactNumber)
       formData.append('whatsappNumber', whatsappNumber || contactNumber)
+
+      // Append existing photos
+      existingImages.forEach(url => {
+        formData.append('existingPhotos', url)
+      })
+
+      // Append new photos
+      newImages.forEach(img => {
+        formData.append('additionalPhotos', img.file)
+      })
 
       if (latitude !== undefined) formData.append('latitude', latitude.toString())
       if (longitude !== undefined) formData.append('longitude', longitude.toString())
@@ -705,6 +714,38 @@ export default function EditProperty() {
               />
             </div>
 
+            {/* Marla and Kanal */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Marla
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={marla}
+                  onChange={(e) => setMarla(e.target.value)}
+                  placeholder="0"
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Kanal
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={kanal}
+                  onChange={(e) => setKanal(e.target.value)}
+                  placeholder="0"
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
+
             {/* Main Photo Upload */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -756,47 +797,44 @@ export default function EditProperty() {
                 Additional Photos
               </label>
               <div className="grid grid-cols-3 gap-4">
-                {[0, 1, 2].map((index) => (
-                  <div key={index}>
-                    {additionalImagePreviews?.[index] ? (
-                      <div className="relative">
-                        <img
-                          src={additionalImagePreviews[index]!}
-                          alt={`Additional ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <Button
-                          type="button"
-                          onClick={() => removeAdditionalImage(index)}
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-2 right-2 h-8 w-8"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-500 transition-colors h-32 flex items-center justify-center">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleAdditionalImageUpload(e, index)}
-                          disabled={isLoading}
-                          className="hidden"
-                          id={`photo-${index}`}
-                        />
-                        <label htmlFor={`photo-${index}`} className="cursor-pointer">
-                          <div className="flex flex-col items-center">
-                            <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span className="text-xs text-gray-600">Photo {index + 1}</span>
-                          </div>
-                        </label>
-                      </div>
-                    )}
+                {[...existingImages, ...newImages.map(n => n.preview)].map((preview, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={preview}
+                      alt={`Additional ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
                 ))}
+
+                {/* Add More Button */}
+                <div
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-500 transition-colors h-32 flex items-center justify-center cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className="flex flex-col items-center">
+                    <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                    <span className="text-xs text-gray-600">Add Photos</span>
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleAddImages}
+                  disabled={isLoading}
+                  className="hidden"
+                  ref={fileInputRef}
+                />
               </div>
             </div>
 

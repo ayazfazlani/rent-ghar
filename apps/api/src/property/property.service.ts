@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException 
 import { Property } from '@rent-ghar/db/schemas/property.schema';
 import { InjectModel} from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { CreatePropertyDto } from '@rent-ghar/types/property';
+import { CreatePropertyDto } from './dto/create-property.dto';
 import { Area } from '@rent-ghar/db/schemas/area.schema';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { IndexNowService } from '../indexnow/indexnow.service';
@@ -111,10 +111,12 @@ export class PropertyService {
               slug,
               title: dto.title,
               location: dto.location,
-              bedrooms: typeof dto.bedrooms === 'string' ? parseInt(dto.bedrooms, 10) : dto.bedrooms,
-              bathrooms: typeof dto.bathrooms === 'string' ? parseInt(dto.bathrooms, 10) : dto.bathrooms,
-              areaSize: typeof dto.areaSize === 'string' ? parseInt(dto.areaSize, 10) : dto.areaSize,
-              price: typeof dto.price === 'string' ? parseFloat(dto.price) : dto.price,
+              bedrooms: Number(dto.bedrooms),
+              bathrooms: Number(dto.bathrooms),
+              areaSize: Number(dto.areaSize),
+              price: Number(dto.price),
+              marla: dto.marla ? Number(dto.marla) : 0,
+              kanal: dto.kanal ? Number(dto.kanal) : 0,
               description: dto.description,
               contactNumber: dto.contactNumber,
               features: dto.features || [],
@@ -122,8 +124,8 @@ export class PropertyService {
               mainPhotoUrl,
               additionalPhotosUrls: additionalPhotosUrls || [],
               status: 'pending',
-              latitude: typeof dto.latitude === 'string' ? parseFloat(dto.latitude) : dto.latitude,
-              longitude: typeof dto.longitude === 'string' ? parseFloat(dto.longitude) : dto.longitude,
+              latitude: dto.latitude ? Number(dto.latitude) : undefined,
+              longitude: dto.longitude ? Number(dto.longitude) : undefined,
             })
             const saved = await property.save()
             fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service: Property saved successfully. ID: ${saved._id}\n`);
@@ -446,15 +448,17 @@ export class PropertyService {
             area: dto.area,
             title: dto.title,
             location: dto.location,
-            bedrooms: typeof dto.bedrooms === 'string' ? parseInt(dto.bedrooms, 10) : dto.bedrooms,
-            bathrooms: typeof dto.bathrooms === 'string' ? parseInt(dto.bathrooms, 10) : dto.bathrooms,
-            areaSize: typeof dto.areaSize === 'string' ? parseInt(dto.areaSize, 10) : dto.areaSize,
-            price: typeof dto.price === 'string' ? parseFloat(dto.price) : dto.price,
+            bedrooms: Number(dto.bedrooms),
+            bathrooms: Number(dto.bathrooms),
+            areaSize: Number(dto.areaSize),
+            price: Number(dto.price),
+            marla: dto.marla ? Number(dto.marla) : 0,
+            kanal: dto.kanal ? Number(dto.kanal) : 0,
             description: dto.description,
             contactNumber: dto.contactNumber,
             features: dto.features || [],
-            latitude: typeof dto.latitude === 'string' ? parseFloat(dto.latitude) : dto.latitude,
-            longitude: typeof dto.longitude === 'string' ? parseFloat(dto.longitude) : dto.longitude,
+            latitude: dto.latitude ? Number(dto.latitude) : undefined,
+            longitude: dto.longitude ? Number(dto.longitude) : undefined,
           };
 
           if (dto.slug) {
@@ -467,8 +471,17 @@ export class PropertyService {
           if (mainPhotoUrl) {
             updateData.mainPhotoUrl = mainPhotoUrl;
           }
-          if (additionalPhotosUrls && additionalPhotosUrls.length > 0) {
-            updateData.additionalPhotosUrls = additionalPhotosUrls;
+           
+          // Handle additional photos - combine existing and new
+          const existingPhotos = dto.existingPhotos || [];
+          // Ensure existingPhotos is an array (might be single string if only one sent in form data and not parsed correctly as array)
+          const validExistingPhotos = Array.isArray(existingPhotos) ? existingPhotos : [existingPhotos].filter(Boolean);
+          
+          if (validExistingPhotos.length > 0 || (additionalPhotosUrls && additionalPhotosUrls.length > 0)) {
+             updateData.additionalPhotosUrls = [
+                 ...validExistingPhotos,
+                 ...(additionalPhotosUrls || [])
+             ];
           }
 
           const updatedProperty = await this.propertyModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
