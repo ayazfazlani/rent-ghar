@@ -8,8 +8,7 @@ import { toast } from 'sonner';
 interface User {
   _id: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
+  name?: string;
   role?: string;
   isActive: boolean;
   // Add other fields as needed

@@ -14,6 +14,18 @@ let accessToken: string | null = null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
+  if (typeof window !== "undefined") {
+    if (token) {
+      localStorage.setItem("accessToken", token);
+    } else {
+      localStorage.removeItem("accessToken");
+    }
+  }
+}
+
+// Initialize from localStorage
+if (typeof window !== "undefined") {
+  accessToken = localStorage.getItem("accessToken");
 }
 
 export function getAccessToken(): string | null {

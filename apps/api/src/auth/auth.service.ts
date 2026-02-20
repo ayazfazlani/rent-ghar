@@ -13,7 +13,7 @@ import { LoginDto } from './dtos/login.dto';
 
 export interface TokenResponse {
   token: string;
-  user: { name: string; email: string; role: string; isActive: boolean };
+  user: { _id: string; name: string; email: string; role: string; isActive: boolean };
   status: number;
   message: string;
 }
@@ -38,6 +38,7 @@ export class AuthService {
     return {
       token,
       user: {
+        _id: user._id.toString(),
         name: user.name || '',
         email: user.email,
         role: user.role || 'user',
@@ -81,6 +82,7 @@ export class AuthService {
       token: accessToken,
       refreshToken,
       user: {
+        _id: user._id.toString(),
         name: user.name || '',
         email: user.email,
         role: user.role || 'user',
@@ -116,6 +118,7 @@ export class AuthService {
       return {
         token: this.generateToken(user),
         user: {
+          _id: user._id.toString(),
           name: user.name || '',
           email: user.email,
           role: user.role || 'user',

@@ -150,7 +150,7 @@ export default function AddProperty() {
       toast.success('City added successfully')
       const allCities = await cityApi.getAll()
       setCities(allCities)
-      setCityId(data._id)
+      setCityId(String(data._id))
       setShowAddCityModal(false)
       setNewCityName('')
     } catch (error: any) {
@@ -169,7 +169,7 @@ export default function AddProperty() {
       toast.success('Area added successfully')
       const allAreas = await areaApi.getAll(cityId)
       setAreas(allAreas)
-      setAreaId(data._id)
+      setAreaId(String(data._id))
       setShowAddAreaModal(false)
       setNewAreaName('')
     } catch (error: any) {
@@ -424,8 +424,8 @@ export default function AddProperty() {
                   </SelectTrigger>
                   <SelectContent>
                     {cities.map((city) => (
-                      <SelectItem key={city._id} value={city._id}>
-                        {city.name}
+                      <SelectItem key={String(city._id)} value={String(city._id)}>
+                        {city.name || 'Unnamed City'}
                       </SelectItem>
                     ))}
                     <div
@@ -459,8 +459,8 @@ export default function AddProperty() {
                   </SelectTrigger>
                   <SelectContent>
                     {areas.map((area) => (
-                      <SelectItem key={area._id} value={area._id}>
-                        {area.name}
+                      <SelectItem key={String(area._id)} value={String(area._id)}>
+                        {area.name || 'Unnamed Area'}
                       </SelectItem>
                     ))}
                     {cityId && (

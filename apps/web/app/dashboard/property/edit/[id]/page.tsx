@@ -270,7 +270,7 @@ export default function EditProperty() {
       toast.success('City added successfully')
       const allCities = await cityApi.getAll()
       setCities(allCities)
-      setCityId(data._id)
+      setCityId(String(data._id))
       setShowAddCityModal(false)
       setNewCityName('')
     } catch (error: any) {
@@ -296,7 +296,7 @@ export default function EditProperty() {
       toast.success('Area added successfully')
       const allAreas = await areaApi.getAll(cityId)
       setAreas(allAreas)
-      setAreaId(data._id)
+      setAreaId(String(data._id))
       setShowAddAreaModal(false)
       setNewAreaName('')
     } catch (error: any) {
