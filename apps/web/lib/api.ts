@@ -351,6 +351,11 @@ export const areaApi = {
     const response = await api.get(`/areas/${id}`);
     return response.data;
   },
+  getBySlug: async (slug: string, cityId?: string) => {
+    const url = cityId ? `/areas/slug/${slug}?cityId=${cityId}` : `/areas/slug/${slug}`;
+    const response = await api.get(url);
+    return response.data;
+  },
 };
 
 // User API functions

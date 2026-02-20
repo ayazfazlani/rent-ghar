@@ -10,6 +10,9 @@ export class Area {
   @Prop({ required: true, lowercase: true, trim: true })
   name: string;
 
+  @Prop({ required: true, lowercase: true, trim: true })
+  areaSlug: string;
+
   @Prop({ type: Types.ObjectId, ref: 'City', required: true, index: true })
   city: Types.ObjectId | City;
 

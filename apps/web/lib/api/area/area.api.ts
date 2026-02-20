@@ -3,6 +3,7 @@ import api from '../../api'
 export interface CreateAreaData {
   name: string;
   city: string; // City ID
+  areaSlug: string;
   metaTitle?: string;
   metaDescription?: string;
   canonicalUrl?: string;

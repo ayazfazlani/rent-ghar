@@ -6,6 +6,10 @@ export class UpdateAreaDto {
     name?: string;
 
     @IsOptional()
+    @IsString()
+    areaSlug?: string;
+
+    @IsOptional()
     @IsMongoId()
     city?: string; // City ID
 

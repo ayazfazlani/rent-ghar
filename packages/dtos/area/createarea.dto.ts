@@ -6,6 +6,10 @@ export class CreateAreaDto {
     name: string;
 
     @IsNotEmpty()
+    @IsString()
+    areaSlug: string;
+
+    @IsNotEmpty()
     @IsMongoId()
     city: string; // City ID
 

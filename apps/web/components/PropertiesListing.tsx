@@ -34,6 +34,7 @@ interface PropertiesListingProps {
   type?: string;
   useCleanUrls?: boolean; // If true, navigate using /properties/rent/city/type format
   richDescription?: string;
+  areaId?: string;
 }
 
 export default function PropertiesListing({
@@ -41,7 +42,8 @@ export default function PropertiesListing({
   city: initialCity = '',
   type: initialType = 'all',
   useCleanUrls = false,
-  richDescription
+  richDescription,
+  areaId: initialAreaId
 }: PropertiesListingProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -187,7 +189,7 @@ export default function PropertiesListing({
         const response = await propertyApi.getAll({
           cityId: currentCity?._id,
           cityName: cityToMatch,
-          areaId: searchParams.get('areaId') || undefined,
+          areaId: searchParams.get('areaId') || initialAreaId || undefined,
 
           priceMin: advancedFilters.priceMin,
           priceMax: advancedFilters.priceMax,
@@ -257,7 +259,7 @@ export default function PropertiesListing({
     setTempCity(initialCity);
     setTempType(initialType);
     setCurrentPage(1); // Reset to first page on URL/filter change
-  }, [initialCity, initialType, purpose, searchParams]);
+  }, [initialCity, initialType, purpose, searchParams, initialAreaId]);
 
 
   // Match temp city for the filter dropdown
@@ -291,8 +293,8 @@ export default function PropertiesListing({
 
   const currentAreaId = useMemo(() => {
     // If we're filtering by areaId, pass it to explorer
-    return searchParams.get('areaId') || '';
-  }, [searchParams]);
+    return searchParams.get('areaId') || initialAreaId || '';
+  }, [searchParams, initialAreaId]);
 
   // LOADING STATE
   if (loading) {
@@ -424,12 +426,31 @@ export default function PropertiesListing({
                 currentAreaId={currentAreaId}
                 currentType={type}
 
-                onAreaSelect={(areaId) => {
+                onAreaSelect={(areaId, areaSlug) => {
                   // Standardize navigation to preserve current filters
                   const params = new URLSearchParams(searchParams.toString());
+                  const isUnselecting = params.get('areaId') === areaId || initialAreaId === areaId;
 
-                  // Toggle logic: if clicking already selected area, clear it
-                  if (params.get('areaId') === areaId) {
+                  if (useCleanUrls && matchedCity) {
+                    const currentPurpose = purpose;
+                    const purposePath = currentPurpose === 'buy' ? 'sale' : currentPurpose;
+                    const citySlug = cityToSlug(matchedCity);
+
+                    // If unselecting, go to city page
+                    if (isUnselecting) {
+                      router.push(`/properties/${purposePath}/${citySlug}`);
+                      return;
+                    }
+
+                    // If selecting and we have a slug, go to area page
+                    if (areaSlug) {
+                      router.push(`/properties/${purposePath}/${citySlug}/${areaSlug}`);
+                      return;
+                    }
+                  }
+
+                  // Fallback to query params
+                  if (isUnselecting) {
                     params.delete('areaId');
                   } else {
                     params.set('areaId', areaId);
@@ -438,6 +459,13 @@ export default function PropertiesListing({
                   // Use standardized updateFilters logic for navigation
                   const queryString = params.toString();
                   const currentPath = window.location.pathname;
+                  // If we are on a clean URL for an area (e.g. /model-town) and we switch to another area via query param (fallback)
+                  // We should probably redirect to base city URL + query param, but keeping current path might be okay if next.js handles it.
+                  // But if next.js treats current path as [type], adding ?areaId might be confusing but valid.
+                  // However, if we unselect, we want to clear the area. 
+                  // If we are at /model-town and unselect, we want to go up to /multan.
+                  // The useCleanUrls block above handles this for unselecting if we have city matched.
+
                   router.push(`${currentPath}${queryString ? `?${queryString}` : ''}`);
                 }}
                 onTypeSelect={(newType) => {

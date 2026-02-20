@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import {
   Accordion,
   AccordionContent,
@@ -12,7 +11,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { X, MapPin, Loader2 } from 'lucide-react';
+import { MapPin, Loader2 } from 'lucide-react';
 import { propertyApi } from '@/lib/api';
 import Link from 'next/link';
 
@@ -38,6 +37,7 @@ interface LocationStat {
   name: string;
   id: string; // areaId
   count: number;
+  slug?: string;
 }
 
 interface StatsData {
@@ -246,14 +246,15 @@ export default function SearchSidebar({
                     <li key={loc.id}>
                       <Link
                         href={(() => {
-                          const query = `areaId=${loc.id}${purpose !== 'all' ? `&purpose=${purpose}` : ''}`;
-                          if (useCleanUrls && city && purpose !== 'all') {
-                            const purposePath = purpose === 'buy' ? 'sale' : purpose;
+                          if (useCleanUrls && city && loc.slug) {
+                            const purposePath = purpose === 'buy' ? 'sale' : (purpose === 'all' ? 'all' : purpose);
                             const citySlug = toSlug(city);
-                            const typeSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
-                            return `/properties/${purposePath}/${citySlug}${typeSlug}?areaId=${loc.id}`;
+                            // Clean URL: /properties/sale/lahore/dha
+                            return `/properties/${purposePath}/${citySlug}/${loc.slug}`;
                           }
-                          return `/properties?city=${city}&areaId=${loc.id}&purpose=${purpose}`;
+                          // Fallback URL: /properties?city=lahore&areaId=...&purpose=sale
+                          const query = `areaId=${loc.id}${purpose !== 'all' ? `&purpose=${purpose}` : ''}&city=${city}`;
+                          return `/properties?${query}`;
                         })()}
                         className="flex justify-between items-center py-3 px-4 hover:bg-muted/50 transition-colors text-sm group"
                       >

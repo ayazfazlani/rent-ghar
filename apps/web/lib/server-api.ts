@@ -58,6 +58,11 @@ export const serverApi = {
     return this.get('/properties/types', { next: { revalidate: 3600 } }); // Cache types for 1 hour
   },
 
+  async getAreaBySlug(slug: string, cityId?: string): Promise<any> {
+    const query = cityId ? `?cityId=${cityId}` : '';
+    return this.get(`/areas/slug/${slug}${query}`, { next: { revalidate: 3600 } });
+  },
+
   async getPropertyBySlug(slug: string): Promise<any> {
     return this.get(`/properties/slug/${slug}`, { next: { revalidate: 1800 } });
   },

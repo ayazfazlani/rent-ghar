@@ -602,21 +602,22 @@ export class PropertyService {
                             },
 
                             {
-                                $group: {
-                                    _id: { name: '$areaDetails.name', id: '$areaDetails._id' },
-                                    count: { $sum: 1 }
+                                    $group: {
+                                        _id: { name: '$areaDetails.name', id: '$areaDetails._id', slug: '$areaDetails.areaSlug' },
+                                        count: { $sum: 1 }
+                                    }
+                                },
+                                { $sort: { count: -1 } },
+                                {
+                                    $project: {
+                                        name: '$_id.name',
+                                        id: '$_id.id',
+                                        slug: '$_id.slug',
+                                        count: 1,
+                                        _id: 0
+                                    }
                                 }
-                            },
-                            { $sort: { count: -1 } },
-                            {
-                                $project: {
-                                    name: '$_id.name',
-                                    id: '$_id.id',
-                                    count: 1,
-                                    _id: 0
-                                }
-                            }
-                        ],
+                            ],
 
                         summary: [
                             {

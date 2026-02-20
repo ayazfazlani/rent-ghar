@@ -33,6 +33,7 @@ import cityApi from "@/lib/api/city/city.api";
 // Zod schema
 const formSchema = z.object({
   name: z.string().min(2, { message: "Area name must be at least 2 characters" }),
+  areaSlug: z.string().min(3, { message: "Area slug is required" }),
   city: z.string().min(1, { message: "Please select a city" }),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
@@ -52,6 +53,7 @@ export default function EditAreaPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      areaSlug: "",
       city: "",
       metaTitle: "",
       metaDescription: "",
@@ -93,6 +95,7 @@ export default function EditAreaPage() {
         form.reset({
           name: area.name || "",
           city: typeof area.city === 'string' ? area.city : area.city?._id || "",
+          areaSlug: area.areaSlug || "",
           metaTitle: area.metaTitle || "",
           metaDescription: area.metaDescription || "",
           canonicalUrl: area.canonicalUrl || "",
@@ -119,6 +122,7 @@ export default function EditAreaPage() {
       await areaApi.update(areaId, {
         name: values.name,
         city: values.city,
+        areaSlug: values.areaSlug,
         metaTitle: values.metaTitle?.trim() || undefined,
         metaDescription: values.metaDescription?.trim() || undefined,
         canonicalUrl: values.canonicalUrl?.trim() || undefined,
@@ -192,7 +196,30 @@ export default function EditAreaPage() {
                     <FormItem>
                       <FormLabel>Area Name *</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. DHA Phase 5" {...field} />
+                        <Input placeholder="e.g. DHA Phase 5" {...field}
+                          onChange={(e) => {
+                            field.onChange(e.target.value)
+                            const slug = e.target.value.replace(/[^a-zA-Z0-9]+/g, '-').trim().toLowerCase()
+                            form.setValue("areaSlug", slug)
+                            form.setValue("canonicalUrl", `https://propertydealer.pk/area/${slug}`)
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+
+                {/* Area Slug */}
+                <FormField
+                  control={form.control}
+                  name="areaSlug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Area Slug *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. dha-phase-5" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -20,7 +20,7 @@ interface LocationExplorerProps {
   city: string;
   purpose: 'rent' | 'buy' | 'all';
   currentAreaId?: string;
-  onAreaSelect: (areaId: string) => void;
+  onAreaSelect: (areaId: string, slug?: string) => void;
   onTypeSelect: (type: string) => void;
   onPurposeChange?: (purpose: 'rent' | 'buy') => void;
   currentType?: string;
@@ -30,6 +30,7 @@ interface LocationStat {
   name: string;
   id: string;
   count: number;
+  slug?: string;
 }
 
 interface StatsData {
@@ -194,7 +195,7 @@ export default function LocationExplorer({
             {displayedLocations.map((loc) => (
               <button
                 key={loc.id}
-                onClick={() => onAreaSelect(loc.id)}
+                onClick={() => onAreaSelect(loc.id, loc.slug)}
                 className={cn(
                   "flex items-center justify-between p-3 rounded-xl transition-all border text-sm group",
                   currentAreaId === loc.id

@@ -64,6 +64,17 @@ export class AreaService {
         return await this.areaModel.find({ city: cityId }).populate('city', 'name state country').sort({ name: 1 }).exec();
     }
 
+    async findAreaBySlug(slug: string, cityId?: string): Promise<AreaDocument> {
+        const query: any = { areaSlug: slug.toLowerCase().trim() };
+        if (cityId) query.city = cityId;
+        
+        const area = await this.areaModel.findOne(query).populate('city', 'name state country').exec();
+        if (!area) {
+            throw new NotFoundException(`Area with slug ${slug} not found`);
+        }
+        return area as AreaDocument;
+    }
+
     async updateArea(id: string, updateAreaDto: UpdateAreaDto): Promise<AreaDocument> {
         if (!isValidObjectId(id)) {
             throw new NotFoundException('Invalid area ID');

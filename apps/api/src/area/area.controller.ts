@@ -35,6 +35,11 @@ export class AreaController {
         return this.areaService.findAreaByName(name, cityId);
     }
 
+    @Get('slug/:slug')
+    async findAreaBySlug(@Param('slug') slug: string, @Query('cityId') cityId?: string): Promise<AreaDocument> {
+        return this.areaService.findAreaBySlug(slug, cityId);
+    }
+
     @Put(':id')
     @UseGuards(JwtAuthGuard, AdminGuard)
     async updateArea(@Param('id') id: string, @Body() updateAreaDto: UpdateAreaDto): Promise<AreaDocument> {

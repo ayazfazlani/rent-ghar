@@ -7,6 +7,9 @@ export class City {
   @Prop({ required: true, lowercase: true, trim: true })
   name: string;
 
+  @Prop({ required: true, tolowerecase: true , trim: true})
+  areaSlug: string;
+  
   @Prop({ required: false, lowercase: true, trim: true })
   state?: string;
 

@@ -33,6 +33,7 @@ import cityApi from "@/lib/api/city/city.api";
 // Zod schema
 const formSchema = z.object({
   name: z.string().min(2, { message: "Area name must be at least 2 characters" }),
+  areaSlug: z.string().min(3, { message: "Area slug is required" }),
   city: z.string().min(1, { message: "Please select a city" }),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
@@ -49,6 +50,7 @@ export default function AddAreaPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      areaSlug: "",
       city: "",
       metaTitle: "",
       metaDescription: "",
@@ -83,6 +85,7 @@ export default function AddAreaPage() {
     try {
       await areaApi.create({
         name: values.name,
+        areaSlug: values.areaSlug,
         city: values.city,
         metaTitle: values.metaTitle?.trim() || undefined,
         metaDescription: values.metaDescription?.trim() || undefined,
@@ -153,7 +156,29 @@ export default function AddAreaPage() {
                   <FormItem>
                     <FormLabel>Area Name *</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. DHA Phase 5" {...field} />
+                      <Input placeholder="e.g. DHA Phase 5" {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          const slug = e.target.value.toLowerCase().trim().replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()
+                          form.setValue('areaSlug', slug)
+                          form.setValue('canonicalUrl', `https://propertydealer.pk/area/${slug}`)
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Area Slug */}
+              <FormField
+                control={form.control}
+                name="areaSlug"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Area Slug *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. dha-phase-5" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
