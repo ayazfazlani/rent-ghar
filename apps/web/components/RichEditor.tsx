@@ -119,9 +119,6 @@ export default function RichEditor({ value, onChange }: RichEditorProps) {
                 class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none focus:outline-none min-h-[500px] p-6',
             }
         },
-        onUpdate: ({ editor }) => {
-            onChange(editor.getHTML());
-        }
     })
 
     // Update editor content when value prop changes externally
@@ -130,7 +127,7 @@ export default function RichEditor({ value, onChange }: RichEditorProps) {
 
         const currentHTML = editor.getHTML();
         if (value !== currentHTML && !isUpdatingRef.current) {
-            editor.commands.setContent(value || '<p></p>', false);
+            editor.commands.setContent(value || '<p></p>');
         }
     }, [value, editor]);
 
