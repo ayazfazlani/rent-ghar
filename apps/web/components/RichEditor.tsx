@@ -6,16 +6,16 @@ import Image from '@tiptap/extension-image'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Placeholder from '@tiptap/extension-placeholder'
-import { useEffect, useState } from 'react'
-import { 
-    Bold, 
-    Italic, 
-    List, 
-    ListOrdered, 
-    Quote, 
-    Code, 
-    Heading1, 
-    Heading2, 
+import { useEffect, useState, useRef } from 'react'
+import {
+    Bold,
+    Italic,
+    List,
+    ListOrdered,
+    Quote,
+    Code,
+    Heading1,
+    Heading2,
     Heading3,
     Link as LinkIcon,
     Image as ImageIcon,
@@ -46,10 +46,18 @@ type RichEditorProps = {
 }
 
 export default function RichEditor({ value, onChange }: RichEditorProps) {
+    const [mounted, setMounted] = useState(false)
     const [linkDialogOpen, setLinkDialogOpen] = useState(false)
     const [imageDialogOpen, setImageDialogOpen] = useState(false)
     const [linkUrl, setLinkUrl] = useState('')
     const [imageAlt, setImageAlt] = useState('')
+
+    // Use a ref to track if the update came from the editor itself
+    const isUpdatingRef = useRef(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     const editor = useEditor({
         extensions: [
@@ -116,12 +124,34 @@ export default function RichEditor({ value, onChange }: RichEditorProps) {
         }
     })
 
-    // Update editor content when value prop changes
+    // Update editor content when value prop changes externally
     useEffect(() => {
-        if (editor && value !== undefined && value !== editor.getHTML()) {
-            editor.commands.setContent(value || '<p></p>');
+        if (!editor || value === undefined) return;
+
+        const currentHTML = editor.getHTML();
+        if (value !== currentHTML && !isUpdatingRef.current) {
+            editor.commands.setContent(value || '<p></p>', false);
         }
     }, [value, editor]);
+
+    // Update the ref when the editor content changes
+    useEffect(() => {
+        if (!editor) return;
+
+        const handleUpdate = () => {
+            isUpdatingRef.current = true;
+            onChange(editor.getHTML());
+            // Reset the flag after the current tick
+            setTimeout(() => {
+                isUpdatingRef.current = false;
+            }, 0);
+        };
+
+        editor.on('update', handleUpdate);
+        return () => {
+            editor.off('update', handleUpdate);
+        };
+    }, [editor, onChange]);
 
     const handleSetLink = () => {
         if (!editor) return
@@ -150,10 +180,10 @@ export default function RichEditor({ value, onChange }: RichEditorProps) {
 
     const handleImageSelect = (image: GalleryImageItem | { url: string; key: string }) => {
         if (!editor) return
-        
+
         // Get the image URL from either GalleryImageItem or URL object
         const imageUrl = image.url
-        
+
         // Get full URL if it's a relative path
         const getFullImageUrl = (url: string): string => {
             if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -166,7 +196,7 @@ export default function RichEditor({ value, onChange }: RichEditorProps) {
         }
 
         const fullUrl = getFullImageUrl(imageUrl)
-        
+
         // Extract a meaningful alt text from the image key/filename
         const getAltText = (): string => {
             if (imageAlt) return imageAlt
@@ -177,22 +207,30 @@ export default function RichEditor({ value, onChange }: RichEditorProps) {
             const nameWithoutExt = filename.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
             return nameWithoutExt || 'Image'
         }
-        
-        editor.chain().focus().setImage({ 
+
+        editor.chain().focus().setImage({
             src: fullUrl,
             alt: getAltText()
         }).run()
-        
+
         setImageDialogOpen(false)
         setImageAlt('')
     }
 
-    if (!editor) {
+    if (!mounted || !editor) {
         return (
-            <div className="min-h-[500px] border-2 border-gray-200 dark:border-gray-700 rounded-lg p-8 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100 mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Loading editor...</p>
+            <div className="min-h-[400px] w-full border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-950/50 flex flex-col items-center justify-center p-12 transition-all duration-300">
+                <div className="relative">
+                    <div className="h-16 w-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <ImageIcon className="h-6 w-6 text-primary animate-pulse" />
+                    </div>
+                </div>
+                <div className="mt-6 text-center">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 italic">Initializing Editor</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-[250px]">
+                        Setting up your creative workspace...
+                    </p>
                 </div>
             </div>
         );
@@ -414,8 +452,8 @@ export default function RichEditor({ value, onChange }: RichEditorProps) {
 
                 {/* Editor Content Area */}
                 <div className="bg-white dark:bg-gray-900">
-            <EditorContent editor={editor} /> 
-        </div>
+                    <EditorContent editor={editor} />
+                </div>
             </div>
 
             {/* Link Dialog */}

@@ -27,7 +27,11 @@ import {
 } from "@/components/ui/select";
 import { pageApi } from "@/lib/api/page/page.api";
 import { ImagePickerDialog, type GalleryImageItem } from "@/components/ImagePickerDialog";
-import RichEditor from "@/components/RichEditor";
+import dynamic from "next/dynamic";
+const RichEditor = dynamic(() => import("@/components/RichEditor"), {
+    ssr: false,
+    loading: () => <div className="h-[200px] w-full bg-gray-100 animate-pulse rounded-lg flex items-center justify-center text-gray-400">Loading Editor...</div>
+});
 
 // Custom validation for image URLs - accepts full URLs or relative paths starting with /uploads/
 const imageUrlSchema = z.string().refine(
@@ -176,8 +180,8 @@ export default function EditPagePage() {
                                         <FormItem>
                                             <FormLabel>Title *</FormLabel>
                                             <FormControl>
-                                                <Input 
-                                                    placeholder="e.g About Us" 
+                                                <Input
+                                                    placeholder="e.g About Us"
                                                     {...field}
                                                     onChange={(e) => {
                                                         field.onChange(e);
@@ -201,8 +205,8 @@ export default function EditPagePage() {
                                         <FormItem>
                                             <FormLabel>Slug (Auto-generated from title)</FormLabel>
                                             <FormControl>
-                                                <Input 
-                                                    placeholder="e.g about-us" 
+                                                <Input
+                                                    placeholder="e.g about-us"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -220,10 +224,10 @@ export default function EditPagePage() {
                                         <FormItem>
                                             <FormLabel>Excerpt</FormLabel>
                                             <FormControl>
-                                                <Textarea 
+                                                <Textarea
                                                     placeholder="A brief summary of the page (150-160 characters recommended)"
                                                     rows={3}
-                                                    {...field} 
+                                                    {...field}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -292,9 +296,9 @@ export default function EditPagePage() {
                                             <FormControl>
                                                 <div className="space-y-2">
                                                     <div className="flex gap-2">
-                                                        <Input 
-                                                            placeholder="https://example.com/image.jpg or /uploads/..." 
-                                                            {...field} 
+                                                        <Input
+                                                            placeholder="https://example.com/image.jpg or /uploads/..."
+                                                            {...field}
                                                         />
                                                         <Button
                                                             type="button"
@@ -354,10 +358,10 @@ export default function EditPagePage() {
                                             <FormItem>
                                                 <FormLabel>Meta Description (SEO)</FormLabel>
                                                 <FormControl>
-                                                    <Textarea 
+                                                    <Textarea
                                                         placeholder="SEO description (max 160 characters)"
                                                         rows={2}
-                                                        {...field} 
+                                                        {...field}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -381,8 +385,8 @@ export default function EditPagePage() {
                                 />
 
                                 <div className="flex gap-4 pt-6">
-                                    <Button 
-                                        type="submit" 
+                                    <Button
+                                        type="submit"
                                         className="flex-1"
                                         disabled={form.formState.isSubmitting}
                                     >
