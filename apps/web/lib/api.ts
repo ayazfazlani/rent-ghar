@@ -4,19 +4,36 @@ import { BackendProperty } from "./types/property-utils";
 
 const getBaseURL = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  console.log(apiUrl);
   if (!apiUrl) return "/api";
   const baseURL = apiUrl.endsWith("/") ? `${apiUrl}api` : `${apiUrl}/api`;
-  console.log("🌐 API BaseURL:", baseURL);
   return baseURL;
 };
 
+// In-memory access token storage — works even when cross-origin cookies are blocked
+let accessToken: string | null = null;
+
+export function setAccessToken(token: string | null) {
+  accessToken = token;
+}
+
+export function getAccessToken(): string | null {
+  return accessToken;
+}
+
 const api = axios.create({
   baseURL: getBaseURL(),
-  withCredentials: true, // ← cookie (refresh_token) automatic bhejo
+  withCredentials: true, // still send cookies when possible
   headers: {
     "Content-Type": "application/json",
   },
+});
+
+// Request interceptor — attach Bearer token from memory for every request
+api.interceptors.request.use((config) => {
+  if (accessToken && config.headers) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  return config;
 });
 
 // Response interceptor for auto refresh on 401
@@ -28,14 +45,10 @@ api.interceptors.response.use(
     // Determine request type
     const isRefreshRequest = originalRequest.url?.includes("/auth/refresh");
     const isProfileRequest = originalRequest.url?.includes("/auth/profile");
-    const isAuthRequest = originalRequest.url?.includes("/auth/");
-    const isOnLoginPage =
-      typeof window !== "undefined" && window.location.pathname === "/login";
     const isOnAuthPage =
-      (typeof window !== "undefined" &&
-        window.location.pathname.includes("/(auth)")) ||
-      window.location.pathname.includes("/login") ||
-      window.location.pathname.includes("/register");
+      typeof window !== "undefined" &&
+      (window.location.pathname.includes("/login") ||
+       window.location.pathname.includes("/register"));
 
     // For 401 errors, attempt refresh only for non-special requests
     if (
@@ -48,14 +61,17 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await api.post("/auth/refresh");
+        const refreshResponse = await api.post("/auth/refresh");
+        // Store new access token from refresh response
+        if (refreshResponse.data?.token) {
+          setAccessToken(refreshResponse.data.token);
+        }
         return api(originalRequest);
       } catch (refreshError) {
         console.warn("Refresh token expired or missing → session ended");
+        // Clear stored token
+        setAccessToken(null);
 
-        // Only redirect if NOT on a public page and NOT an auth request
-        // Public pages don't need auth, so don't redirect for them
-        // Only redirect if user is trying to access an authenticated-only feature
         const isOnDashboard =
           typeof window !== "undefined" &&
           window.location.pathname.includes("/dashboard");

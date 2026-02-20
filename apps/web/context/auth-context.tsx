@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/lib/api';
+import api, { setAccessToken } from '@/lib/api';
 import { toast } from 'sonner';
 
 interface User {
@@ -33,13 +33,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUser = async () => {
     try {
-      // Trying to fetch the user profile using the existing token (in cookie)
+      // Try fetching profile using existing token (cookie or in-memory Bearer)
       const response = await api.get('/auth/profile');
       setUser(response.data);
     } catch (error) {
-      // If 401, the interceptor might have handled it or it failed.
-      // We just set user to null.
-      setUser(null);
+      // Profile failed — try to refresh to get a new access token
+      try {
+        const refreshResponse = await api.post('/auth/refresh');
+        if (refreshResponse.data?.token) {
+          setAccessToken(refreshResponse.data.token);
+        }
+        // Retry profile with new token
+        const profileResponse = await api.get('/auth/profile');
+        setUser(profileResponse.data);
+      } catch (refreshError) {
+        // Both failed — user is not authenticated
+        setUser(null);
+        setAccessToken(null);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -51,19 +62,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (data: any) => {
     const response = await api.post('/auth/login', data);
-    // Assuming backend returns user object or we fetch it after
-    // If backend returns just access_token and sets cookie, we might need to fetch profile.
-    // Based on apps/web/app/(auth)/login/page.tsx, it seems login returns data.
-    // Let's assume we need to fetch profile or set it from response if available.
-    // Ideally, consistent behavior is to fetch profile or have login return it.
-
-    // For now, let's fetch profile to be sure or use response.data.user if it exists
+    // Store access token in memory for Bearer auth
+    if (response.data.token) {
+      setAccessToken(response.data.token);
+    }
     if (response.data.user) {
       setUser(response.data.user);
     } else {
       await fetchUser();
     }
-
     router.refresh();
   };
 
@@ -81,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Logout failed", e);
     }
     setUser(null);
+    setAccessToken(null);
     router.push('/');
     router.refresh();
   };
