@@ -6,7 +6,11 @@ import * as z from "zod";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import RichEditor from "@/components/RichEditor";
+import dynamic from "next/dynamic";
+const RichEditor = dynamic(() => import("@/components/RichEditor"), {
+  ssr: false,
+  loading: () => <div className="h-[200px] w-full bg-gray-100 animate-pulse rounded-lg flex items-center justify-center text-gray-400">Loading Editor...</div>
+});
 import { useEffect, useState } from "react";
 
 import {
@@ -177,7 +181,7 @@ export default function EditAreaPage() {
                         </FormControl>
                         <SelectContent>
                           {cities.map((city) => (
-                            <SelectItem key={city._id} value={city._id}>
+                            <SelectItem key={String(city._id)} value={String(city._id)}>
                               {city.name}{city.state ? `, ${city.state}` : ''}{city.country ? `, ${city.country}` : ''}
                             </SelectItem>
                           ))}
