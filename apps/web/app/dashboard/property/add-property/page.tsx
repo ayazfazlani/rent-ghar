@@ -41,6 +41,7 @@ interface City {
 
 interface Area {
   _id: string
+  areaslug: string
   name: string
   city: string | City
 }
@@ -163,7 +164,8 @@ export default function AddProperty() {
     if (!newAreaName.trim() || !cityId) return
     try {
       setIsAddingLocation(true)
-      const data = await areaApi.create({ name: newAreaName.trim(), city: cityId })
+      const slug = generateSlug(newAreaName)
+      const data = await areaApi.create({ name: newAreaName.trim(), city: cityId, areaSlug: slug })
       toast.success('Area added successfully')
       const allAreas = await areaApi.getAll(cityId)
       setAreas(allAreas)

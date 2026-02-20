@@ -280,11 +280,19 @@ export default function EditProperty() {
     }
   }
 
+  const generateSlug = (value: string) =>
+    value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+
   const handleCreateArea = async () => {
     if (!newAreaName.trim() || !cityId) return
     try {
       setIsAddingLocation(true)
-      const data = await areaApi.create({ name: newAreaName.trim(), city: cityId })
+      const areaSlug = generateSlug(newAreaName)
+      const data = await areaApi.create({ name: newAreaName.trim(), city: cityId, areaSlug })
       toast.success('Area added successfully')
       const allAreas = await areaApi.getAll(cityId)
       setAreas(allAreas)
