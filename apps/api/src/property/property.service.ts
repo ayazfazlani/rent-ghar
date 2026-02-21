@@ -163,9 +163,22 @@ export class PropertyService {
           
           if (filters?.areaId) {
             if (!this.isValidObjectId(filters.areaId)) {
-              return [];
+              return { properties: [], total: 0, page: filters?.page || 1, limit: filters?.limit || 12, totalPages: 0 };
             }
-            query.area = filters.areaId;
+            
+            // Try to find the area name to also search by string as fallback
+            const areaDoc = await this.areaModel.findById(filters.areaId).select('name').lean();
+            const orConditions: any[] = [{ area: filters.areaId }];
+            
+            if (areaDoc && areaDoc.name) {
+                // Escape regex special characters
+                const escapedName = areaDoc.name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const areaNameRegex = new RegExp(`${escapedName}`, 'i');
+                orConditions.push({ location: areaNameRegex });
+                orConditions.push({ title: areaNameRegex });
+            }
+            
+            query.$or = orConditions;
           } else if (filters?.cityId || filters?.cityName) {
             const orConditions: any[] = [];
 
@@ -192,7 +205,7 @@ export class PropertyService {
                 query.$or = orConditions;
             } else if (filters.cityId) {
                  // If cityId was provided but no areas found and no cityName provided, return empty
-                 return [];
+                 return { properties: [], total: 0, page: filters?.page || 1, limit: filters?.limit || 12, totalPages: 0 };
             }
           }
 

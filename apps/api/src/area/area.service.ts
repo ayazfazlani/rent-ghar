@@ -57,7 +57,9 @@ export class AreaService {
   }
 
   async findAreaByName(name: string, cityId?: string): Promise<AreaDocument> {
-    const query: any = { name: name.toLowerCase().trim() };
+    const query: any = { 
+      name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } 
+    };
     if (cityId) query.city = cityId;
 
     const area = await this.areaModel
@@ -82,7 +84,9 @@ export class AreaService {
   }
 
   async findAreaBySlug(slug: string, cityId?: string): Promise<AreaDocument> {
-    const query: any = { areaSlug: slug.toLowerCase().trim() };
+    const query: any = { 
+      areaSlug: { $regex: new RegExp(`^${slug.trim()}$`, 'i') } 
+    };
     if (cityId) query.city = cityId;
 
     const area = await this.areaModel
