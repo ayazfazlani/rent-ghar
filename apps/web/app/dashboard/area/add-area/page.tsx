@@ -38,7 +38,7 @@ import { toTitleCase } from "@/lib/utils";
 // Zod schema
 const formSchema = z.object({
   name: z.string().min(2, { message: "Area name must be at least 2 characters" }),
-  areaSlug: z.string().min(3, { message: "Area slug is required" }),
+  areaSlug: z.string().min(1, { message: "Area slug is required" }),
   city: z.string().min(1, { message: "Please select a city" }),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
@@ -164,7 +164,7 @@ export default function AddAreaPage() {
                       <Input placeholder="e.g. DHA Phase 5" {...field}
                         onChange={(e) => {
                           field.onChange(e);
-                          const slug = e.target.value.toLowerCase().trim().replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()
+                          const slug = e.target.value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-')
                           form.setValue('areaSlug', slug)
                           form.setValue('canonicalUrl', `https://propertydealer.pk/area/${slug}`)
                         }}
