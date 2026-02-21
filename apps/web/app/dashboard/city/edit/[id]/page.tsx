@@ -27,6 +27,7 @@ import { ImagePickerDialog } from "@/components/ImagePickerDialog";
 import { Image as ImageIcon, X } from "lucide-react";
 
 import cityApi from "@/lib/api/city/city.api";
+import { toTitleCase } from "@/lib/utils";
 
 // Zod schema
 const formSchema = z.object({
@@ -97,7 +98,13 @@ export default function EditCityPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await cityApi.update(cityId, values);
+      const payload = {
+        ...values,
+        name: toTitleCase(values.name.trim()),
+        state: toTitleCase(values.state.trim()),
+        country: toTitleCase(values.country.trim()),
+      };
+      await cityApi.update(cityId, payload);
 
       toast.success("City updated successfully!");
       router.push("/dashboard/city");

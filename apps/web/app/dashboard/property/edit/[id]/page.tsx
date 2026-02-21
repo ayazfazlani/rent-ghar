@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2, X, Plus } from 'lucide-react'
+import { toTitleCase } from '@/lib/utils'
 import { propertyApi } from '@/lib/api'
 import cityApi from '@/lib/api/city/city.api'
 import areaApi from '@/lib/api/area/area.api'
@@ -269,7 +270,7 @@ export default function EditProperty() {
     if (!newCityName.trim()) return
     try {
       setIsAddingLocation(true)
-      const data = await cityApi.create({ name: newCityName.trim() })
+      const data = await cityApi.create({ name: toTitleCase(newCityName.trim()) })
       toast.success('City added successfully')
       const allCities = await cityApi.getAll()
       setCities(allCities)
@@ -295,7 +296,7 @@ export default function EditProperty() {
     try {
       setIsAddingLocation(true)
       const areaSlug = generateSlug(newAreaName)
-      const data = await areaApi.create({ name: newAreaName.trim(), city: cityId, areaSlug })
+      const data = await areaApi.create({ name: toTitleCase(newAreaName.trim()), city: cityId, areaSlug })
       toast.success('Area added successfully')
       const allAreas = await areaApi.getAll(cityId)
       setAreas(allAreas)

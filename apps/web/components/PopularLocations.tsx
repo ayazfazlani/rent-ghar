@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowRight, Loader2 } from 'lucide-react';
 import { cityApi, propertyApi } from '@/lib/api';
+import { toTitleCase } from '@/lib/utils';
 
 const DEFAULT_CITY_IMAGES: Record<string, string> = {
   'karachi': 'https://images.unsplash.com/photo-1570533113000-67623306634d?w=800&q=80',
@@ -131,7 +132,7 @@ const PopularLocations: React.FC<PopularLocationsProps> = ({ initialCities }) =>
                     <MapPin className="w-4 h-4" />
                     <span>Pakistan</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-1 capitalize">{city.name}</h3>
+                  <h3 className="text-2xl font-bold text-white mb-1">{toTitleCase(city.name)}</h3>
                   <p className="text-white/90 text-sm font-semibold">{city.count} Properties</p>
                 </div>
               </Link>

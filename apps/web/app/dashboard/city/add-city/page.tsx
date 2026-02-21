@@ -28,6 +28,7 @@ import { useState } from "react";
 
 // Assuming this is your API client (adjust path/name if different)
 import cityApi from "@/lib/api/city/city.api"; // or "@/lib/api/city/city.api"
+import { toTitleCase } from "@/lib/utils";
 
 // Zod schema – only name is required, state and country are optional
 const formSchema = z.object({
@@ -65,15 +66,15 @@ export default function AddCityPage() {
     try {
       // Only send fields that have values (filter out empty strings)
       const payload: any = {
-        name: values.name.trim(),
+        name: toTitleCase(values.name.trim()),
       };
 
       if (values.state && values.state.trim()) {
-        payload.state = values.state.trim();
+        payload.state = toTitleCase(values.state.trim());
       }
 
       if (values.country && values.country.trim()) {
-        payload.country = values.country.trim();
+        payload.country = toTitleCase(values.country.trim());
       }
 
       if (values.metaTitle?.trim()) payload.metaTitle = values.metaTitle.trim();

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ImagePickerDialog, type GalleryImageItem } from '@/components/ImagePickerDialog'
+import { toTitleCase } from '@/lib/utils'
 import dynamic from 'next/dynamic'
 const RichEditor = dynamic(() => import('@/components/RichEditor'), {
   ssr: false,
@@ -149,7 +150,7 @@ export default function AddProperty() {
     if (!newCityName.trim()) return
     try {
       setIsAddingLocation(true)
-      const data = await cityApi.create({ name: newCityName.trim() })
+      const data = await cityApi.create({ name: toTitleCase(newCityName.trim()) })
       toast.success('City added successfully')
       const allCities = await cityApi.getAll()
       setCities(allCities)
@@ -168,7 +169,7 @@ export default function AddProperty() {
     try {
       setIsAddingLocation(true)
       const slug = generateSlug(newAreaName)
-      const data = await areaApi.create({ name: newAreaName.trim(), city: cityId, areaSlug: slug })
+      const data = await areaApi.create({ name: toTitleCase(newAreaName.trim()), city: cityId, areaSlug: slug })
       toast.success('Area added successfully')
       const allAreas = await areaApi.getAll(cityId)
       setAreas(allAreas)

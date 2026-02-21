@@ -1,8 +1,9 @@
- 'use client'
+'use client'
 import { useRouter } from 'next/navigation';
 import { MapPin, Bed, Bath, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Property } from '@/lib/data';
+import { toTitleCase } from '@/lib/utils';
 interface PropertyCardProps {
   property: Property;
 }
@@ -32,7 +33,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   // Navigate to detail page
   const handleCardClick = () => {
 
-      router.push(`/properties/${property.slug}`);
+    router.push(`/properties/${property.slug}`);
 
   };
 
@@ -44,7 +45,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   };
 
   return (
-    <div 
+    <div
       className="property-card group cursor-pointer bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 active:scale-[0.98]"
       onClick={handleCardClick}
     >
@@ -61,17 +62,17 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             target.parentElement?.classList.add('flex', 'items-center', 'justify-center');
           }}
         />
-        
+
         {/* Gradient Overlay on Hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
+
         {/* Purpose Badge with Animation */}
         <div className="absolute top-3 left-3 flex gap-2">
           <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 animate-in fade-in slide-in-from-left duration-500">
             {property.purpose === 'buy' ? 'For Sale' : 'For Rent'}
           </span>
         </div>
-        
+
         {/* Type Badge with Animation */}
         <div className="absolute top-3 right-3">
           <span className="px-3 py-1 bg-background/90 backdrop-blur-md text-foreground text-xs font-medium rounded-full shadow-md transition-all duration-300 group-hover:bg-background group-hover:scale-110 group-hover:shadow-lg animate-in fade-in slide-in-from-right duration-500">
@@ -87,7 +88,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
       <div className="p-5 bg-card relative">
         {/* Subtle Top Border Animation */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
-        
+
         {/* Property Name */}
         <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-all duration-300 transform group-hover:translate-x-1">
           {property.name}
@@ -97,7 +98,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         <div className="flex items-center gap-1 text-muted-foreground text-sm mb-4 transition-all duration-300 group-hover:text-foreground">
           <MapPin className="w-4 h-4 text-primary transition-all duration-300 group-hover:scale-125 group-hover:animate-bounce" />
           <span className="transition-all duration-300 group-hover:translate-x-1">
-            {property.location}, {property.city}
+            {property.location}, {toTitleCase(property.city)}
           </span>
         </div>
 
@@ -129,10 +130,10 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
               Rs. {formatPrice(property.price)}
             </p>
           </div>
-          
+
           {/* Enhanced Contact Button */}
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             onClick={handleContactClick}
             className="transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-primary/30 active:scale-95 relative overflow-hidden group/btn"
           >

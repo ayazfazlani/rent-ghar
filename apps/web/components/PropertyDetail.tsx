@@ -12,6 +12,7 @@ import { propertyApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 import { toast } from 'sonner';
+import { toTitleCase } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 
 const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
@@ -240,12 +241,12 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
     '@context': 'https://schema.org',
     '@type': property.type === 'House' ? 'SingleFamilyResidence' : (property.type === 'Apartment' || property.type === 'Flat' ? 'Apartment' : 'Accommodation'),
     'name': property.name,
-    'description': property.description || `${property.name} in ${property.location}, ${property.city}`,
+    'description': property.description || `${property.name} in ${toTitleCase(property.location)}, ${toTitleCase(property.city)}`,
     'image': images,
     'address': {
       '@type': 'PostalAddress',
-      'addressLocality': property.city,
-      'addressRegion': property.location,
+      'addressLocality': toTitleCase(property.city),
+      'addressRegion': toTitleCase(property.location),
       'addressCountry': 'PK'
     },
     'numberOfBedrooms': property.bedrooms,
@@ -293,10 +294,10 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">{property.name}</h1>
                     <div className="flex items-center gap-2 text-muted-foreground mb-4">
                       <MapPin className="w-5 h-5 text-primary" />
-                      <span className="text-lg capitalize">
-                        {property.areaName || property.location}
+                      <span className="text-lg">
+                        {toTitleCase(property.areaName || property.location)}
                         {property.city && property.city.toLowerCase() !== (property.areaName || property.location).toLowerCase()
-                          ? `, ${property.city}`
+                          ? `, ${toTitleCase(property.city)}`
                           : ''}
                       </span>
 
@@ -321,7 +322,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                               ? // Rough char limit — adjust based on average HTML → visible length
                               property.description.substring(0, 320).replace(/<[^>]*>?/gm, '').trim() + '…'
                               : property.description
-                            : `This beautiful ${(property.type ?? 'property').toLowerCase()} is located in the prime area of ${property.location ?? ''}, ${property.city ?? ''}. 
+                            : `This beautiful ${(property.type ?? 'property').toLowerCase()} is located in the prime area of ${toTitleCase(property.location ?? '')}, ${toTitleCase(property.city ?? '')}. 
                         Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort.`.replace(/\s+/g, ' ').trim()),
                       }}
                     />
@@ -485,7 +486,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   <div
                     className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{
-                      __html: property.description || `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${property.location}, ${property.city}. 
+                      __html: property.description || `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${toTitleCase(property.location)}, ${toTitleCase(property.city)}. 
                       It offers ${property.bedrooms} spacious bedrooms and ${property.bathrooms} modern bathrooms spread across ${property.area} square feet. 
                       Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort for your lifestyle needs.
                       
@@ -529,16 +530,16 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                       <div className="flex items-center gap-2 p-3 bg-secondary rounded-lg">
                         <MapPin className="w-5 h-5 text-primary" />
                         <div>
-                          <p className="text-sm font-semibold">{property.location}</p>
-                          <p className="text-xs text-muted-foreground">{property.city}, Pakistan</p>
+                          <p className="text-sm font-semibold">{toTitleCase(property.location)}</p>
+                          <p className="text-xs text-muted-foreground">{toTitleCase(property.city)}, Pakistan</p>
                         </div>
                       </div>
                     </div>
                   ) : (
                     <div className="bg-secondary rounded-lg p-8 text-center">
                       <MapPin className="w-12 h-12 mx-auto mb-3 text-primary" />
-                      <p className="text-lg font-semibold mb-1">{property.location}</p>
-                      <p className="text-muted-foreground">{property.city}, Pakistan</p>
+                      <p className="text-lg font-semibold mb-1">{toTitleCase(property.location)}</p>
+                      <p className="text-muted-foreground">{toTitleCase(property.city)}, Pakistan</p>
                     </div>
                   )}
                 </CardContent>
@@ -605,17 +606,17 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">City:</span>
-                        <span className="font-semibold capitalize">{property.city}</span>
+                        <span className="font-semibold">{toTitleCase(property.city)}</span>
                       </div>
                       {property.areaName && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Area:</span>
-                          <span className="font-semibold capitalize">{property.areaName}</span>
+                          <span className="font-semibold">{toTitleCase(property.areaName)}</span>
                         </div>
                       )}
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Location:</span>
-                        <span className="font-semibold capitalize">{property.location}</span>
+                        <span className="font-semibold">{toTitleCase(property.location)}</span>
                       </div>
 
                     </div>

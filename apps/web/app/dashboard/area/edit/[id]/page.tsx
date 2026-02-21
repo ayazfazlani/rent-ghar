@@ -33,6 +33,7 @@ import {
 
 import areaApi from "@/lib/api/area/area.api";
 import cityApi from "@/lib/api/city/city.api";
+import { toTitleCase } from "@/lib/utils";
 
 // Zod schema
 const formSchema = z.object({
@@ -124,7 +125,7 @@ export default function EditAreaPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await areaApi.update(areaId, {
-        name: values.name,
+        name: toTitleCase(values.name),
         city: values.city,
         areaSlug: values.areaSlug,
         metaTitle: values.metaTitle?.trim() || undefined,

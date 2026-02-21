@@ -4,7 +4,7 @@ export type CityDocument = City & Document;
 
 @Schema({ timestamps: true })
 export class City {
-  @Prop({ required: true, lowercase: true, trim: true })
+  @Prop({ required: true, nameCase: true, trim: true })
   name: string;
 
   @Prop({ required: true, tolowerecase: true , trim: true})

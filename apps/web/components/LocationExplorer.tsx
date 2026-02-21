@@ -14,7 +14,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { propertyApi } from '@/lib/api';
-import { cn } from '@/lib/utils';
+import { cn, toTitleCase } from '@/lib/utils';
 
 interface LocationExplorerProps {
   city: string;
@@ -211,7 +211,7 @@ export default function LocationExplorer({
                   <span className={cn(
                     "font-medium truncate",
                     currentAreaId === loc.id ? "text-primary" : "text-foreground"
-                  )}>{loc.name}</span>
+                  )}>{toTitleCase(loc.name)}</span>
                 </div>
                 <Badge
                   variant={currentAreaId === loc.id ? "default" : "outline"}

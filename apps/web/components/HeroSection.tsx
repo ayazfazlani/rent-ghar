@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { propertyApi, cityApi, areaApi } from '@/lib/api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
+import { toTitleCase } from '@/lib/utils';
 
 interface HeroSectionProps {
   initialCities?: any[];
@@ -274,7 +275,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
                         </h4>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <MapPin className="w-3.5 h-3.5" />
-                          <span>{property.location}, {property.city}</span>
+                          <span>{property.location}, {toTitleCase(property.city)}</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -330,7 +331,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
                   >
                     <option value="">All Cities</option>
                     {cityList.map((c) => (
-                      <option key={c._id} value={c.name} className="capitalize">{c.name}</option>
+                      <option key={c._id} value={c.name}>{toTitleCase(c.name)}</option>
                     ))}
                   </select>
                   <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-hover/select:text-black transition-colors" />
@@ -351,7 +352,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
                   >
                     <option value="">{city ? (areaList.length > 0 ? 'All Areas' : 'No Areas') : 'Select City'}</option>
                     {areaList.map((a) => (
-                      <option key={a._id} value={a.name}>{a.name}</option>
+                      <option key={a._id} value={a.name}>{toTitleCase(a.name)}</option>
                     ))}
                   </select>
                   <Map className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none group-hover/select:text-black transition-colors" />

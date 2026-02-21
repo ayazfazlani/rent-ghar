@@ -33,6 +33,7 @@ import {
 
 import areaApi from "@/lib/api/area/area.api";
 import cityApi from "@/lib/api/city/city.api";
+import { toTitleCase } from "@/lib/utils";
 
 // Zod schema
 const formSchema = z.object({
@@ -88,7 +89,7 @@ export default function AddAreaPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await areaApi.create({
-        name: values.name,
+        name: toTitleCase(values.name),
         areaSlug: values.areaSlug,
         city: values.city,
         metaTitle: values.metaTitle?.trim() || undefined,

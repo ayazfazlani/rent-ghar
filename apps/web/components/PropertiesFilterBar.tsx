@@ -10,8 +10,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Search, Loader2 } from 'lucide-react';
 import { propertyApi, cityApi } from '@/lib/api';
-import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
+import { BackendProperty, mapBackendToFrontendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
+import { cn, toTitleCase } from '@/lib/utils';
 import {
   Drawer,
   DrawerClose,
@@ -169,7 +170,7 @@ export default function PropertiesFilterBar() {
   // Navigate to clean URL based on filters
   const applyFilters = () => {
     const purpose = tempPurpose;
-    const citySlug = tempCity ? cityToSlug(tempCity) : '';
+    const citySlug = tempCity && toTitleCase(tempCity) ? cityToSlug(tempCity) : '';
     const typeSlug = tempType && tempType !== 'all' ? `/${tempType.toLowerCase()}` : '';
 
     const params = new URLSearchParams(searchParams.toString());
@@ -191,7 +192,7 @@ export default function PropertiesFilterBar() {
   // Navigate to purpose page
   const navigateToPurpose = (newPurpose: 'rent' | 'sale' | 'all') => {
     const purpose = newPurpose;
-    const citySlug = tempCity ? cityToSlug(tempCity) : '';
+    const citySlug = tempCity && toTitleCase(tempCity) ? cityToSlug(tempCity) : '';
     const typeSlug = tempType && tempType !== 'all' ? `/${tempType.toLowerCase()}` : '';
 
     const params = new URLSearchParams(searchParams.toString());
@@ -296,7 +297,7 @@ export default function PropertiesFilterBar() {
           <option value="">All Cities</option>
           {cities.map((c) => (
             <option key={c} value={c}>
-              {c}
+              {c.charAt(0).toUpperCase() + c.slice(1)}
             </option>
           ))}
         </select>
