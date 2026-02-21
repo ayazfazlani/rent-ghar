@@ -36,7 +36,7 @@ const PopularLocations: React.FC<PopularLocationsProps> = ({ initialCities }) =>
   const [loading, setLoading] = useState(!initialCities);
 
   useEffect(() => {
-    if (initialCities) return;
+    if (initialCities && initialCities.length > 0) return;
 
     const fetchCitiesWithCounts = async () => {
       try {

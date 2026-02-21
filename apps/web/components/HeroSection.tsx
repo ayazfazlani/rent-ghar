@@ -48,9 +48,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
     return typeName.toLowerCase().trim();
   };
 
-  // Fetch initial data if not provided via props
+  // Fetch initial data if not provided via props or if they are empty arrays (server fetch failure)
   useEffect(() => {
-    if (initialCities && initialProperties && initialTypes) return;
+    const hasInitialData =
+      initialCities && initialCities.length > 0 &&
+      initialProperties && initialProperties.length > 0 &&
+      initialTypes && initialTypes.length > 0;
+
+    if (hasInitialData) return;
 
     const fetchInitialData = async () => {
       try {

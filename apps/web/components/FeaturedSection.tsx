@@ -104,7 +104,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ initialProperties }) 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialProperties) return;
+    if (initialProperties && initialProperties.length > 0) return;
 
     const fetchProperties = async () => {
       try {
