@@ -23,12 +23,16 @@ export function setAccessToken(token: string | null) {
   }
 }
 
-// Initialize from localStorage
+// Initialize from localStorage on module load
 if (typeof window !== "undefined") {
   accessToken = localStorage.getItem("accessToken");
 }
 
 export function getAccessToken(): string | null {
+  // Always try localStorage as a fallback in case the in-memory value was lost
+  if (!accessToken && typeof window !== "undefined") {
+    accessToken = localStorage.getItem("accessToken");
+  }
   return accessToken;
 }
 
@@ -40,10 +44,12 @@ const api = axios.create({
   },
 });
 
-// Request interceptor — attach Bearer token from memory for every request
+// Request interceptor — attach Bearer token from memory (or localStorage) for every request
 api.interceptors.request.use((config) => {
-  if (accessToken && config.headers) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+  // Refresh from localStorage each time in case in-memory was lost (e.g. after SSR/page reload)
+  const token = getAccessToken();
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -78,18 +84,25 @@ api.interceptors.response.use(
         if (refreshResponse.data?.token) {
           setAccessToken(refreshResponse.data.token);
         }
+        // Retry the original request with the new token
+        const token = getAccessToken();
+        if (token && originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+        }
         return api(originalRequest);
       } catch (refreshError) {
         console.warn("Refresh token expired or missing → session ended");
         // Clear stored token
         setAccessToken(null);
 
-        const isOnDashboard =
-          typeof window !== "undefined" &&
-          window.location.pathname.includes("/dashboard");
-
-        if (isOnDashboard && typeof window !== "undefined") {
-          window.location.href = "/login?sessionExpired=true";
+        if (typeof window !== "undefined") {
+          const isOnDashboard = window.location.pathname.includes("/dashboard");
+          if (isOnDashboard) {
+            // Small delay so any pending toasts can show before redirect
+            setTimeout(() => {
+              window.location.href = "/login?sessionExpired=true";
+            }, 300);
+          }
         }
 
         return Promise.reject(refreshError);

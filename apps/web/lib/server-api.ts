@@ -2,8 +2,17 @@
 import { Blog } from './types/blog';
 import { BackendProperty } from './types/property-utils';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
-const BASE_URL = API_URL.trim().endsWith('/') ? `${API_URL.trim()}api` : `${API_URL.trim()}/api`;
+// For server-side (SSR/SSG) fetches, use the internal URL to avoid routing
+// through the public internet/nginx when both Next.js and the API share the same host.
+// INTERNAL_API_URL should be set to http://localhost:<API_PORT> in production.
+// Falls back to NEXT_PUBLIC_API_URL (browser-facing URL) then localhost:3005.
+const RAW_API_URL =
+  process.env.INTERNAL_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  'http://localhost:3005';
+const BASE_URL = RAW_API_URL.trim().endsWith('/')
+  ? `${RAW_API_URL.trim()}api`
+  : `${RAW_API_URL.trim()}/api`;
 
 console.log('🚀 Server API Base URL:', BASE_URL);
 

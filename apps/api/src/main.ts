@@ -35,6 +35,10 @@ async function bootstrap() {
     'http://localhost:3005',
     'https://propertydealer.pk',
     'http://propertydealer.pk',
+    'https://www.propertydealer.pk',
+    'http://www.propertydealer.pk',
+    'https://pro.adca.pk',
+    'http://pro.adca.pk',
   ];
 
   // Add Vercel deployment URL for production

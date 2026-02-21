@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '@/context/auth-context'
 import * as z from 'zod'
+import { AlertTriangle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -36,7 +37,15 @@ type FormValues = z.infer<typeof formSchema>
 export default function LoginPage() {
   const { login } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
+  const [sessionExpired, setSessionExpired] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get('sessionExpired') === 'true') {
+      setSessionExpired(true)
+    }
+  }, [searchParams])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -87,6 +96,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4 py-12">
       <Card className="w-full max-w-md shadow-lg">
+        {sessionExpired && (
+          <div className="mx-6 mt-6 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <span>
+              <strong>Session expired.</strong> Please log in again to continue.
+            </span>
+          </div>
+        )}
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             Welcome Back
