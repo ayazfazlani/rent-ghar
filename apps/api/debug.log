@@ -138,3 +138,9 @@ Stack: ForbiddenException: No active subscription found. Please purchase a packa
 [2026-02-12T08:04:21.220Z] Service: Creating property model instance
 [2026-02-12T08:04:21.291Z] Service: Property saved successfully. ID: 698d8985ec8da95de2e54ef9
 [2026-02-12T08:04:21.291Z] Controller: property created successfully
+[2026-02-21T08:47:18.574Z] Controller: processing create request for user 698d86cdb63dfe156d70909e
+[2026-02-21T08:47:18.577Z] Service: Start create. User: 698d86cdb63dfe156d70909e, Role: ADMIN
+[2026-02-21T08:47:18.579Z] Service: Generated slug: test
+[2026-02-21T08:47:18.579Z] Service: Creating property model instance
+[2026-02-21T08:47:18.669Z] Service: Property saved successfully. ID: 6999711653b0ade1e0e50796
+[2026-02-21T08:47:18.670Z] Controller: property created successfully
