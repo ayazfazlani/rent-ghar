@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -24,9 +24,6 @@ import { Loader2 } from 'lucide-react'
 
 import api from '@/lib/api'  // tumhara axios client (withCredentials: true wala)
 
-// Route segment config for Next.js type validation
-export const dynamic = 'force-dynamic'
-
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
@@ -34,7 +31,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-export default function LoginPage() {
+function LoginForm() {
   const { login } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -65,14 +62,6 @@ export default function LoginPage() {
         description: "Welcome back! Redirecting...",
       })
 
-      // Redirect is handled by the component or we can do it here if login doesn't redirect
-      // AuthContext login implementation:
-      // const login = async (data: any) => {
-      //   const response = await api.post('/auth/login', data);
-      //   if (response.data.user) setUser(response.data.user); else await fetchUser();
-      //   router.refresh();
-      // };
-      // It doesn't redirect. We should redirect here.
       router.push('/dashboard')
 
     } catch (err: any) {
@@ -193,5 +182,17 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-muted/40">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
