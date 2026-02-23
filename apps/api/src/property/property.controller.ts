@@ -190,7 +190,7 @@ export class PropertyController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async update(
     @Param('id') id: string,
@@ -233,7 +233,7 @@ export class PropertyController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(JwtAuthGuard)
   async delete(@Param('id') id: string, @Request() req) {
     try {
       const userId = req.user?.userId;

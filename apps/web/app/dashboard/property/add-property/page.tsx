@@ -239,14 +239,23 @@ export default function AddProperty() {
   }
 
   // Map frontend propertyType to backend format (lowercase)
-  const mapPropertyTypeToBackend = (type: string): 'house' | 'apartment' | 'flat' | 'commercial' => {
-    const mapping: Record<string, 'house' | 'apartment' | 'flat' | 'commercial'> = {
+  const mapPropertyTypeToBackend = (type: string): string => {
+    const mapping: Record<string, string> = {
       'House': 'house',
       'Apartment': 'apartment',
       'Flat': 'flat',
       'Commercial': 'commercial',
+      'Plot': 'plot',
+      'Land': 'land',
+      'Shop': 'shop',
+      'Office': 'office',
+      'Warehouse': 'warehouse',
+      'Factory': 'factory',
+      'Hotel': 'hotel',
+      'Restaurant': 'restaurant',
+      'Other': 'other'
     }
-    return mapping[type] || 'house'
+    return mapping[type] || type.toLowerCase()
   }
 
   const generateSlug = (value: string) =>

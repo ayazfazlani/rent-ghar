@@ -449,9 +449,9 @@ export class PropertyService {
             throw new NotFoundException('Property not found');
           }
 
-          // Strict Admin-only check as requested (manual guard revert on backend)
-          if (userRole !== 'ADMIN') {
-            throw new ForbiddenException('Only administrators can modify property listings');
+          // Allow update if user is ADMIN or the actual OWNER
+          if (userRole !== 'ADMIN' && String(property.owner) !== String(userId)) {
+            throw new ForbiddenException('You do not have permission to modify this property listing');
           }
 
           // Build update object
@@ -512,9 +512,9 @@ export class PropertyService {
             throw new NotFoundException('Property not found');
           }
 
-          // Strict Admin-only check as requested
-          if (userRole !== 'ADMIN') {
-            throw new ForbiddenException('Only administrators can delete property listings');
+          // Allow delete if user is ADMIN or the actual OWNER
+          if (userRole !== 'ADMIN' && String(property.owner) !== String(userId)) {
+            throw new ForbiddenException('You do not have permission to delete this property listing');
           }
 
           await this.propertyModel.findByIdAndDelete(id).exec();

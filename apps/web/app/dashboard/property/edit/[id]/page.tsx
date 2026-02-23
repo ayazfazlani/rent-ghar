@@ -95,7 +95,7 @@ export default function EditProperty() {
 
   const params = useParams()
   const propertyId = params.id as string
-  const isFirstLoad = useRef(true)
+
 
   // Fetch cities on component mount
   useEffect(() => {
@@ -208,23 +208,12 @@ export default function EditProperty() {
       fetchProperty(propertyId)
     }
 
-    // Set first load to false after a delay
-    const timer = setTimeout(() => {
-      isFirstLoad.current = false
-    }, 2000)
-    return () => clearTimeout(timer)
   }, [propertyId])
 
-  // Fetch areas when city changes
   useEffect(() => {
     const fetchAreas = async () => {
       if (!cityId) {
         setAreas([])
-        // Only clear areaId if cityId is truly empty (manual reset)
-        // If it's the initial load, we want to keep the areaId set by fetchProperty
-        if (!loadingProperty) {
-          setAreaId('')
-        }
         return
       }
 
@@ -242,16 +231,6 @@ export default function EditProperty() {
           })
           return newAreas
         })
-
-        // Only reset areaId if the current area isn't in the new city's areas
-        // and only if we're not currently in the initial loading state
-        if (!loadingProperty && !isFirstLoad.current) {
-          const currentAreaId = String(areaId)
-          const areaExists = data.find((a: { _id: string }) => String(a._id) === currentAreaId)
-          if (!areaExists && currentAreaId !== '') {
-            setAreaId('')
-          }
-        }
       } catch (error: any) {
         console.error('Error fetching areas:', error)
         toast.error('Error', {
@@ -263,7 +242,9 @@ export default function EditProperty() {
       }
     }
 
-    fetchAreas()
+    if (!loadingProperty) {
+      fetchAreas()
+    }
   }, [cityId, loadingProperty])
 
   const handleCreateCity = async () => {
@@ -275,6 +256,7 @@ export default function EditProperty() {
       const allCities = await cityApi.getAll()
       setCities(allCities)
       setCityId(String(data._id))
+      setAreaId('')
       setShowAddCityModal(false)
       setNewCityName('')
     } catch (error: any) {
@@ -364,14 +346,23 @@ export default function EditProperty() {
   }
 
   // Map frontend propertyType to backend format (lowercase)
-  const mapPropertyTypeToBackend = (type: string): 'house' | 'apartment' | 'flat' | 'commercial' => {
-    const mapping: Record<string, 'house' | 'apartment' | 'flat' | 'commercial'> = {
+  const mapPropertyTypeToBackend = (type: string): string => {
+    const mapping: Record<string, string> = {
       'House': 'house',
       'Apartment': 'apartment',
       'Flat': 'flat',
       'Commercial': 'commercial',
+      'Plot': 'plot',
+      'Land': 'land',
+      'Shop': 'shop',
+      'Office': 'office',
+      'Warehouse': 'warehouse',
+      'Factory': 'factory',
+      'Hotel': 'hotel',
+      'Restaurant': 'restaurant',
+      'Other': 'other'
     }
-    return mapping[type] || 'house'
+    return mapping[type] || type.toLowerCase()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -537,7 +528,10 @@ export default function EditProperty() {
                 </label>
                 <Select
                   value={cityId}
-                  onValueChange={setCityId}
+                  onValueChange={(value) => {
+                    setCityId(value)
+                    setAreaId('')
+                  }}
                   disabled={isLoading || loadingProperty}
                 >
                   <SelectTrigger className="w-full">
