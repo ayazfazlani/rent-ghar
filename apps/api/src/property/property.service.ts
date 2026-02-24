@@ -145,6 +145,7 @@ export class PropertyService {
         cityId?: string; 
         cityName?: string;
         areaId?: string;
+        search?: string;
 
         priceMin?: number;
         priceMax?: number;
@@ -161,6 +162,14 @@ export class PropertyService {
         try {
           const query: any = { status: 'approved' };
           
+          if (filters?.search) {
+            const searchRegex = new RegExp(`${filters.search.trim()}`, 'i');
+            query.$or = [
+              { title: searchRegex },
+              { location: searchRegex }
+            ];
+          }
+
           if (filters?.areaId) {
             if (!this.isValidObjectId(filters.areaId)) {
               return { properties: [], total: 0, page: filters?.page || 1, limit: filters?.limit || 12, totalPages: 0 };
@@ -168,19 +177,39 @@ export class PropertyService {
             
             // Try to find the area name to also search by string as fallback
             const areaDoc = await this.areaModel.findById(filters.areaId).select('name').lean();
-            const orConditions: any[] = [{ area: filters.areaId }];
+            
+            // Handle both string and ObjectId for area field to be resilient
+            const areaOrConditions: any[] = [
+              { area: filters.areaId }
+            ];
+            
+            try {
+               areaOrConditions.push({ area: new Types.ObjectId(filters.areaId) });
+            } catch (e) {
+               // Ignore if conversion fails, though isValidObjectId should have caught it
+            }
             
             if (areaDoc && areaDoc.name) {
                 // Escape regex special characters
                 const escapedName = areaDoc.name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const areaNameRegex = new RegExp(`${escapedName}`, 'i');
-                orConditions.push({ location: areaNameRegex });
-                orConditions.push({ title: areaNameRegex });
+                areaOrConditions.push({ location: areaNameRegex });
+                areaOrConditions.push({ title: areaNameRegex });
             }
             
-            query.$or = orConditions;
+            if (query.$or) {
+              // If we already have a search $or, we need to combine them with $and
+              const searchOr = query.$or;
+              delete query.$or;
+              query.$and = [
+                { $or: searchOr },
+                { $or: areaOrConditions }
+              ];
+            } else {
+              query.$or = areaOrConditions;
+            }
           } else if (filters?.cityId || filters?.cityName) {
-            const orConditions: any[] = [];
+            const cityOrConditions: any[] = [];
 
             // 1. Relational match via cityId -> areaIds
             if (filters.cityId && this.isValidObjectId(filters.cityId)) {
@@ -188,7 +217,9 @@ export class PropertyService {
                 const areas = await this.areaModel.find({ city: filters.cityId }).select('_id').lean();
                 const areaIds = areas.map(a => a._id);
                 if (areaIds.length > 0) {
-                    orConditions.push({ area: { $in: areaIds } });
+                    cityOrConditions.push({ area: { $in: areaIds } });
+                    // Also include string versions of areaIds for resilience
+                    cityOrConditions.push({ area: { $in: areaIds.map(id => id.toString()) } });
                 }
             }
 
@@ -196,13 +227,22 @@ export class PropertyService {
             if (filters.cityName) {
                  // Case-insensitive match for city string field
                  const cityRegex = new RegExp(`${filters.cityName}`, 'i');
-                 orConditions.push({ city: cityRegex });
-                 orConditions.push({ location: cityRegex });
-                 orConditions.push({ title: cityRegex });
+                 cityOrConditions.push({ city: cityRegex });
+                 cityOrConditions.push({ location: cityRegex });
+                 cityOrConditions.push({ title: cityRegex });
             }
 
-            if (orConditions.length > 0) {
-                query.$or = orConditions;
+            if (cityOrConditions.length > 0) {
+                if (query.$or) {
+                    const searchOr = query.$or;
+                    delete query.$or;
+                    query.$and = [
+                        { $or: searchOr },
+                        { $or: cityOrConditions }
+                    ];
+                } else {
+                    query.$or = cityOrConditions;
+                }
             } else if (filters.cityId) {
                  // If cityId was provided but no areas found and no cityName provided, return empty
                  return { properties: [], total: 0, page: filters?.page || 1, limit: filters?.limit || 12, totalPages: 0 };

@@ -147,21 +147,48 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
 
   // Filter suggestions based on search query
   useEffect(() => {
-    if (searchQuery.trim().length >= 2) {
-      const searchTerm = searchQuery.toLowerCase().trim();
-      const filtered = allProperties.filter(property =>
-        property.name?.toLowerCase().includes(searchTerm) ||
-        property.city?.toLowerCase().includes(searchTerm) ||
-        property.type?.toLowerCase().includes(searchTerm) ||
-        property.location?.toLowerCase().includes(searchTerm)
-      ).slice(0, 8); // Limit to 8 suggestions
+    const fetchSuggestions = async () => {
+      if (searchQuery.trim().length >= 2) {
+        const searchTerm = searchQuery.toLowerCase().trim();
 
-      setFilteredSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
-    }
+        try {
+          // Fetch from API using search filter
+          const response = await propertyApi.getAll({
+            search: searchTerm,
+            limit: 8
+          });
+
+          let backendProperties: BackendProperty[] = [];
+          if (Array.isArray(response)) {
+            backendProperties = response;
+          } else if (response && (response as any).properties) {
+            backendProperties = (response as any).properties;
+          }
+
+          const transformed = backendProperties.map(mapBackendToFrontendProperty);
+          setFilteredSuggestions(transformed);
+          setShowSuggestions(transformed.length > 0);
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+          // Fallback to local filtering if API fails
+          const filtered = allProperties.filter(property =>
+            property.name?.toLowerCase().includes(searchTerm) ||
+            property.city?.toLowerCase().includes(searchTerm) ||
+            property.type?.toLowerCase().includes(searchTerm) ||
+            property.location?.toLowerCase().includes(searchTerm)
+          ).slice(0, 8);
+
+          setFilteredSuggestions(filtered);
+          setShowSuggestions(filtered.length > 0);
+        }
+      } else {
+        setFilteredSuggestions([]);
+        setShowSuggestions(false);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 300); // Debounce
+    return () => clearTimeout(timeoutId);
   }, [searchQuery, allProperties]);
 
   const handleSearch = () => {

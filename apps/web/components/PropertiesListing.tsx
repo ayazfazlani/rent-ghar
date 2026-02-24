@@ -190,6 +190,7 @@ export default function PropertiesListing({
           cityId: currentCity?._id,
           cityName: cityToMatch,
           areaId: searchParams.get('areaId') || initialAreaId || undefined,
+          search: searchParams.get('search') || undefined,
 
           priceMin: advancedFilters.priceMin,
           priceMax: advancedFilters.priceMax,

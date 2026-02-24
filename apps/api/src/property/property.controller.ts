@@ -126,6 +126,7 @@ export class PropertyController {
     @Query('baths') baths?: string,
     @Query('type') type?: string,
     @Query('purpose') purpose?: string,
+    @Query('search') search?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string
   ) {
@@ -142,6 +143,7 @@ export class PropertyController {
       if (baths) filters.baths = Number(baths);
       if (type) filters.type = type;
       if (purpose) filters.purpose = purpose;
+      if (search) filters.search = search;
       if (page) filters.page = Number(page);
       if (limit) filters.limit = Number(limit);
       if (city) filters.cityName = city; // Pass derived city name if explicit cityId is not enough

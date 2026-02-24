@@ -140,12 +140,14 @@ export const propertyApi = {
     baths?: number;
     type?: string;
     purpose?: string;
+    search?: string;
   }): Promise<PropertyResponse | BackendProperty[]> => {
     const params = new URLSearchParams();
     if (filters?.cityId) params.append("cityId", filters.cityId);
     if (filters?.cityName) params.append("city", filters.cityName);
 
     if (filters?.areaId) params.append("areaId", filters.areaId);
+    if (filters?.search) params.append("search", filters.search);
     if (filters?.page) params.append("page", filters.page.toString());
     if (filters?.limit) params.append("limit", filters.limit.toString());
     if (filters?.priceMin) params.append("priceMin", filters.priceMin.toString());
