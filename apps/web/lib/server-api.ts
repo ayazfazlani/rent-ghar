@@ -73,6 +73,10 @@ export const serverApi = {
     return this.get(`/areas/slug/${slug}${query}`, { next: { revalidate: 3600 } });
   },
 
+  async getAreasByCity(cityId: string): Promise<any[]> {
+    return this.get(`/areas?cityId=${cityId}`, { next: { revalidate: 3600 } });
+  },
+
   async getPropertyBySlug(slug: string): Promise<any> {
     return this.get(`/properties/slug/${slug}`, { next: { revalidate: 1800 } });
   },

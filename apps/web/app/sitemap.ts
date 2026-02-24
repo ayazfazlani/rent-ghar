@@ -40,11 +40,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const purposes = ['rent', 'sale', 'all'];
 
-    cities.forEach((city: any) => {
+    // For each city, we fetch areas and generate URLs
+    const cityAreaPages: MetadataRoute.Sitemap = [];
+    
+    await Promise.all(cities.map(async (city: any) => {
       const citySlug = toSlug(city.name);
       
+      // Fetch areas for this city
+      let cityAreas: any[] = [];
+      try {
+        cityAreas = await serverApi.getAreasByCity(city._id);
+      } catch (err) {
+        console.error(`Error fetching areas for city ${city.name}:`, err);
+      }
+
       purposes.forEach(purpose => {
-        // City Pages (/properties/rent/karachi)
+        // 1. City Pages (/properties/rent/karachi)
         categoryPages.push({
           url: `${BASE_URL}/properties/${purpose}/${citySlug}`,
           lastModified: currentDate,
@@ -52,7 +63,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.7,
         });
 
-        // City + Type Pages (/properties/rent/karachi/house)
+        // 2. City + Area Pages (/properties/rent/karachi/model-town)
+        cityAreas.forEach(area => {
+          if (area.areaSlug) {
+            categoryPages.push({
+              url: `${BASE_URL}/properties/${purpose}/${citySlug}/${area.areaSlug}`,
+              lastModified: currentDate,
+              changeFrequency: 'weekly',
+              priority: 0.6,
+            });
+          }
+        });
+
+        // 3. City + Type Pages (/properties/rent/karachi/house)
         types.forEach(type => {
           const typeSlug = type.toLowerCase();
           categoryPages.push({
@@ -63,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           });
         });
       });
-    });
+    }));
   } catch (error) {
     console.error('Sitemap Categories Fetch Error:', error);
   }

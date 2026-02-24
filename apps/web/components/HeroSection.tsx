@@ -22,13 +22,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
   const [cityId, setCityId] = useState(initialCities?.[0]?._id || '');
   const [area, setArea] = useState('');
   const [areaId, setAreaId] = useState('');
+  const [areaSlug, setAreaSlug] = useState('');
   const [type, setType] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<Property[]>([]);
   const [allProperties, setAllProperties] = useState<Property[]>(initialProperties || []);
   const [cityList, setCityList] = useState<{ _id: string; name: string }[]>(initialCities || []);
-  const [areaList, setAreaList] = useState<{ _id: string; name: string }[]>([]);
+  const [areaList, setAreaList] = useState<{ _id: string; name: string; areaSlug: string }[]>([]);
   const [propertyTypes, setPropertyTypes] = useState<string[]>(initialTypes || []);
   const [loading, setLoading] = useState(!initialCities || !initialProperties || !initialTypes);
   const [loadingAreas, setLoadingAreas] = useState(false);
@@ -122,6 +123,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
         // Reset area when city changes
         setArea('');
         setAreaId('');
+        setAreaSlug('');
       } catch (error) {
         console.error('Error fetching areas:', error);
         setAreaList([]);
@@ -196,7 +198,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
     const typeSlug = type ? typeToSlug(type) : 'all';
 
     const params = new URLSearchParams();
-    if (areaId) params.set('areaId', areaId);
+    // If we have an area slug, we use it in the path, otherwise use it as query param if no slug
+    // if (areaId && !areaSlug) params.set('areaId', areaId); 
     if (searchQuery) params.set('search', searchQuery);
 
     const queryString = params.toString();
@@ -209,10 +212,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
 
     const citySlug = cityToSlug(city);
 
-    if (typeSlug === 'all') {
+    // SEO-friendly path: /properties/[purpose]/[city]/[area-or-type]
+    // Priority: Area Slug > Type Slug
+    const pathSegment = areaSlug || (typeSlug !== 'all' ? typeSlug : '');
+
+    if (!pathSegment) {
       router.push(`/properties/${purposeSlug}/${citySlug}${suffix}`);
     } else {
-      router.push(`/properties/${purposeSlug}/${citySlug}/${typeSlug}${suffix}`);
+      router.push(`/properties/${purposeSlug}/${citySlug}/${pathSegment}${suffix}`);
     }
   };
 
@@ -378,6 +385,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
                       setArea(selectedAreaName);
                       const selectedArea = areaList.find(a => a.name === selectedAreaName);
                       setAreaId(selectedArea?._id || '');
+                      setAreaSlug(selectedArea?.areaSlug || '');
                     }}
                     disabled={!city || areaList.length === 0}
                     className="w-full h-12 pl-4 pr-10 rounded-xl border border-gray-300 bg-white/50 hover:bg-white hover:border-black transition-all appearance-none text-sm font-semibold cursor-pointer outline-none focus:border-black disabled:opacity-50"
