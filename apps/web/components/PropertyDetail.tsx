@@ -14,6 +14,8 @@ import { Property } from '@/lib/data';
 import { toast } from 'sonner';
 import { toTitleCase } from '@/lib/utils';
 import dynamic from 'next/dynamic';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
+import PropertyCard from '@/components/PropertyCard';
 
 const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
   ssr: false,
@@ -42,6 +44,116 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
     features: []
   });
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('overview-section');
+  const [relatedByArea, setRelatedByArea] = useState<Property[]>([]);
+  const [relatedByCity, setRelatedByCity] = useState<Property[]>([]);
+  const [relatedByOwner, setRelatedByOwner] = useState<Property[]>([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-120px 0px -50% 0px' }
+    );
+
+    const sections = ['overview-section', 'description-section', 'features-section', 'location-section'];
+    const timeout = setTimeout(() => {
+      sections.forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) observer.observe(element);
+      });
+    }, 100);
+
+    return () => {
+      clearTimeout(timeout);
+      sections.forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) observer.unobserve(element);
+      });
+    };
+  }, [property]);
+
+  useEffect(() => {
+    const fetchRelatedProperties = async () => {
+      if (!property) return;
+      try {
+        setLoadingRelated(true);
+
+        // 1. Similar Houses around [Area] - Same Type, Same Purpose, Same Area
+        const areaData = await propertyApi.getAll({
+          cityName: property.city,
+          search: property.location,
+          type: backendProperty?.propertyType,
+          purpose: backendProperty?.listingType,
+          limit: 12
+        });
+        const areaProperties = Array.isArray(areaData) ? areaData : areaData.properties;
+        setRelatedByArea(
+          areaProperties
+            .map(p => mapBackendToFrontendProperty(p))
+            .filter(p => p.slug !== resolvedSlug)
+        );
+
+        // 2. Similar Houses in [City] - Same Type, Same Purpose, Different Area
+        const cityData = await propertyApi.getAll({
+          cityName: property.city,
+          type: backendProperty?.propertyType,
+          purpose: backendProperty?.listingType,
+          limit: 15
+        });
+        const cityProperties = Array.isArray(cityData) ? cityData : cityData.properties;
+        setRelatedByCity(
+          cityProperties
+            .map(p => mapBackendToFrontendProperty(p))
+            .filter(p =>
+              p.slug !== resolvedSlug &&
+              !areaProperties.some(ap => ap.slug === p.slug)
+            )
+        );
+
+        // 3. Similar Houses by Same Agency (Owner)
+        if (backendProperty?.owner?._id) {
+          const ownerData = await propertyApi.getAll({
+            ownerId: backendProperty.owner._id,
+            limit: 12
+          } as any);
+          const ownerProperties = Array.isArray(ownerData) ? ownerData : ownerData.properties;
+          setRelatedByOwner(
+            ownerProperties
+              .map(p => mapBackendToFrontendProperty(p))
+              .filter(p => p.slug !== resolvedSlug)
+          );
+        }
+      } catch (err) {
+        console.error('Error fetching related properties:', err);
+      } finally {
+        setLoadingRelated(false);
+      }
+    };
+
+    fetchRelatedProperties();
+  }, [property, resolvedSlug]);
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const yOffset = -100;
+      const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -262,13 +374,13 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
       'priceCurrency': 'PKR',
       'businessFunction': property.purpose === 'buy' ? 'http://purl.org/goodrelations/v1#Sell' : 'http://purl.org/goodrelations/v1#LeaseOut',
       'availability': 'https://schema.org/InStock',
-      'url': typeof window !== 'undefined' ? window.location.href : ''
+      'url': ''
     }
   } : null;
 
   return (
     <div className="min-h-screen bg-background">
-      {jsonLd && (
+      {isMounted && jsonLd && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -303,15 +415,15 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
                       {property.latitude && property.longitude && (
                         <button
-                          onClick={() => document.getElementById('property-location')?.scrollIntoView({ behavior: 'smooth' })}
+                          onClick={() => scrollToSection('location-section')}
                           className="text-primary hover:underline text-sm ml-2 font-medium"
                         >
                           (Show on Map)
                         </button>
                       )}
                     </div>
-                    {/* Short Excerpt make it like render heml also */}
-                    <p
+                    {/* Short Excerpt make it like render html also */}
+                    {/* <p
                       className="text-muted-foreground text-lg leading-relaxed"
                       // Prefer excerpt → truncated description → fallback plain text
                       dangerouslySetInnerHTML={{
@@ -325,7 +437,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                             : `This beautiful ${(property.type ?? 'property').toLowerCase()} is located in the prime area of ${toTitleCase(property.location ?? '')}, ${toTitleCase(property.city ?? '')}. 
                         Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort.`.replace(/\s+/g, ' ').trim()),
                       }}
-                    />
+                    /> */}
                   </div>
                   <div className="flex gap-2 ml-4">
                     {/* <Button
@@ -479,26 +591,113 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 </div>
               </section>
 
+              {/* Sticky Navigation Bar */}
+              <div className="sticky top-[64px] md:top-[88px] z-30 bg-background/95 backdrop-blur-sm border-b pb-0 mb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 transition-all">
+                <div className="flex gap-6 overflow-x-auto scrollbar-none">
+                  {[
+                    { id: 'overview-section', label: 'Overview' },
+                    { id: 'description-section', label: 'Description' },
+                    { id: 'features-section', label: 'Features & Amenities' },
+                    { id: 'location-section', label: 'Location' },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => scrollToSection(tab.id)}
+                      className={`pb-3 text-base whitespace-nowrap font-semibold transition-all border-b-2 ${activeSection === tab.id
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted-foreground hover:text-foreground hover:border-primary/50'
+                        }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Overview will be table like  with size location and more features like of the zameen.com*/}
+              <Card id="overview-section" className="scroll-mt-28">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-4">Overview</h2>
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1 border p-4 rounded-lg">
+                      <table className="w-full text-sm">
+                        <tbody className="divide-y divide-border">
+                          <tr>
+                            <td className="py-2 text-muted-foreground font-medium">Type</td>
+                            <td className="py-2 text-right font-semibold">{property.type}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 text-muted-foreground font-medium">Location</td>
+                            <td className="py-2 text-right font-semibold">{toTitleCase(property.location)}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 text-muted-foreground font-medium">Area</td>
+                            <td className="py-2 text-right font-semibold">{property.area} sq ft</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 text-muted-foreground font-medium">Bedrooms</td>
+                            <td className="py-2 text-right font-semibold">{property.bedrooms}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="flex-1 border p-4 rounded-lg">
+                      <table className="w-full text-sm">
+                        <tbody className="divide-y divide-border">
+                          <tr>
+                            <td className="py-2 text-muted-foreground font-medium">Purpose</td>
+                            <td className="py-2 text-right font-semibold">{property.purpose === 'buy' ? 'For Sale' : 'For Rent'}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 text-muted-foreground font-medium">Price</td>
+                            <td className="py-2 text-right font-semibold">Rs. {formatPrice(property.price)}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 text-muted-foreground font-medium">Bathrooms</td>
+                            <td className="py-2 text-right font-semibold">{property.bathrooms}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+
+
               {/* Description */}
-              <Card>
+              <Card id="description-section" className="scroll-mt-28">
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-4">Description</h2>
-                  <div
-                    className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{
-                      __html: property.description || `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${toTitleCase(property.location)}, ${toTitleCase(property.city)}. 
-                      It offers ${property.bedrooms} spacious bedrooms and ${property.bathrooms} modern bathrooms spread across ${property.area} square feet. 
-                      Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort for your lifestyle needs.
-                      
-                      The property is situated in a well-developed neighborhood with easy access to schools, hospitals, shopping centers, and public transport. 
-                      It features modern amenities and finishes throughout, making it an ideal choice for families and professionals alike.`
-                    }}
-                  />
+                  <div className={`overflow-hidden transition-all duration-300 ${!isDescriptionExpanded ? 'max-h-[150px] relative' : 'max-h-full'}`}>
+                    <div
+                      className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{
+                        __html: property.description || `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${toTitleCase(property.location)}, ${toTitleCase(property.city)}. 
+                        It offers ${property.bedrooms} spacious bedrooms and ${property.bathrooms} modern bathrooms spread across ${property.area} square feet. 
+                        Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort for your lifestyle needs.
+                        
+                        The property is situated in a well-developed neighborhood with easy access to schools, hospitals, shopping centers, and public transport. 
+                        It features modern amenities and finishes throughout, making it an ideal choice for families and professionals alike.`
+                      }}
+                    />
+                    {!isDescriptionExpanded && (
+                      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-card to-transparent" />
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-4 text-primary font-semibold hover:bg-primary/5 p-0 h-auto"
+                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  >
+                    {isDescriptionExpanded ? 'Read Less' : 'Read More'}
+                  </Button>
                 </CardContent>
               </Card>
 
               {/* Features */}
-              <Card>
+              <Card id="features-section" className="scroll-mt-28">
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-4">Features & Amenities</h2>
                   {backendProperty?.features && backendProperty.features.length > 0 ? (
@@ -517,7 +716,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               </Card>
 
               {/* Location */}
-              <Card id="property-location">
+              <Card id="location-section" className="scroll-mt-28">
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-4">Location</h2>
                   {property.latitude && property.longitude ? (
@@ -544,6 +743,66 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   )}
                 </CardContent>
               </Card>
+
+              {/* Related Properties Matching Area - Horizontal Scroll */}
+              {relatedByArea.length > 0 && (
+                <section className="pt-8 border-t">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl md:text-2xl font-bold">
+                      Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
+                    </h2>
+                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties?city=${property.city}&search=${property.location}&type=${backendProperty?.propertyType}&purpose=${backendProperty?.listingType}`)}>
+                      View All
+                    </Button>
+                  </div>
+                  <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+                    {relatedByArea.map((item) => (
+                      <div key={item.id} className="min-w-[280px] md:min-w-[340px] snap-start">
+                        <PropertyCard property={item} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Related Properties by Same Agency - Horizontal Scroll */}
+              {relatedByOwner.length > 0 && (
+                <section className="pt-8 border-t">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl md:text-2xl font-bold">
+                      More properties by {backendProperty?.owner?.name || 'this Agency'}
+                    </h2>
+                  </div>
+                  <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+                    {relatedByOwner.map((item) => (
+                      <div key={item.id} className="min-w-[280px] md:min-w-[340px] snap-start">
+                        <PropertyCard property={item} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Related Properties Matching City - Horizontal Scroll */}
+              {relatedByCity.length > 0 && (
+                <section className="pt-8 border-t">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl md:text-2xl font-bold">
+                      Similar {toTitleCase(property.type)}s in {toTitleCase(property.city)}
+                    </h2>
+                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties?city=${property.city}&type=${backendProperty?.propertyType}&purpose=${backendProperty?.listingType}`)}>
+                      View All
+                    </Button>
+                  </div>
+                  <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+                    {relatedByCity.map((item) => (
+                      <div key={item.id} className="min-w-[280px] md:min-w-[340px] snap-start">
+                        <PropertyCard property={item} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
 
             {/* Sidebar - Right Side */}
