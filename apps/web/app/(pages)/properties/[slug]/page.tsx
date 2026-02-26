@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       };
     }
 
-    const title = `${property.title} | PropertyDealer`;
+    const title = `${property.title} | Property Dealer`;
     const description = property.description?.substring(0, 160) || `View details for property: ${property.title}`;
     const imageUrl = property.mainPhotoUrl || '/og-image.jpg';
 

@@ -20,10 +20,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk'),
   title: {
-    default: "PropertyDealer - Property Portal Pakistan",
-    template: "%s | PropertyDealer"
+    default: "Property Dealer | Buy, Sell & Rent Property",
+    template: "%s | Property Dealer"
   },
-  description: "Pakistan's most trusted property portal since 2007. Find properties for rent and sale in Multan, Lahore, Karachi, and Islamabad.",
+  description: "Property Dealer is a property buying and selling marketplace across Pakistan, connecting buyers and sellers for residential and commercial real estate.",
   keywords: ["property portal pakistan", "Property Dealer", "houses for rent multan", "apartments for sale lahore", "plots karachi", "commercial property islamabad"],
   authors: [{ name: "PropertyDealer Team" }],
   creator: "PropertyDealer",
@@ -37,9 +37,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_PK',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://propertydealer.pk',
-    siteName: 'PropertyDealer',
-    title: 'PropertyDealer - Find Your Dream Property in Pakistan',
-    description: "Explore thousands of properties for rent and sale across Pakistan.",
+    siteName: 'Property Dealer',
+    title: 'Property Dealer | Buy, Sell & Rent Property',
+    description: "Property Dealer is a property buying and selling marketplace across Pakistan, connecting buyers and sellers for residential and commercial real estate.",
     images: [
       {
         url: '/og-image.jpg',

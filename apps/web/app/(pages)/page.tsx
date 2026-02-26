@@ -11,6 +11,12 @@ import FAQSection from "@/components/FAQSection";
 import { serverApi } from "@/lib/server-api";
 import { mapBackendToFrontendProperty } from "@/lib/types/property-utils";
 import { transformBlogsToPosts } from "@/lib/utils/blog-utils";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Property Dealer | Buy, Sell & Rent Property",
+  description: "Property Dealer is a property buying and selling marketplace across Pakistan, connecting buyers and sellers for residential and commercial real estate.",
+};
 
 // Home Page - Server Component
 // =============================
