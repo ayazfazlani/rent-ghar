@@ -592,7 +592,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               </section>
 
               {/* Sticky Navigation Bar */}
-              <div className="sticky top-[64px] md:top-[88px] z-30 bg-background/95 backdrop-blur-sm border-b pb-0 mb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 transition-all">
+              <div className="sticky top-[64px] md:top-[88px] z-30 bg-black/80 backdrop-blur-sm border-b pb-0 mb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 transition-all">
                 <div className="flex gap-6 overflow-x-auto scrollbar-none">
                   {[
                     { id: 'overview-section', label: 'Overview' },
@@ -603,9 +603,9 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     <button
                       key={tab.id}
                       onClick={() => scrollToSection(tab.id)}
-                      className={`pb-3 text-base whitespace-nowrap font-semibold transition-all border-b-2 ${activeSection === tab.id
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground hover:border-primary/50'
+                      className={`pb-3  text-white whitespace-nowrap font-semibold transition-all border-b-2 m-2 ${activeSection === tab.id
+                        ? 'border-white text-white'
+                        : 'border-transparent text-muted-foreground hover:text-gray-200 hover:border-primary/50'
                         }`}
                     >
                       {tab.label}
@@ -701,7 +701,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-4">Features & Amenities</h2>
                   {backendProperty?.features && backendProperty.features.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
                       {backendProperty.features.map((feature: string, idx: number) => (
                         <div key={idx} className="flex items-center gap-2">
                           <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
@@ -744,65 +744,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 </CardContent>
               </Card>
 
-              {/* Related Properties Matching Area - Horizontal Scroll */}
-              {relatedByArea.length > 0 && (
-                <section className="pt-8 border-t">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl md:text-2xl font-bold">
-                      Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
-                    </h2>
-                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties?city=${property.city}&search=${property.location}&type=${backendProperty?.propertyType}&purpose=${backendProperty?.listingType}`)}>
-                      View All
-                    </Button>
-                  </div>
-                  <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
-                    {relatedByArea.map((item) => (
-                      <div key={item.id} className="min-w-[280px] md:min-w-[340px] snap-start">
-                        <PropertyCard property={item} />
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
 
-              {/* Related Properties by Same Agency - Horizontal Scroll */}
-              {relatedByOwner.length > 0 && (
-                <section className="pt-8 border-t">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl md:text-2xl font-bold">
-                      More properties by {backendProperty?.owner?.name || 'this Agency'}
-                    </h2>
-                  </div>
-                  <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
-                    {relatedByOwner.map((item) => (
-                      <div key={item.id} className="min-w-[280px] md:min-w-[340px] snap-start">
-                        <PropertyCard property={item} />
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Related Properties Matching City - Horizontal Scroll */}
-              {relatedByCity.length > 0 && (
-                <section className="pt-8 border-t">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl md:text-2xl font-bold">
-                      Similar {toTitleCase(property.type)}s in {toTitleCase(property.city)}
-                    </h2>
-                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties?city=${property.city}&type=${backendProperty?.propertyType}&purpose=${backendProperty?.listingType}`)}>
-                      View All
-                    </Button>
-                  </div>
-                  <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
-                    {relatedByCity.map((item) => (
-                      <div key={item.id} className="min-w-[280px] md:min-w-[340px] snap-start">
-                        <PropertyCard property={item} />
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
             </div>
 
             {/* Sidebar - Right Side */}
@@ -886,6 +828,65 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               </div>
             </div>
           </div>
+          {/* Related Properties Matching Area - Horizontal Scroll */}
+          {relatedByArea.length > 0 && (
+            <section className="pt-8 border-t">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl md:text-2xl font-bold">
+                  Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
+                </h2>
+                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties?city=${property.city}&search=${property.location}&type=${backendProperty?.propertyType}&purpose=${backendProperty?.listingType}`)}>
+                  View All
+                </Button>
+              </div>
+              <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+                {relatedByArea.map((item) => (
+                  <div key={item.id} className="min-w-[200px] md:min-w-[300px] snap-start">
+                    <PropertyCard property={item} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Related Properties by Same Agency - Horizontal Scroll */}
+          {relatedByOwner.length > 0 && (
+            <section className="pt-8 border-t">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl md:text-2xl font-bold">
+                  More properties by {backendProperty?.owner?.name || 'this Agency'}
+                </h2>
+              </div>
+              <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+                {relatedByOwner.map((item) => (
+                  <div key={item.id} className="min-w-[200px] md:min-w-[300px] snap-start">
+                    <PropertyCard property={item} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Related Properties Matching City - Horizontal Scroll */}
+          {relatedByCity.length > 0 && (
+            <section className="pt-8 border-t">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl md:text-2xl font-bold">
+                  Similar {toTitleCase(property.type)}s in {toTitleCase(property.city)}
+                </h2>
+                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties?city=${property.city}&type=${backendProperty?.propertyType}&purpose=${backendProperty?.listingType}`)}>
+                  View All
+                </Button>
+              </div>
+              <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+                {relatedByCity.map((item) => (
+                  <div key={item.id} className="min-w-[200px] md:min-w-[300px] snap-start">
+                    <PropertyCard property={item} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </div>
 
