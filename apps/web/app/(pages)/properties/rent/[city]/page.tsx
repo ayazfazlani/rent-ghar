@@ -19,10 +19,10 @@ export async function generateMetadata(
     // Attempt to fetch city data by name (slug)
     const cityData = await serverApi.getCityByName(citySlug);
 
-    if (!cityData) return { title: `Properties in ${citySlug} | Property Dealer` };
+    if (!cityData) return { title: `Properties in ${citySlug} ` };
 
     return {
-      title: cityData.metaTitle || `Properties for Rent in ${cityData.name} | Property Dealer`,
+      title: cityData.metaTitle || `Properties for Rent in ${cityData.name} `,
       description: cityData.metaDescription || `Find the best properties for rent in ${cityData.name}. Browse houses, flats, and more on Property Dealer.`,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
@@ -30,7 +30,7 @@ export async function generateMetadata(
     };
   } catch (error) {
     return {
-      title: `Properties for Rent in ${citySlug} | Property Dealer`,
+      title: `Properties for Rent in ${citySlug} `,
     };
   }
 }

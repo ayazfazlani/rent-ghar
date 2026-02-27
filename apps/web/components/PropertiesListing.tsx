@@ -603,7 +603,7 @@ export default function PropertiesListing({
               </p>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
                 {type !== 'all' ? `${type.charAt(0).toUpperCase() + type.slice(1)}s` : 'Properties'}
-                {purpose === 'rent' ? ' for Rent' : purpose === 'buy' ? ' for Sale' : ''}
+                {purpose === 'rent' ? ' for Rent ' : purpose === 'buy' ? ' for Sale ' : ' '}
                 in {matchedCity || 'Pakistan'}
               </h1>
               {richDescription && (

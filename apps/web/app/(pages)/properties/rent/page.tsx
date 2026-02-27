@@ -12,19 +12,19 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const cityName = (params.city as string) || '';
   const type = (params.type as string) || '';
 
-  let title = 'Properties for Rent in Pakistan | Property Dealer';
+  let title = 'Properties for Rent in Pakistan ';
   let description = 'Search and find houses, apartments and commercial properties for rent across Pakistan on Property Dealer.';
 
   if (cityName) {
     try {
       const cityData = await serverApi.getCityByName(cityName);
       if (cityData) {
-        title = cityData.metaTitle ? `For Rent: ${cityData.metaTitle}` : `${type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties'} for Rent in ${cityData.name} | Property Dealer`;
+        title = cityData.metaTitle ? `For Rent: ${cityData.metaTitle}` : `${type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties'} for Rent in ${cityData.name} `;
         description = cityData.metaDescription || `Find the best properties for rent in ${cityData.name}. Browse houses, flats, and more on Property Dealer.`;
       }
     } catch (e) {
       const formattedCity = cityName.charAt(0).toUpperCase() + cityName.slice(1);
-      title = `Properties for Rent in ${formattedCity} | Property Dealer`;
+      title = `Properties for Rent in ${formattedCity} `;
     }
   }
 

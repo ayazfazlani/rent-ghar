@@ -89,10 +89,29 @@ export class AreaService {
     };
     if (cityId) query.city = cityId;
 
-    const area = await this.areaModel
+    let area = await this.areaModel
       .findOne(query)
       .populate('city', 'name state country')
       .exec();
+
+    // Fallback: If areaSlug is missing in historical DB entries, find dynamically
+    if (!area) {
+      const fallbackQuery = cityId ? { city: cityId } : {};
+      const allAreas = await this.areaModel.find(fallbackQuery).populate('city', 'name state country').exec();
+      const targetSlug = slug.trim().toLowerCase();
+      
+      area = allAreas.find(a => {
+        const generatedSlug = a.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        return generatedSlug === targetSlug;
+      }) || null;
+
+      // Lazily update the database if we found a match so it's much faster next time
+      if (area && !area.areaSlug) {
+        area.areaSlug = targetSlug;
+        area.save().catch(e => console.error('Silent error updating areaSlug fallback', e));
+      }
+    }
+
     if (!area) {
       throw new NotFoundException(`Area with slug ${slug} not found`);
     }

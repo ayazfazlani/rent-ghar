@@ -12,7 +12,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const cityName = (params.city as string) || '';
   const type = (params.type as string) || '';
 
-  let title = 'Properties for Sale & Rent in Pakistan | Property Dealer';
+  let title = 'Properties for Sale & Rent in Pakistan ';
   let description = 'Search and find properties for sale and rent across Pakistan. Browse houses, apartments, plots and commercial properties on Property Dealer.';
 
   if (cityName) {
@@ -20,13 +20,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       const cityData = await serverApi.getCityByName(cityName);
       if (cityData) {
         // Use custom meta if available, otherwise construct one
-        title = cityData.metaTitle || `${type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties'} in ${cityData.name} | Property Dealer`;
+        title = cityData.metaTitle || `${type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties'} in ${cityData.name} `;
         description = cityData.metaDescription || `Find the latest properties in ${cityData.name}. Browse real estate listings for sale and rent in ${cityData.name}, Pakistan on Property Dealer.`;
       }
     } catch (e) {
       // Fallback if city not found or API fails
       const formattedCity = cityName.charAt(0).toUpperCase() + cityName.slice(1);
-      title = `Properties in ${formattedCity} | Property Dealer`;
+      title = `Properties in ${formattedCity} `;
     }
   }
 

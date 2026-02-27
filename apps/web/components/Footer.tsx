@@ -60,8 +60,8 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link href="/properties" className="text-background/70 hover:text-primary transition-colors">Properties for Rent</Link></li>
-              <li><Link href="/properties" className="text-background/70 hover:text-primary transition-colors">Properties for Sale</Link></li>
+              <li><Link href="/properties/rent" className="text-background/70 hover:text-primary transition-colors">Properties for Rent</Link></li>
+              <li><Link href="/properties/sale" className="text-background/70 hover:text-primary transition-colors">Properties for Sale</Link></li>
               <li><Link href="/about" className="text-background/70 hover:text-primary transition-colors">About Us</Link></li>
               {pages.map((page) => (
                 <li key={page._id}>
@@ -77,10 +77,10 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Popular Cities</h3>
             <ul className="space-y-2">
-              <li><Link href="/properties?city=Multan" className="text-background/70 hover:text-primary transition-colors">Multan</Link></li>
-              <li><Link href="/properties?city=Lahore" className="text-background/70 hover:text-primary transition-colors">Lahore</Link></li>
-              <li><Link href="/properties?city=Karachi" className="text-background/70 hover:text-primary transition-colors">Karachi</Link></li>
-              <li><Link href="/properties?city=Islamabad" className="text-background/70 hover:text-primary transition-colors">Islamabad</Link></li>
+              <li><Link href="/properties/all/multan" className="text-background/70 hover:text-primary transition-colors">Multan</Link></li>
+              <li><Link href="/properties/all/lahore" className="text-background/70 hover:text-primary transition-colors">Lahore</Link></li>
+              <li><Link href="/properties/all/karachi" className="text-background/70 hover:text-primary transition-colors">Karachi</Link></li>
+              <li><Link href="/properties/all/islamabad" className="text-background/70 hover:text-primary transition-colors">Islamabad</Link></li>
             </ul>
           </div>
 

@@ -4,12 +4,12 @@ import { Plus, Minus } from 'lucide-react';
 
 const faqs = [
   {
-    question: "How do I verify a property listing on Rent-Ghar?",
-    answer: "Rent-Ghar uses a multi-step verification process. Look for the 'Verified' badge on listings, which means our team has manually checked the property details, ownership documents, and location."
+    question: "How do I verify a property listing on Property Dealer?",
+    answer: "Property Dealer uses a multi-step verification process. Look for the 'Verified' badge on listings, which means our team has manually checked the property details, ownership documents, and location."
   },
   {
     question: "Are there any service charges for using the platform?",
-    answer: "Searching and browsing properties on Rent-Ghar is completely free for users. We only charge for premium listing packages and specialized consulting services."
+    answer: "Searching and browsing properties on Property Dealer is completely free for users. We only charge for premium listing packages and specialized consulting services."
   },
   {
     question: "What legal documents should I check before renting a house?",

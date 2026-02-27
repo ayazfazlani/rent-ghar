@@ -12,19 +12,19 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const cityName = (params.city as string) || '';
   const type = (params.type as string) || '';
 
-  let title = 'Properties for Sale in Pakistan | Property Dealer';
+  let title = 'Properties for Sale in Pakistan ';
   let description = 'Find your dream home with Property Dealer. Browse thousands of houses, plots, and commercial properties for sale in Pakistan.';
 
   if (cityName) {
     try {
       const cityData = await serverApi.getCityByName(cityName);
       if (cityData) {
-        title = cityData.metaTitle ? `For Sale: ${cityData.metaTitle}` : `${type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties'} for Sale in ${cityData.name} | Property Dealer`;
+        title = cityData.metaTitle ? `For Sale: ${cityData.metaTitle}` : `${type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties'} for Sale in ${cityData.name} `;
         description = cityData.metaDescription || `Explore the best properties for sale in ${cityData.name}. Find houses, apartments, and plots on Property Dealer.`;
       }
     } catch (e) {
       const formattedCity = cityName.charAt(0).toUpperCase() + cityName.slice(1);
-      title = `Properties for Sale in ${formattedCity} | Property Dealer`;
+      title = `Properties for Sale in ${formattedCity} `;
     }
   }
 

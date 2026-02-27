@@ -10,7 +10,7 @@ const AboutBrief = () => {
             Your Trusted Partner for <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Real Estate in Pakistan</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 leading-relaxed font-medium">
-            Rent-Ghar is Pakistan's premier property portal, dedicated to helping you find the perfect place to call home. Whether you're looking to <span className="text-gray-900 font-bold">rent a house</span>, <span className="text-gray-900 font-bold">buy an apartment</span>, or invest in <span className="text-gray-900 font-bold">commercial real estate</span>, our platform connects you with thousands of verified listings across major cities like Karachi, Lahore, and Islamabad.
+            Property Dealer is Pakistan's premier property portal, dedicated to helping you find the perfect place to call home. Whether you're looking to <span className="text-gray-900 font-bold">rent a house</span>, <span className="text-gray-900 font-bold">buy an apartment</span>, or invest in <span className="text-gray-900 font-bold">commercial real estate</span>, our platform connects you with thousands of verified listings across major cities like Karachi, Lahore, and Islamabad.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm font-bold uppercase tracking-wider text-gray-400">
             <span>Residential</span>

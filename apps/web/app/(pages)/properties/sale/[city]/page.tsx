@@ -18,10 +18,10 @@ export async function generateMetadata(
   try {
     const cityData = await serverApi.getCityByName(citySlug);
 
-    if (!cityData) return { title: `Properties for Sale in ${citySlug} | Property Dealer` };
+    if (!cityData) return { title: `Properties for Sale in ${citySlug} ` };
 
     return {
-      title: cityData.metaTitle || `Properties for Sale in ${cityData.name} | Property Dealer`,
+      title: cityData.metaTitle || `Properties for Sale in ${cityData.name} `,
       description: cityData.metaDescription || `Find properties for sale in ${cityData.name}. Best real estate listings in Pakistan on Property Dealer.`,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
@@ -29,7 +29,7 @@ export async function generateMetadata(
     };
   } catch (error) {
     return {
-      title: `Properties for Sale in ${citySlug} | Property Dealer`,
+      title: `Properties for Sale in ${citySlug} `,
     };
   }
 }

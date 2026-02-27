@@ -51,7 +51,7 @@ export async function generateMetadata(
   const { cityData, isPropertyType, areaData, propertyType } = await resolveTypeOrArea(citySlug, type);
 
   if (!cityData) {
-    return { title: `Properties in ${citySlug} | RENT-GHAR` };
+    return { title: `Properties in ${citySlug} ` };
   }
 
   if (isPropertyType && propertyType) {
@@ -59,7 +59,7 @@ export async function generateMetadata(
     return {
       title: cityData.metaTitle
         ? `${typeCapitalized} - ${cityData.metaTitle}`
-        : `${typeCapitalized} for Rent & Sale in ${cityData.name} | RENT-GHAR`,
+        : `${typeCapitalized} for Rent & Sale in ${cityData.name} `,
       description: cityData.metaDescription || `Find the best ${propertyType} for rent and sale in ${cityData.name}. Browse latest listings.`,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
@@ -69,7 +69,7 @@ export async function generateMetadata(
 
   if (areaData) {
     return {
-      title: areaData.metaTitle || `Properties in ${areaData.name}, ${cityData.name} | RENT-GHAR`,
+      title: areaData.metaTitle || `Properties in ${areaData.name}, ${cityData.name} `,
       description: areaData.metaDescription || `Find properties for rent and sale in ${areaData.name}, ${cityData.name}. Browse latest listings.`,
       alternates: {
         canonical: areaData.canonicalUrl || undefined,
@@ -79,7 +79,7 @@ export async function generateMetadata(
 
   // Fallback if neither (e.g. 404 implicitly, but we return basic metadata)
   return {
-    title: `Properties in ${citySlug} | RENT-GHAR`,
+    title: `Properties in ${citySlug} `,
   };
 }
 

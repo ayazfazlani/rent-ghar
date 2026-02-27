@@ -208,9 +208,7 @@ export class PropertyService {
             } else {
               query.$or = areaOrConditions;
             }
-          } 
-          
-          if (filters?.cityId || filters?.cityName) {
+          } else if (filters?.cityId || filters?.cityName) {
             const cityOrConditions: any[] = [];
 
             // 1. Relational match via cityId -> areaIds
