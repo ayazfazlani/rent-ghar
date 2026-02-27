@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         type: 'article',
       },
       alternates: {
-        canonical: `/${slug}`,
+        canonical: `/p/${slug}`,
       },
     };
   } catch (error) {
@@ -45,15 +45,25 @@ export default async function CustomPage({ params }: PageProps) {
       notFound();
     }
 
+    // ← Add this debug log (check Vercel logs, PM2 logs, or browser console via hydration)
+    console.log('Raw page.content:', page.content);
+    console.log('First 200 chars:', page.content.slice(0, 200));
+
+    // Also render it safely for inspection
     return (
-      <div className="min-h-screen bg-background pt-24 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-4xl font-bold text-foreground mb-8">{page.title}</h1>
-          <div
-            className="prose prose-lg max-w-none text-muted-foreground leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: page.content }}
-          />
-        </div>
+      <div className="container mx-auto px-4 pt-24 pb-16 min-h-screen bg-background">
+        <h1 className="text-4xl font-bold text-foreground mb-8">{page.title}</h1>
+
+        {/* Debug: show raw string */}
+        {/* <pre className="bg-gray-100 p-4 rounded overflow-auto text-sm mb-8">
+          {page.content}
+        </pre> */}
+
+        {/* Your original render */}
+        <div
+          className="prose prose-lg max-w-none text-muted-foreground leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: page.content }}
+        />
       </div>
     );
   } catch (error) {

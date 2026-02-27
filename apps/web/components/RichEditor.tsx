@@ -6,6 +6,10 @@ import Image from '@tiptap/extension-image'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Placeholder from '@tiptap/extension-placeholder'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
 import { useEffect, useState, useRef } from 'react'
 import {
     Bold,
@@ -25,7 +29,11 @@ import {
     AlignJustify,
     Undo,
     Redo,
-    X
+    X,
+    Trash2,
+    Columns,
+    Rows,
+    Table as TableIcon
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -110,6 +118,23 @@ export default function RichEditor({ value, onChange }: RichEditorProps) {
             }),
             Placeholder.configure({
                 placeholder: 'Start writing your content...',
+            }),
+            Table.configure({
+                resizable: true,
+                HTMLAttributes: {
+                    class: 'min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4 border',
+                },
+            }),
+            TableRow,
+            TableHeader.configure({
+                HTMLAttributes: {
+                    class: 'bg-gray-50 dark:bg-gray-800 px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600',
+                },
+            }),
+            TableCell.configure({
+                HTMLAttributes: {
+                    class: 'px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600',
+                },
             }),
         ],
         content: value || '<p></p>',
@@ -417,6 +442,54 @@ export default function RichEditor({ value, onChange }: RichEditorProps) {
                             >
                                 <ImageIcon className="h-4 w-4" />
                             </Button>
+                        </div>
+
+                        {/* Table Group */}
+                        <div className="flex items-center gap-1 px-2 border-r border-gray-300 dark:border-gray-600">
+                            <Button
+                                type="button"
+                                variant={editor.isActive('table') ? 'default' : 'ghost'}
+                                size="sm"
+                                onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+                                className="h-9 w-9 p-0 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                title="Insert Table"
+                            >
+                                <TableIcon className="h-4 w-4" />
+                            </Button>
+                            {editor.isActive('table') && (
+                                <>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => editor.chain().focus().addRowAfter().run()}
+                                        className="h-9 w-9 p-0 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                        title="Add Row Below"
+                                    >
+                                        <Rows className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => editor.chain().focus().addColumnAfter().run()}
+                                        className="h-9 w-9 p-0 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                        title="Add Column Right"
+                                    >
+                                        <Columns className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => editor.chain().focus().deleteTable().run()}
+                                        className="h-9 w-9 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                                        title="Delete Table"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </>
+                            )}
                         </div>
 
                         {/* History Group */}

@@ -21,7 +21,7 @@ export async function generateMetadata(
     if (!category) return {};
 
     return {
-      title: category.metaTitle || `${category.name} | RENT-GHAR Blog`,
+      title: category.metaTitle || `${category.name}`,
       description: category.metaDescription || category.description?.replace(/<[^>]*>/g, '').substring(0, 160),
       alternates: {
         canonical: category.canonicalUrl || undefined,
@@ -29,7 +29,7 @@ export async function generateMetadata(
     };
   } catch (error) {
     return {
-      title: 'Blog Category | RENT-GHAR',
+      title: 'Blog Category ',
     };
   }
 }

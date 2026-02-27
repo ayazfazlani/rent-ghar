@@ -233,3 +233,20 @@ a[class*="footerAction"] {
 .prose strong {
   @apply font-bold text-foreground;
 }
+
+/* Rich Text Tables */
+.prose table {
+  @apply w-full text-left border-collapse my-6 border-2 border-border;
+}
+
+.prose th {
+  @apply border-2 border-border px-4 py-2 font-bold bg-muted/30;
+}
+
+.prose td {
+  @apply border border-border px-4 py-2;
+}
+
+.prose tr:nth-child(even) {
+  @apply bg-muted/10;
+}
