@@ -37,14 +37,18 @@ export const serverApi = {
       });
 
       if (!response.ok) {
-        console.error(`❌ API Error [${response.status}] for ${url}. BaseURL: ${BASE_URL}`);
+        if (response.status !== 404) {
+           console.error(`❌ API Error [${response.status}] for ${url}. BaseURL: ${BASE_URL}`);
+        }
         throw new Error(`API Error: ${response.status} ${response.statusText} at ${path}`);
       }
 
       return response.json();
     } catch (error: any) {
-      console.error(`💥 Fetch Failed for ${url}. (BaseURL: ${BASE_URL}) Error:`, error.message);
-      if (error.cause) console.error('  Cause:', error.cause);
+      if (!error.message?.includes('404')) {
+        console.error(`💥 Fetch Failed for ${url}. (BaseURL: ${BASE_URL}) Error:`, error.message);
+        if (error.cause) console.error('  Cause:', error.cause);
+      }
       throw error;
     }
   },

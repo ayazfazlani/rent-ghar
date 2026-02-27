@@ -378,6 +378,10 @@ export const cityApi = {
     const response = await api.get(`/cities/${id}`);
     return response.data;
   },
+  getByName: async (name: string) => {
+    const response = await api.get(`/cities/name/${name}`);
+    return response.data;
+  },
 };
 
 // Area API functions
@@ -417,6 +421,26 @@ export const userApi = {
   },
   delete: async (id: string) => {
     const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
+};
+
+// Page API functions
+export const pageApi = {
+  getAll: async () => {
+    const response = await api.get("/page");
+    return response.data;
+  },
+  getPublished: async () => {
+    const response = await api.get("/page/published");
+    return response.data;
+  },
+  getById: async (id: string) => {
+    const response = await api.get(`/page/${id}`);
+    return response.data;
+  },
+  getBySlug: async (slug: string) => {
+    const response = await api.get(`/page/slug/${slug}`);
     return response.data;
   },
 };
