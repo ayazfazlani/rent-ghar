@@ -18,18 +18,18 @@ export async function generateMetadata(
   try {
     const cityData = await serverApi.getCityByName(citySlug);
 
-    if (!cityData) return { title: `All Properties in ${citySlug} | RENT-GHAR` };
+    if (!cityData) return { title: `All Properties in ${citySlug} | Property Dealer` };
 
     return {
-      title: cityData.metaTitle || `Properties in ${cityData.name} | RENT-GHAR`,
-      description: cityData.metaDescription || `Browse all properties for rent and sale in ${cityData.name}. Find your ideal home with RENT-GHAR.`,
+      title: cityData.metaTitle || `Properties in ${cityData.name} | Property Dealer`,
+      description: cityData.metaDescription || `Browse all properties for rent and sale in ${cityData.name}. Find your ideal home with Property Dealer.`,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
       },
     };
   } catch (error) {
     return {
-      title: `Properties in ${citySlug} | RENT-GHAR`,
+      title: `Properties in ${citySlug} | Property Dealer`,
     };
   }
 }

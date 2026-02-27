@@ -1,14 +1,67 @@
 import PropertiesListing from '@/components/PropertiesListing';
+import { serverApi } from '@/lib/server-api';
+import { Metadata } from 'next';
 import { Suspense } from 'react';
 
-export default function AllRootPage() {
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const cityName = (params.city as string) || '';
+  const type = (params.type as string) || '';
+
+  let title = 'Properties for Sale & Rent in Pakistan | Property Dealer';
+  let description = 'Search and find properties for sale and rent across Pakistan. Browse houses, apartments, plots and commercial properties on Property Dealer.';
+
+  if (cityName) {
+    try {
+      const cityData = await serverApi.getCityByName(cityName);
+      if (cityData) {
+        // Use custom meta if available, otherwise construct one
+        title = cityData.metaTitle || `${type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties'} in ${cityData.name} | Property Dealer`;
+        description = cityData.metaDescription || `Find the latest properties in ${cityData.name}. Browse real estate listings for sale and rent in ${cityData.name}, Pakistan on Property Dealer.`;
+      }
+    } catch (e) {
+      // Fallback if city not found or API fails
+      const formattedCity = cityName.charAt(0).toUpperCase() + cityName.slice(1);
+      title = `Properties in ${formattedCity} | Property Dealer`;
+    }
+  }
+
+  return {
+    title,
+    description,
+  };
+}
+
+export default async function AllRootPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const cityName = (params.city as string) || '';
+
+  let cityRichDescription = '';
+  if (cityName) {
+    try {
+      const cityData = await serverApi.getCityByName(cityName);
+      cityRichDescription = cityData?.description || '';
+    } catch (e) {
+      console.warn('Could not fetch city content for SEO:', e);
+    }
+  }
+
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     }>
-      <PropertiesListing purpose="all" useCleanUrls={true} />
+      <PropertiesListing
+        purpose="all"
+        useCleanUrls={true}
+        city={cityName}
+        richDescription={cityRichDescription}
+      />
     </Suspense>
   );
 }

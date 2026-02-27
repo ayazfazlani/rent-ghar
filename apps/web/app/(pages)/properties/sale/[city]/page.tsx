@@ -18,18 +18,18 @@ export async function generateMetadata(
   try {
     const cityData = await serverApi.getCityByName(citySlug);
 
-    if (!cityData) return { title: `Properties for Sale in ${citySlug} | RENT-GHAR` };
+    if (!cityData) return { title: `Properties for Sale in ${citySlug} | Property Dealer` };
 
     return {
-      title: cityData.metaTitle || `Properties for Sale in ${cityData.name} | RENT-GHAR`,
-      description: cityData.metaDescription || `Find properties for sale in ${cityData.name}. Best real estate listings in Pakistan.`,
+      title: cityData.metaTitle || `Properties for Sale in ${cityData.name} | Property Dealer`,
+      description: cityData.metaDescription || `Find properties for sale in ${cityData.name}. Best real estate listings in Pakistan on Property Dealer.`,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
       },
     };
   } catch (error) {
     return {
-      title: `Properties for Sale in ${citySlug} | RENT-GHAR`,
+      title: `Properties for Sale in ${citySlug} | Property Dealer`,
     };
   }
 }

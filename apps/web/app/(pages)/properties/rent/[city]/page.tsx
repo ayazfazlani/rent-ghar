@@ -19,18 +19,18 @@ export async function generateMetadata(
     // Attempt to fetch city data by name (slug)
     const cityData = await serverApi.getCityByName(citySlug);
 
-    if (!cityData) return { title: `Properties in ${citySlug} | RENT-GHAR` };
+    if (!cityData) return { title: `Properties in ${citySlug} | Property Dealer` };
 
     return {
-      title: cityData.metaTitle || `Properties for Rent in ${cityData.name} | RENT-GHAR`,
-      description: cityData.metaDescription || `Find the best properties for rent in ${cityData.name}. Browse houses, flats, and more.`,
+      title: cityData.metaTitle || `Properties for Rent in ${cityData.name} | Property Dealer`,
+      description: cityData.metaDescription || `Find the best properties for rent in ${cityData.name}. Browse houses, flats, and more on Property Dealer.`,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
       },
     };
   } catch (error) {
     return {
-      title: `Properties for Rent in ${citySlug} | RENT-GHAR`,
+      title: `Properties for Rent in ${citySlug} | Property Dealer`,
     };
   }
 }

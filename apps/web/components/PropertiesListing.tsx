@@ -249,7 +249,7 @@ export default function PropertiesListing({
     };
 
     fetchData();
-  }, [matchedCity, purpose, type, advancedFilters, searchParams, currentPage]);
+  }, [matchedCity, purpose, type, advancedFilters, searchParams, currentPage, initialAreaId]);
 
 
   // Update state when props change
@@ -377,24 +377,6 @@ export default function PropertiesListing({
 
   return (
     <div className="min-h-screen bg-background">
-
-      {/* Hero Banner - Responsive sizing */}
-      <section className="pt-24 pb-6 md:pt-28 md:pb-8 bg-secondary/50 animate-in fade-in duration-500">
-        <div className="container mx-auto px-4">
-          <p className="text-[10px] md:text-sm font-bold text-primary mb-1 uppercase tracking-widest opacity-70">
-            Property Search
-          </p>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
-            Browse Listings in {matchedCity || 'Pakistan'}
-          </h1>
-          {richDescription && (
-            <div
-              className="mt-6 prose prose-sm max-w-4xl text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
-              dangerouslySetInnerHTML={{ __html: richDescription }}
-            />
-          )}
-        </div>
-      </section>
 
       {/* Main Content Area - Sidebar + Grid */}
       <section className="py-8 md:py-10">
@@ -613,6 +595,25 @@ export default function PropertiesListing({
               </div>
             </div>
           </div>
+          {/* Hero Banner - Responsive sizing */}
+          <section className="pt-24 pb-6 md:pt-28 md:pb-8 bg-secondary/50 animate-in fade-in duration-500">
+            <div className="container mx-auto px-4">
+              <p className="text-[10px] md:text-sm font-bold text-primary mb-1 uppercase tracking-widest opacity-70">
+                Property Search
+              </p>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
+                {type !== 'all' ? `${type.charAt(0).toUpperCase() + type.slice(1)}s` : 'Properties'}
+                {purpose === 'rent' ? ' for Rent' : purpose === 'buy' ? ' for Sale' : ''}
+                in {matchedCity || 'Pakistan'}
+              </h1>
+              {richDescription && (
+                <div
+                  className="mt-6 prose prose-sm max-w-4xl text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
+                  dangerouslySetInnerHTML={{ __html: richDescription }}
+                />
+              )}
+            </div>
+          </section>
         </div>
       </section>
 
