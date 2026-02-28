@@ -47,6 +47,9 @@ export class CityService {
             if (createCityDto.metaDescription) cityData.metaDescription = createCityDto.metaDescription;
             if (createCityDto.canonicalUrl) cityData.canonicalUrl = createCityDto.canonicalUrl;
             if (createCityDto.description) cityData.description = createCityDto.description;
+            if (createCityDto.rentContent) cityData.rentContent = createCityDto.rentContent;
+            if (createCityDto.saleContent) cityData.saleContent = createCityDto.saleContent;
+            if (createCityDto.buyContent) cityData.buyContent = createCityDto.buyContent;
             if (createCityDto.thumbnail) cityData.thumbnail = createCityDto.thumbnail;
             
             const createdCity = new this.cityModel(cityData);
@@ -134,6 +137,9 @@ export class CityService {
             if (updateCityDto.metaDescription !== undefined) updateData.metaDescription = updateCityDto.metaDescription;
             if (updateCityDto.canonicalUrl !== undefined) updateData.canonicalUrl = updateCityDto.canonicalUrl;
             if (updateCityDto.description !== undefined) updateData.description = updateCityDto.description;
+            if (updateCityDto.rentContent !== undefined) updateData.rentContent = updateCityDto.rentContent;
+            if (updateCityDto.saleContent !== undefined) updateData.saleContent = updateCityDto.saleContent;
+            if (updateCityDto.buyContent !== undefined) updateData.buyContent = updateCityDto.buyContent;
             if (updateCityDto.thumbnail !== undefined) updateData.thumbnail = updateCityDto.thumbnail;
 
             const city = await this.cityModel.findByIdAndUpdate(id, updateData, { new: true }).exec();

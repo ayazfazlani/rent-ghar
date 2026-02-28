@@ -31,5 +31,17 @@ export class UpdateCityDto {
 
     @IsOptional()
     @IsString()
+    rentContent?: string;
+
+    @IsOptional()
+    @IsString()
+    saleContent?: string;
+
+    @IsOptional()
+    @IsString()
+    buyContent?: string;
+
+    @IsOptional()
+    @IsString()
     thumbnail?: string;
 }

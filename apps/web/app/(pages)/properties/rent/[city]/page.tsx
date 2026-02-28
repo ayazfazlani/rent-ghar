@@ -55,7 +55,7 @@ export default async function RentCityPage(props: PageProps) {
         purpose="rent"
         city={city}
         useCleanUrls={true}
-        richDescription={cityDetails?.description}
+        richDescription={cityDetails?.rentContent}
       />
     </Suspense>
   );

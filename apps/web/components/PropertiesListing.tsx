@@ -251,6 +251,22 @@ export default function PropertiesListing({
     fetchData();
   }, [matchedCity, purpose, type, advancedFilters, searchParams, currentPage, initialAreaId]);
 
+  // Derive richDescription from allCities based on purpose if not explicitly provided
+  const effectiveRichDescription = useMemo(() => {
+    if (richDescription) return richDescription;
+
+    // Only attempt to derive if we have a city matched
+    if (!matchedCity || allCities.length === 0) return undefined;
+
+    const cityData = allCities.find(c => c.name.toLowerCase() === matchedCity.toLowerCase());
+    if (!cityData) return undefined;
+
+    if (purpose === 'rent') return cityData.rentContent;
+    if (purpose === 'buy') return cityData.saleContent;
+
+    return cityData.description;
+  }, [richDescription, matchedCity, allCities, purpose]);
+
 
   // Update state when props change
   useEffect(() => {
@@ -606,10 +622,10 @@ export default function PropertiesListing({
                 {purpose === 'rent' ? ' for Rent ' : purpose === 'buy' ? ' for Sale ' : ' '}
                 in {matchedCity || 'Pakistan'}
               </h1>
-              {richDescription && (
+              {effectiveRichDescription && (
                 <div
                   className="mt-6 prose prose-sm max-w-4xl text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
-                  dangerouslySetInnerHTML={{ __html: richDescription }}
+                  dangerouslySetInnerHTML={{ __html: effectiveRichDescription }}
                 />
               )}
             </div>

@@ -92,7 +92,6 @@ export default async function SaleCityTypePage(props: PageProps) {
 
   const listingType = isPropertyType ? (propertyType || type) : 'all';
   const areaId = areaData?._id;
-  const description = areaData?.description || cityData?.description;
 
   return (
     <Suspense fallback={
@@ -106,7 +105,7 @@ export default async function SaleCityTypePage(props: PageProps) {
         type={listingType}
         areaId={areaId}
         useCleanUrls={true}
-        richDescription={description}
+        richDescription={areaData?.description || cityData?.saleContent}
       />
     </Suspense>
   );

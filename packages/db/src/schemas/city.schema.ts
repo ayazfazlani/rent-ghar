@@ -29,6 +29,15 @@ export class City {
   description?: string; // Rich Text
 
   @Prop({ trim: true })
+  rentContent?: string; // Rich Text for Rent
+
+  @Prop({ trim: true })
+  saleContent?: string; // Rich Text for Sale
+
+  @Prop({ trim: true })
+  buyContent?: string; // Rich Text for Buy
+
+  @Prop({ trim: true })
   thumbnail?: string; // City Image URL
 
   // Areas are optional - a city can exist without areas initially

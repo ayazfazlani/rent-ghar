@@ -8,6 +8,10 @@ export interface CreateCityData {
   metaDescription?: string;
   canonicalUrl?: string;
   description?: string;
+  rentContent?: string;
+  saleContent?: string;
+  buyContent?: string;
+  thumbnail?: string;
 }
 
 export interface UpdateCityData {
@@ -18,6 +22,10 @@ export interface UpdateCityData {
   metaDescription?: string;
   canonicalUrl?: string;
   description?: string;
+  rentContent?: string;
+  saleContent?: string;
+  buyContent?: string;
+  thumbnail?: string;
 }
 
 export const cityApi = {

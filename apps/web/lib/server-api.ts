@@ -55,11 +55,11 @@ export const serverApi = {
 
   // City API
   async getCities(): Promise<any[]> {
-    return this.get('/cities', { next: { revalidate: 900, tags: ['cities'] } }); // Cache cities for 15 minutes
+    return this.get('/cities', { next: { revalidate: 60, tags: ['cities'] } }); // Cache cities for 1 minute
   },
 
   async getCityByName(name: string): Promise<any> {
-    return this.get(`/cities/name/${name}`, { next: { revalidate: 900, tags: ['cities'] } });
+    return this.get(`/cities/name/${name}`, { next: { revalidate: 60, tags: ['cities'] } });
   },
 
   // Property API

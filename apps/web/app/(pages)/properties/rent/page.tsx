@@ -42,7 +42,7 @@ export default async function RentRootPage({ searchParams }: PageProps) {
   if (cityName) {
     try {
       const cityData = await serverApi.getCityByName(cityName);
-      cityRichDescription = cityData?.description || '';
+      cityRichDescription = cityData?.rentContent || '';
     } catch (e) {
       console.warn('Could not fetch city content for SEO:', e);
     }

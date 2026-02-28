@@ -38,6 +38,9 @@ const formSchema = z.object({
   metaDescription: z.string().optional(),
   canonicalUrl: z.string().optional(),
   description: z.string().optional(),
+  rentContent: z.string().optional(),
+  saleContent: z.string().optional(),
+  buyContent: z.string().optional(),
   thumbnail: z.string().optional(),
 });
 
@@ -58,6 +61,9 @@ export default function EditCityPage() {
       metaDescription: "",
       canonicalUrl: "",
       description: "",
+      rentContent: "",
+      saleContent: "",
+      buyContent: "",
       thumbnail: "",
     },
   });
@@ -78,6 +84,9 @@ export default function EditCityPage() {
           metaDescription: city.metaDescription || "",
           canonicalUrl: city.canonicalUrl || "",
           description: city.description || "",
+          rentContent: city.rentContent || "",
+          saleContent: city.saleContent || "",
+          buyContent: city.buyContent || "",
           thumbnail: city.thumbnail || "",
         });
       } catch (error: any) {
@@ -289,7 +298,7 @@ export default function EditCityPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>City Description (Rich Text)</FormLabel>
+                    <FormLabel>City Description (Rich Text - General)</FormLabel>
                     <FormControl>
                       <RichEditor
                         value={field.value || ""}
@@ -300,6 +309,65 @@ export default function EditCityPage() {
                   </FormItem>
                 )}
               />
+
+              <div className="grid grid-cols-1 gap-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-700">Specific Content Sections</h3>
+                <p className="text-sm text-gray-500 -mt-4">Define specific content for different property purposes. If left empty, the general description above will be used.</p>
+
+                {/* Rent Content */}
+                <FormField
+                  control={form.control}
+                  name="rentContent"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-blue-600 font-medium">Rent Content (Rich Text)</FormLabel>
+                      <FormControl>
+                        <RichEditor
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Sale Content */}
+                <FormField
+                  control={form.control}
+                  name="saleContent"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-green-600 font-medium">Sale Content (Rich Text)</FormLabel>
+                      <FormControl>
+                        <RichEditor
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Buy Content */}
+                <FormField
+                  control={form.control}
+                  name="buyContent"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-purple-600 font-medium">Buy Content (Rich Text)</FormLabel>
+                      <FormControl>
+                        <RichEditor
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               {/* Image Picker Dialog */}
               <ImagePickerDialog

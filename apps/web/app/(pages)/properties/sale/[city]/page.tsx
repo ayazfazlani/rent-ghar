@@ -54,7 +54,7 @@ export default async function SaleCityPage(props: PageProps) {
         purpose="buy"
         city={city}
         useCleanUrls={true}
-        richDescription={cityDetails?.description}
+        richDescription={cityDetails?.saleContent}
       />
     </Suspense>
   );
