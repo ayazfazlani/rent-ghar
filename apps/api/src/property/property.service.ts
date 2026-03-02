@@ -151,6 +151,8 @@ export class PropertyService {
         priceMax?: number;
         areaMin?: number;
         areaMax?: number;
+        marlaMin?: number;
+        marlaMax?: number;
         beds?: number;
         baths?: number;
         type?: string;
@@ -262,6 +264,13 @@ export class PropertyService {
             query.areaSize = {};
             if (filters.areaMin !== undefined) query.areaSize.$gte = filters.areaMin;
             if (filters.areaMax !== undefined) query.areaSize.$lte = filters.areaMax;
+          }
+
+          // Marla Filter
+          if (filters?.marlaMin !== undefined || filters?.marlaMax !== undefined) {
+            query.marla = {};
+            if (filters.marlaMin !== undefined) query.marla.$gte = filters.marlaMin;
+            if (filters.marlaMax !== undefined) query.marla.$lte = filters.marlaMax;
           }
 
           // Beds Filter

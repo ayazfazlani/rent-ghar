@@ -31,7 +31,7 @@ type FeaturedProperty = {
   priceLabel?: string;
   beds: number;
   baths: number;
-  area: string;
+  marla: string;
   slug?: string;
 };
 
@@ -73,7 +73,7 @@ const PropertyCard = ({ property }: { property: FeaturedProperty }) => {
           </div>
           <div className="flex items-center gap-1.5">
             <Maximize className="w-4 h-4" />
-            <span className="text-xs font-medium whitespace-nowrap">{property.area}</span>
+            <span className="text-xs font-medium whitespace-nowrap">{property.marla}</span>
           </div>
         </div>
 
@@ -130,7 +130,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ initialProperties }) 
           priceLabel: property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent',
           beds: property.bedrooms,
           baths: property.bathrooms,
-          area: `${property.area} sq ft`,
+          marla: property.marla && property.marla > 0 ? `${property.marla} marla` : `${property.marla} `,
           slug: property.slug,
         }));
 

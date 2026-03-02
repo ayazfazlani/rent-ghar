@@ -156,7 +156,7 @@ export default async function Home() {
     priceLabel: property.purpose === "buy" ? "Total Price" : "Monthly Rent",
     beds: property.bedrooms ?? 0,
     baths: property.bathrooms ?? 0,
-    area: `${property.area ?? 0} sq ft`,
+    marla: `${property.marla ?? 0} marla`,
     slug: property.slug,
   }));
 

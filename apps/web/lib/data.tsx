@@ -9,6 +9,8 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   area: number;
+  marla?: number;
+  kenal?: number;
   purpose: 'rent' | 'buy';
   image: string;
   featured?: boolean;

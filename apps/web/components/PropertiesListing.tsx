@@ -71,6 +71,8 @@ export default function PropertiesListing({
     priceMax?: number;
     areaMin?: number;
     areaMax?: number;
+    marlaMin?: number;
+    marlaMax?: number;
     beds?: number;
     baths?: number;
   }>({});
@@ -196,6 +198,8 @@ export default function PropertiesListing({
           priceMax: advancedFilters.priceMax,
           areaMin: advancedFilters.areaMin,
           areaMax: advancedFilters.areaMax,
+          marlaMin: advancedFilters.marlaMin,
+          marlaMax: advancedFilters.marlaMax,
           beds: advancedFilters.beds,
           baths: advancedFilters.baths,
           type: type !== 'all' ? type : undefined,

@@ -63,7 +63,7 @@ const Footer = () => {
               <li><Link href="/properties/rent" className="text-background/70 hover:text-primary transition-colors">Properties for Rent</Link></li>
               <li><Link href="/properties/sale" className="text-background/70 hover:text-primary transition-colors">Properties for Sale</Link></li>
               <li><Link href="/about" className="text-background/70 hover:text-primary transition-colors">About Us</Link></li>
-              <li><Link href="/today-cement-rate-in-pakistan" className="text-background/70 hover:text-primary transition-colors">Today Cement Rate in Pakistan</Link></li>
+              {/* <li><Link href="/today-cement-rate-in-pakistan" className="text-background/70 hover:text-primary transition-colors">Today Cement Rate in Pakistan</Link></li> */}
               {/* {pages.map((page) => (
                 <li key={page._id}>
                   <Link href={`/${page.slug}`} className="text-background/70 hover:text-primary transition-colors">

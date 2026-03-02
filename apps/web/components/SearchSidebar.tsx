@@ -25,6 +25,8 @@ interface SearchSidebarProps {
     priceMax?: number;
     areaMin?: number;
     areaMax?: number;
+    marlaMin?: number;
+    marlaMax?: number;
     beds?: number;
     baths?: number;
   };
@@ -98,6 +100,8 @@ export default function SearchSidebar({
       priceMax: undefined,
       areaMin: undefined,
       areaMax: undefined,
+      marlaMin: undefined,
+      marlaMax: undefined,
       beds: undefined,
       baths: undefined,
     };
@@ -162,21 +166,21 @@ export default function SearchSidebar({
 
           {/* Area Range */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Area (Sq. Ft.)</Label>
+            <Label className="text-sm font-medium">Area (Marla)</Label>
             <div className="grid grid-cols-1 xs:grid-cols-[1fr,auto,1fr] gap-2 items-center">
               <Input
                 type="number"
                 placeholder="Min"
-                value={localFilters.areaMin || ''}
-                onChange={(e) => updateFilter('areaMin', e.target.value ? Number(e.target.value) : undefined)}
+                value={localFilters.marlaMin || ''}
+                onChange={(e) => updateFilter('marlaMin', e.target.value ? Number(e.target.value) : undefined)}
                 className="h-10 text-sm"
               />
               <span className="text-muted-foreground hidden xs:inline">-</span>
               <Input
                 type="number"
                 placeholder="Max"
-                value={localFilters.areaMax || ''}
-                onChange={(e) => updateFilter('areaMax', e.target.value ? Number(e.target.value) : undefined)}
+                value={localFilters.marlaMax || ''}
+                onChange={(e) => updateFilter('marlaMax', e.target.value ? Number(e.target.value) : undefined)}
                 className="h-10 text-sm"
               />
             </div>

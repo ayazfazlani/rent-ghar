@@ -68,14 +68,14 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
         {/* Purpose Badge with Animation */}
         <div className="absolute top-3 left-3 flex gap-2">
-          <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 animate-in fade-in slide-in-from-left duration-500">
+          <span className="px-2 md:px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 animate-in fade-in slide-in-from-left duration-500">
             {property.purpose === 'buy' ? 'For Sale' : 'For Rent'}
           </span>
         </div>
 
         {/* Type Badge with Animation */}
         <div className="absolute top-3 right-3">
-          <span className="px-3 py-1 bg-background/90 backdrop-blur-md text-foreground text-xs font-medium rounded-full shadow-md transition-all duration-300 group-hover:bg-background group-hover:scale-110 group-hover:shadow-lg animate-in fade-in slide-in-from-right duration-500">
+          <span className="px-2 md:px-3 py-1 bg-background/90 backdrop-blur-md text-foreground text-xs font-medium rounded-full shadow-md transition-all duration-300 group-hover:bg-background group-hover:scale-110 group-hover:shadow-lg animate-in fade-in slide-in-from-right duration-500">
             {property.type}
           </span>
         </div>
@@ -95,17 +95,17 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         </h3>
 
         {/* Location with Icon Animation */}
-        <div className="flex items-center gap-1 text-muted-foreground text-sm mb-4 transition-all duration-300 group-hover:text-foreground">
-          <MapPin className="w-4 h-4 text-primary transition-all duration-300 group-hover:scale-125 group-hover:animate-bounce" />
-          <span className="transition-all duration-300 group-hover:translate-x-1">
+        <div className="flex items-center gap-1.5 text-muted-foreground text-xs md:text-sm mb-4 transition-all duration-300 group-hover:text-foreground">
+          <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary transition-all duration-300 group-hover:scale-125 group-hover:animate-bounce shrink-0" />
+          <span className="transition-all duration-300 group-hover:translate-x-1 line-clamp-1">
             {property.location}, {toTitleCase(property.city)}
           </span>
         </div>
 
         {/* Property Features with Hover Effects */}
         {property.bedrooms > 0 && (
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default">
+          <div className="flex flex-wrap items-center gap-3 md:gap-4 text-[10px] md:text-sm text-muted-foreground mb-4">
+            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default shrink-0">
               <Bed className="w-4 h-4 transition-transform duration-300" />
               <span>{property.bedrooms} Beds</span>
             </div>
@@ -113,20 +113,20 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
               <Bath className="w-4 h-4 transition-transform duration-300" />
               <span>{property.bathrooms} Baths</span>
             </div>
-            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default">
+            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default shrink-0">
               <Maximize className="w-4 h-4 transition-transform duration-300" />
-              <span>{property.area} sq ft</span>
+              <span className="whitespace-nowrap">{property.marla && property.marla > 0 ? `${property.marla} marla` : `${property.area} sq ft`}</span>
             </div>
           </div>
         )}
 
         {/* Price and Contact Section with Enhanced Styling */}
-        <div className="flex items-center justify-between pt-4 border-t border-border group-hover:border-primary/30 transition-colors duration-500">
-          <div className="transition-all duration-300 group-hover:translate-x-1">
-            <p className="text-xs text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
+        <div className="flex items-center justify-between gap-2 pt-4 border-t border-border group-hover:border-primary/30 transition-colors duration-500">
+          <div className="transition-all duration-300 group-hover:translate-x-1 min-w-0">
+            <p className="text-[10px] md:text-xs text-muted-foreground transition-colors duration-300 group-hover:text-foreground truncate uppercase tracking-wider font-semibold">
               {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
             </p>
-            <p className="text-lg font-bold text-primary transition-all duration-300 group-hover:scale-110 origin-left bg-primary/5 px-2 py-0.5 rounded-md inline-block group-hover:bg-primary/10">
+            <p className="text-sm md:text-lg font-bold text-primary transition-all duration-300 group-hover:scale-105 origin-left bg-primary/5 px-2 py-0.5 rounded-md inline-block group-hover:bg-primary/10 whitespace-nowrap">
               Rs. {formatPrice(property.price)}
             </p>
           </div>
@@ -135,7 +135,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           <Button
             size="sm"
             onClick={handleContactClick}
-            className="transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-primary/30 active:scale-95 relative overflow-hidden group/btn"
+            className="hidden md:block h-8 md:h-10 px-3 md:px-6 text-xs md:text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 active:scale-95 relative overflow-hidden group/btn shrink-0"
           >
             <span className="relative z-10">Contact</span>
             {/* Button Shimmer Effect */}

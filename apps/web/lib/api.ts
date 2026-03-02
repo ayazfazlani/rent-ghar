@@ -136,6 +136,8 @@ export const propertyApi = {
     priceMax?: number;
     areaMin?: number;
     areaMax?: number;
+    marlaMin?: number;
+    marlaMax?: number;
     beds?: number;
     baths?: number;
     type?: string;
@@ -154,6 +156,8 @@ export const propertyApi = {
     if (filters?.priceMax) params.append("priceMax", filters.priceMax.toString());
     if (filters?.areaMin) params.append("areaMin", filters.areaMin.toString());
     if (filters?.areaMax) params.append("areaMax", filters.areaMax.toString());
+    if (filters?.marlaMin) params.append("marlaMin", filters.marlaMin.toString());
+    if (filters?.marlaMax) params.append("marlaMax", filters.marlaMax.toString());
     if (filters?.beds) params.append("beds", filters.beds.toString());
     if (filters?.baths) params.append("baths", filters.baths.toString());
     if (filters?.type && filters.type !== 'all') params.append("type", filters.type);

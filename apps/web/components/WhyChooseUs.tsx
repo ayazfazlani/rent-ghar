@@ -34,7 +34,7 @@ const WhyChooseUs = () => {
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">Why Choose Rent-Ghar?</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">Why Choose Property Dealer?</h2>
           <p className="text-gray-600 max-w-2xl mx-auto font-medium">We provide a seamless and secure property experience tailored to the Pakistani market.</p>
         </div>
 

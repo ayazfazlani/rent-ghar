@@ -122,6 +122,8 @@ export class PropertyController {
     @Query('priceMax') priceMax?: string,
     @Query('areaMin') areaMin?: string,
     @Query('areaMax') areaMax?: string,
+    @Query('marlaMin') marlaMin?: string,
+    @Query('marlaMax') marlaMax?: string,
     @Query('beds') beds?: string,
     @Query('baths') baths?: string,
     @Query('type') type?: string,
@@ -139,6 +141,8 @@ export class PropertyController {
       if (priceMax) filters.priceMax = Number(priceMax);
       if (areaMin) filters.areaMin = Number(areaMin);
       if (areaMax) filters.areaMax = Number(areaMax);
+      if (marlaMin) filters.marlaMin = Number(marlaMin);
+      if (marlaMax) filters.marlaMax = Number(marlaMax);
       if (beds) filters.beds = Number(beds);
       if (baths) filters.baths = Number(baths);
       if (type) filters.type = type;

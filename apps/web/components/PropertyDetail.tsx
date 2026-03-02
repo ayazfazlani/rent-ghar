@@ -403,7 +403,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                         {property.type}
                       </span>
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">{property.name}</h1>
+                    <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-3">{property.name}</h1>
                     <div className="flex items-center gap-2 text-muted-foreground mb-4">
                       <MapPin className="w-5 h-5 text-primary" />
                       <span className="text-lg">
@@ -460,7 +460,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     <p className="text-sm text-muted-foreground mb-1">
                       {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
                     </p>
-                    <p className="text-3xl font-bold text-primary">
+                    <p className="text-xl md:text-2xl font-bold text-primary">
                       Rs. {formatPrice(property.price)}
                     </p>
                   </div>
@@ -478,8 +478,8 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                       </div>
                       <div className="text-center">
                         <Maximize className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                        <p className="text-sm font-semibold">{property.area}</p>
-                        <p className="text-xs text-muted-foreground">sq ft</p>
+                        <p className="text-sm font-semibold">{property.marla && property.marla > 0 ? property.marla : property.area}</p>
+                        <p className="text-xs text-muted-foreground">{property.marla && property.marla > 0 ? 'marla' : 'sq ft'}</p>
                       </div>
                     </div>
                   )}
@@ -632,7 +632,9 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                           </tr>
                           <tr>
                             <td className="py-2 text-muted-foreground font-medium">Area</td>
-                            <td className="py-2 text-right font-semibold">{property.area} sq ft</td>
+                            <td className="py-2 text-right font-semibold">
+                              {property.marla && property.marla > 0 ? `${property.marla} marla` : `${property.area} sq ft`}
+                            </td>
                           </tr>
                           <tr>
                             <td className="py-2 text-muted-foreground font-medium">Bedrooms</td>
@@ -674,7 +676,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                       className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
                       dangerouslySetInnerHTML={{
                         __html: property.description || `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${toTitleCase(property.location)}, ${toTitleCase(property.city)}. 
-                        It offers ${property.bedrooms} spacious bedrooms and ${property.bathrooms} modern bathrooms spread across ${property.area} square feet. 
+                        It offers ${property.bedrooms} spacious bedrooms and ${property.bathrooms} modern bathrooms spread across ${property.marla && property.marla > 0 ? `${property.marla} marla` : `${property.area} square feet`}. 
                         Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort for your lifestyle needs.
                         
                         The property is situated in a well-developed neighborhood with easy access to schools, hospitals, shopping centers, and public transport. 
@@ -830,8 +832,8 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
           </div>
           {/* Related Properties Matching Area - Horizontal Scroll */}
           {relatedByArea.length > 0 && (
-            <section className="pt-8 border-t">
-              <div className="flex items-center justify-between mb-6">
+            <section className="pt-8 border-t max-w-min">
+              <div className="flex items-center justify-between mb-6 ">
                 <h2 className="text-xl md:text-2xl font-bold">
                   Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
                 </h2>

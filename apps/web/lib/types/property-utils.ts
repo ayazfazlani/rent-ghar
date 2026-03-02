@@ -23,6 +23,8 @@ export interface BackendProperty {
   bathrooms: number;
   areaSize?: number; // Property size in sq ft (new field)
   price: number;
+  marla?: number;
+  kanal?: number;
   description: string;
   contactNumber: string;
   whatsappNumber?: string;
@@ -99,6 +101,8 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
     bedrooms: backend.bedrooms,
     bathrooms: backend.bathrooms,
     area: backend.areaSize || 0, // Property size in sq ft
+    marla: backend.marla,
+    kenal: backend.kanal,
     purpose: purposeMap[backend.listingType] || 'rent',
     image: getImageUrl(backend.mainPhotoUrl),
     description: backend.description,
