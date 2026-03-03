@@ -21,8 +21,8 @@ export async function generateMetadata(
     if (!cityData) return { title: `Properties for Sale in ${citySlug} ` };
 
     return {
-      title: cityData.metaTitle || `Properties for Sale in ${cityData.name} `,
-      description: cityData.metaDescription || `Find properties for sale in ${cityData.name}. Best real estate listings in Pakistan on Property Dealer.`,
+      title: cityData.saleMetaTitle || cityData.metaTitle || `Properties for Sale in ${cityData.name} `,
+      description: cityData.saleMetaDescription || cityData.metaDescription || `Find properties for sale in ${cityData.name}. Best real estate listings in Pakistan on Property Dealer.`,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
       },

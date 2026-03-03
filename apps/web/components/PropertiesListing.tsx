@@ -618,9 +618,9 @@ export default function PropertiesListing({
           {/* Hero Banner - Responsive sizing */}
           <section className="pt-24 pb-6 md:pt-28 md:pb-8 bg-secondary/50 animate-in fade-in duration-500">
             <div className="container mx-auto px-4">
-              <p className="text-[10px] md:text-sm font-bold text-primary mb-1 uppercase tracking-widest opacity-70">
+              {/* <p className="text-[10px] md:text-sm font-bold text-primary mb-1 uppercase tracking-widest opacity-70">
                 Property Search
-              </p>
+              </p> */}
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
                 {type !== 'all' ? `${type.charAt(0).toUpperCase() + type.slice(1)}s` : 'Properties'}
                 {purpose === 'rent' ? ' for Rent ' : purpose === 'buy' ? ' for Sale ' : ' '}

@@ -22,8 +22,8 @@ export async function generateMetadata(
     if (!cityData) return { title: `Properties in ${citySlug} ` };
 
     return {
-      title: cityData.metaTitle || `Properties for Rent in ${cityData.name} `,
-      description: cityData.metaDescription || `Find the best properties for rent in ${cityData.name}. Browse houses, flats, and more on Property Dealer.`,
+      title: cityData.rentMetaTitle || cityData.metaTitle || `Properties for Rent in ${cityData.name} `,
+      description: cityData.rentMetaDescription || cityData.metaDescription || `Find the best properties for rent in ${cityData.name}. Browse houses, flats, and more on Property Dealer.`,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
       },

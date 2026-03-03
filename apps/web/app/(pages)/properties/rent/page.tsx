@@ -19,8 +19,9 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     try {
       const cityData = await serverApi.getCityByName(cityName);
       if (cityData) {
-        title = cityData.metaTitle ? `For Rent: ${cityData.metaTitle}` : `${type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties'} for Rent in ${cityData.name} `;
-        description = cityData.metaDescription || `Find the best properties for rent in ${cityData.name}. Browse houses, flats, and more on Property Dealer.`;
+        const typeName = type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties';
+        title = cityData.rentMetaTitle || `${typeName} for Rent in ${cityData.name}`;
+        description = cityData.rentMetaDescription || `Find the best ${typeName.toLowerCase()} for rent in ${cityData.name}. Browse houses, flats, and more on Property Dealer.`;
       }
     } catch (e) {
       const formattedCity = cityName.charAt(0).toUpperCase() + cityName.slice(1);

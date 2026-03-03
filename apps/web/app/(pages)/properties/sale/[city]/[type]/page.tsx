@@ -56,10 +56,10 @@ export async function generateMetadata(
   if (isPropertyType && propertyType) {
     const typeCapitalized = propertyType.charAt(0).toUpperCase() + propertyType.slice(1);
     return {
-      title: cityData.metaTitle
-        ? `${typeCapitalized} - ${cityData.metaTitle}`
+      title: cityData.saleMetaTitle || cityData.metaTitle
+        ? `${typeCapitalized} - ${cityData.saleMetaTitle || cityData.metaTitle}`
         : `${typeCapitalized} for Sale in ${cityData.name} `,
-      description: cityData.metaDescription || `Find the best ${propertyType} for sale in ${cityData.name}. Browse latest listings on Property Dealer.`,
+      description: cityData.saleMetaDescription || cityData.metaDescription || `Find the best ${propertyType} for sale in ${cityData.name}. Browse latest listings on Property Dealer.`,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
       },

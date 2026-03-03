@@ -39,7 +39,11 @@ const formSchema = z.object({
   metaDescription: z.string().optional(),
   canonicalUrl: z.string().optional(),
   description: z.string().optional(),
+  rentMetaTitle: z.string().optional(),
+  rentMetaDescription: z.string().optional(),
   rentContent: z.string().optional(),
+  saleMetaTitle: z.string().optional(),
+  saleMetaDescription: z.string().optional(),
   saleContent: z.string().optional(),
   buyContent: z.string().optional(),
   thumbnail: z.string().optional(),
@@ -59,7 +63,11 @@ export default function AddCityPage() {
       metaDescription: "",
       canonicalUrl: "",
       description: "",
+      rentMetaTitle: "",
+      rentMetaDescription: "",
       rentContent: "",
+      saleMetaTitle: "",
+      saleMetaDescription: "",
       saleContent: "",
       buyContent: "",
       thumbnail: "",
@@ -87,7 +95,11 @@ export default function AddCityPage() {
       if (values.metaDescription?.trim()) payload.metaDescription = values.metaDescription.trim();
       if (values.canonicalUrl?.trim()) payload.canonicalUrl = values.canonicalUrl.trim();
       if (values.description?.trim()) payload.description = values.description.trim();
+      if (values.rentMetaTitle?.trim()) payload.rentMetaTitle = values.rentMetaTitle.trim();
+      if (values.rentMetaDescription?.trim()) payload.rentMetaDescription = values.rentMetaDescription.trim();
       if (values.rentContent?.trim()) payload.rentContent = values.rentContent.trim();
+      if (values.saleMetaTitle?.trim()) payload.saleMetaTitle = values.saleMetaTitle.trim();
+      if (values.saleMetaDescription?.trim()) payload.saleMetaDescription = values.saleMetaDescription.trim();
       if (values.saleContent?.trim()) payload.saleContent = values.saleContent.trim();
       if (values.buyContent?.trim()) payload.buyContent = values.buyContent.trim();
       if (values.thumbnail?.trim()) payload.thumbnail = values.thumbnail.trim();
@@ -293,41 +305,101 @@ export default function AddCityPage() {
                 <h3 className="text-lg font-semibold text-gray-700">Specific Content Sections</h3>
                 <p className="text-sm text-gray-500 -mt-4">Define specific content for different property purposes. If left empty, the general description above will be used.</p>
 
-                {/* Rent Content */}
-                <FormField
-                  control={form.control}
-                  name="rentContent"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-blue-600 font-medium">Rent Content (Rich Text)</FormLabel>
-                      <FormControl>
-                        <RichEditor
-                          value={field.value || ""}
-                          onChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Rent Section */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="rentMetaTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-blue-600 font-medium">Rent Meta Title (SEO)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Meta title for rent page" {...field} value={field.value || ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="rentMetaDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-blue-600 font-medium">Rent Meta Description (SEO)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Meta description for rent page" {...field} value={field.value || ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="rentContent"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-blue-600 font-medium">Rent Content (Rich Text)</FormLabel>
+                        <FormControl>
+                          <RichEditor
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                {/* Sale Content */}
-                <FormField
-                  control={form.control}
-                  name="saleContent"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-green-600 font-medium">Sale Content (Rich Text)</FormLabel>
-                      <FormControl>
-                        <RichEditor
-                          value={field.value || ""}
-                          onChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Sale Section */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="saleMetaTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-green-600 font-medium">Sale Meta Title (SEO)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Meta title for sale page" {...field} value={field.value || ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="saleMetaDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-green-600 font-medium">Sale Meta Description (SEO)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Meta description for sale page" {...field} value={field.value || ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="saleContent"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-green-600 font-medium">Sale Content (Rich Text)</FormLabel>
+                        <FormControl>
+                          <RichEditor
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 {/* Buy Content */}
                 <FormField

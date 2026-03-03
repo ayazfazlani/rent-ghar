@@ -6,6 +6,10 @@ export interface CreateCityData {
   country?: string;
   metaTitle?: string;
   metaDescription?: string;
+  rentMetaTitle?: string;
+  rentMetaDescription?: string;
+  saleMetaTitle?: string;
+  saleMetaDescription?: string;
   canonicalUrl?: string;
   description?: string;
   rentContent?: string;
@@ -20,6 +24,10 @@ export interface UpdateCityData {
   country?: string;
   metaTitle?: string;
   metaDescription?: string;
+  rentMetaTitle?: string;
+  rentMetaDescription?: string;
+  saleMetaTitle?: string;
+  saleMetaDescription?: string;
   canonicalUrl?: string;
   description?: string;
   rentContent?: string;

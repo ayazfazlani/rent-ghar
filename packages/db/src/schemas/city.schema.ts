@@ -26,6 +26,18 @@ export class City {
   canonicalUrl?: string;
 
   @Prop({ trim: true })
+  rentMetaTitle?: string;
+
+  @Prop({ trim: true })
+  rentMetaDescription?: string;
+
+  @Prop({ trim: true })
+  saleMetaTitle?: string;
+
+  @Prop({ trim: true })
+  saleMetaDescription?: string;
+
+  @Prop({ trim: true })
   description?: string; // Rich Text
 
   @Prop({ trim: true })

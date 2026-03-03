@@ -838,7 +838,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 <h2 className="text-xl md:text-2xl font-bold">
                   Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
                 </h2>
-                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties/${property.purpose}/${property.city.toLowerCase()}/${property.areaSlug}`)}>
+                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties/${property.purpose === 'buy' ? 'sale' : 'rent'}/${property.city.toLowerCase()}/${property.areaSlug === undefined ? ' ' : property.areaSlug}`)}>
                   View All
                 </Button>
               </div>
