@@ -16,6 +16,7 @@ import { toTitleCase } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 import PropertyCard from '@/components/PropertyCard';
+import { toLowerCase } from 'zod';
 
 const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
   ssr: false,
@@ -837,7 +838,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 <h2 className="text-xl md:text-2xl font-bold">
                   Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
                 </h2>
-                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties?city=${property.city}&search=${property.location}&type=${backendProperty?.propertyType}&purpose=${backendProperty?.listingType}`)}>
+                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties/${property.purpose}/${property.city.toLowerCase()}/${property.areaSlug}`)}>
                   View All
                 </Button>
               </div>
@@ -876,7 +877,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 <h2 className="text-xl md:text-2xl font-bold">
                   Similar {toTitleCase(property.type)}s in {toTitleCase(property.city)}
                 </h2>
-                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties?city=${property.city}&type=${backendProperty?.propertyType}&purpose=${backendProperty?.listingType}`)}>
+                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties/${backendProperty?.listingType}/${property.citySlug || property.city.toLowerCase()}`)}>
                   View All
                 </Button>
               </div>

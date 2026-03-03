@@ -129,7 +129,7 @@ export const propertyApi = {
     cityId?: string;
     cityName?: string;
     areaId?: string;
-
+    areaSlug?: string;
     page?: number;
     limit?: number;
     priceMin?: number;
@@ -188,7 +188,7 @@ export const propertyApi = {
 
   // Get property by slug
   getPropertyBySlug: async (params: { slug: string }) => {
-    const response = await api.get(`/properties/slug/${params.slug}`);
+    const response = await api.get(`/properties/${params.slug}`);
     return response.data;
   },
 

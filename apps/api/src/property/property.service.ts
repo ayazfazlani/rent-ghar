@@ -7,6 +7,7 @@ import { Area } from '@rent-ghar/db/schemas/area.schema';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { IndexNowService } from '../indexnow/indexnow.service';
 import { ConfigService } from '@nestjs/config';
+import { distinct } from 'rxjs';
 
 @Injectable()
 export class PropertyService {
@@ -332,10 +333,10 @@ export class PropertyService {
           try {
             await this.propertyModel.populate(propertiesWithArea, {
               path: 'area',
-              select: 'name',
+              select: 'name areaSlug',
               populate: { 
                 path: 'city', 
-                select: 'name state country'
+                select: 'name areaSlug state country'
               }
             });
           } catch (populateError: any) {
@@ -405,10 +406,10 @@ export class PropertyService {
             try {
               await this.propertyModel.populate(propertiesWithArea, {
                 path: 'area',
-                select: 'name',
+                select: 'name areaSlug',
                 populate: { 
                   path: 'city', 
-                  select: 'name state country'
+                  select: 'name areaSlug state country'
                 }
               });
             } catch (populateError: any) {
@@ -433,10 +434,10 @@ export class PropertyService {
         try {
           return await this.propertyModel.populate(property, {
             path: 'area',
-            select: 'name',
+            select: 'name areaSlug',
             populate: { 
               path: 'city', 
-              select: 'name state country'
+              select: 'name areaSlug state country'
             }
           });
         } catch (populateError) {
@@ -461,10 +462,10 @@ export class PropertyService {
         try {
           return await this.propertyModel.populate(property, {
             path: 'area',
-            select: 'name',
+            select: 'name areaSlug',
             populate: {
               path: 'city',
-              select: 'name state country'
+              select: 'name areaSlug state country'
             }
           });
         } catch (populateError) {
@@ -724,6 +725,7 @@ export class PropertyService {
         try {
             const types = await this.propertyModel.distinct('propertyType').exec();
             const defaults = ['house', 'apartment', 'flat', 'commercial'];
+            
             // Merge defaults and distinct types, remove duplicates
             const allTypes = Array.from(new Set([...defaults, ...types]));
             return allTypes.sort();

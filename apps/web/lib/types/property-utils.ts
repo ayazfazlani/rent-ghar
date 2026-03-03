@@ -10,9 +10,11 @@ export interface BackendProperty {
   area?: {
     _id: string;
     name: string;
+    areaSlug: string;
     city?: {
       _id: string;
       name: string;
+      areaSlug: string;
       state: string;
       country: string;
     };
@@ -68,12 +70,19 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
 
   // Extract city name from area.city or fallback to legacy city field
   let cityName = backend.city || '';
+  let citySlug = '';
   if (backend.area && typeof backend.area === 'object') {
     cityName = backend.area.city?.name || cityName;
+    citySlug = backend.area.city?.areaSlug || '';
+  }
+  // Fallback: derive city slug from city name if not available
+  if (!citySlug && cityName) {
+    citySlug = toSlug(cityName);
   }
 
-  // Extract area name
+  // Extract area name and slug
   const areaName = (backend.area && typeof backend.area === 'object') ? backend.area.name : '';
+  const areaSlug = (backend.area && typeof backend.area === 'object') ? backend.area.areaSlug : '';
 
   // Convert image URL to full URL if it's a relative path
   const getImageUrl = (url?: string): string => {
@@ -96,11 +105,13 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
     slug: backend.slug || toSlug(backend.title),
     type: (typeMap[backend.propertyType] || 'House') as Property['type'],
     city: cityName,
+    citySlug: citySlug,
     location: backend.location,
     price: backend.price,
     bedrooms: backend.bedrooms,
     bathrooms: backend.bathrooms,
     area: backend.areaSize || 0, // Property size in sq ft
+    areaSlug: areaSlug,
     marla: backend.marla,
     kenal: backend.kanal,
     purpose: purposeMap[backend.listingType] || 'rent',

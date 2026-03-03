@@ -4,11 +4,13 @@ export interface Property {
   slug: string;
   type: 'House' | 'Apartment' | 'Flat' | 'Commercial';
   city: string;
+  citySlug?: string;
   location: string;
   price: number;
   bedrooms: number;
   bathrooms: number;
   area: number;
+  areaSlug?: string;
   marla?: number;
   kenal?: number;
   purpose: 'rent' | 'buy';

@@ -118,6 +118,7 @@ export class PropertyController {
     @Query('city') city?: string,
     @Query('areaId') areaId?: string,
 
+    @Query('areaSlug') areaSlug?: string,
     @Query('priceMin') priceMin?: string,
     @Query('priceMax') priceMax?: string,
     @Query('areaMin') areaMin?: string,

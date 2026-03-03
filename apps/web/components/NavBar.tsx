@@ -62,7 +62,7 @@ const Navbar = () => {
 
               {/* Brand Text */}
               <span className="text-xl pr-4 font-bold tracking-tight text-foreground transition-all duration-300 group-hover:text-primary">
-                PropertyDealer
+                Property Dealer
               </span>
             </Link>
 
