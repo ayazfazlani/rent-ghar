@@ -66,9 +66,7 @@ export async function generateMetadata(
       title,
       description,
       alternates: {
-        canonical: cityData.canonicalUrl 
-          ? `${cityData.canonicalUrl.replace(/\/$/, '')}/${type.toLowerCase()}` 
-          : undefined,
+        canonical: `/properties/rent/${citySlug.toLowerCase()}/${type.toLowerCase()}`,
       },
     };
   }

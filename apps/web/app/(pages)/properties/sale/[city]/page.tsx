@@ -32,7 +32,7 @@ export async function generateMetadata(
       title,
       description,
       alternates: {
-        canonical: cityData.canonicalUrl || undefined,
+        canonical: `/properties/sale/${citySlug.toLowerCase()}`,
       },
     };
   } catch (error) {

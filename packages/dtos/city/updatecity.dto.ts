@@ -27,6 +27,22 @@ export class UpdateCityDto {
 
     @IsOptional()
     @IsString()
+    rentMetaTitle?: string;
+
+    @IsOptional()
+    @IsString()
+    rentMetaDescription?: string;
+
+    @IsOptional()
+    @IsString()
+    saleMetaTitle?: string;
+
+    @IsOptional()
+    @IsString()
+    saleMetaDescription?: string;
+
+    @IsOptional()
+    @IsString()
     description?: string;
 
     @IsOptional()

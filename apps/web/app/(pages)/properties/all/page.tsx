@@ -39,9 +39,20 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     }
   }
 
+  let path = `/properties/all`;
+  if (cityName) {
+    path += `/${cityName.toLowerCase()}`;
+    if (type && type !== 'all') {
+      path += `/${type.toLowerCase()}`;
+    }
+  }
+
   return {
     title,
     description,
+    alternates: {
+      canonical: path,
+    },
   };
 }
 
