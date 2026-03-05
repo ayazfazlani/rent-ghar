@@ -724,14 +724,15 @@ export class PropertyService {
     async getPropertyTypes(): Promise<string[]> {
         try {
             const types = await this.propertyModel.distinct('propertyType').exec();
-            const defaults = ['house', 'apartment', 'flat', 'commercial'];
+            const defaults = ['house', 'apartment', 'flat', 'commercial', 'office'];
             
             // Merge defaults and distinct types, remove duplicates
-            const allTypes = Array.from(new Set([...defaults, ...types]));
+            const allTypes = Array.from(new Set([...defaults, ...types]))
+                .filter(t => t.toLowerCase() !== 'warehouse');
             return allTypes.sort();
         } catch (error) {
             console.error('Error fetching property types:', error);
-            return ['house', 'apartment', 'flat', 'commercial'];
+            return ['house', 'apartment', 'flat', 'commercial', 'office'];
         }
     }
 }

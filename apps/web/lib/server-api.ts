@@ -65,11 +65,11 @@ export const serverApi = {
   // Property API
   async getProperties(params: string = ''): Promise<any> {
     const path = params ? `/properties?${params}` : '/properties';
-    return this.get(path, { next: { revalidate: 300 } }); // Cache properties for 5 minutes
+    return this.get(path, { next: { revalidate: 60 } }); // Cache properties for 1 minute
   },
 
   async getTypes(): Promise<string[]> {
-    return this.get('/properties/types', { next: { revalidate: 3600 } }); // Cache types for 1 hour
+    return this.get('/properties/types', { next: { revalidate: 60 } }); // Cache types for 1 minute
   },
 
   async getAreaBySlug(slug: string, cityId?: string): Promise<any> {

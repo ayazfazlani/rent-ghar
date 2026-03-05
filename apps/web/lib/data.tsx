@@ -2,7 +2,7 @@ export interface Property {
   id: string;
   name: string;
   slug: string;
-  type: 'House' | 'Apartment' | 'Flat' | 'Commercial';
+  type: 'House' | 'Apartment' | 'Flat' | 'Commercial' | 'Office' | 'Plot' | 'Land' | 'Shop' | 'Factory' | 'Hotel' | 'Restaurant' | 'Other';
   city: string;
   citySlug?: string;
   location: string;
@@ -466,9 +466,9 @@ export const properties: Property[] = [
   },
   {
     id: '28',
-    name: "Warehouse Space",
-    type: "Commercial",
-    slug: "warehouse-space",
+    name: "Premium Office Space",
+    type: "Office",
+    slug: "premium-office-space",
     city: "Karachi",
     location: "SITE Area",
     price: 200000,
@@ -476,8 +476,8 @@ export const properties: Property[] = [
     bathrooms: 2,
     area: 8000,
     purpose: "rent",
-    image: "https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&q=80",
-    description: "Large warehouse for industrial use"
+    image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&q=80",
+    description: "Large modern office space in prime industrial area"
   },
   {
     id: '29',
@@ -643,4 +643,4 @@ export const hotels: Hotel[] = [
 ];
 
 export const cities = ['Multan', 'Lahore', 'Karachi', 'Islamabad'] as const;
-export const propertyTypes = ['House', 'Apartment', 'Flat', 'Commercial'] as const;
+export const propertyTypes = ['House', 'Apartment', 'Flat', 'Commercial', 'Office', 'Plot', 'Land', 'Shop', 'Factory', 'Hotel', 'Restaurant', 'Other'] as const;

@@ -140,7 +140,6 @@ export default function EditProperty() {
           'land': 'Land',
           'shop': 'Shop',
           'office': 'Office',
-          'warehouse': 'Warehouse',
           'factory': 'Factory',
           'hotel': 'Hotel',
           'restaurant': 'Restaurant',
@@ -356,7 +355,6 @@ export default function EditProperty() {
       'Land': 'land',
       'Shop': 'shop',
       'Office': 'office',
-      'Warehouse': 'warehouse',
       'Factory': 'factory',
       'Hotel': 'hotel',
       'Restaurant': 'restaurant',
@@ -510,7 +508,6 @@ export default function EditProperty() {
                   <SelectItem value="Land">Land</SelectItem>
                   <SelectItem value="Shop">Shop</SelectItem>
                   <SelectItem value="Office">Office</SelectItem>
-                  <SelectItem value="Warehouse">Warehouse</SelectItem>
                   <SelectItem value="Factory">Factory</SelectItem>
                   <SelectItem value="Hotel">Hotel</SelectItem>
                   <SelectItem value="Restaurant">Restaurant</SelectItem>

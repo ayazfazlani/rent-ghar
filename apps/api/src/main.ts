@@ -31,8 +31,11 @@ async function bootstrap() {
   }
   const allowedOrigins = [
     process.env.APP_URL || 'http://localhost:3000',
+    'http://localhost:3001',
     'http://localhost:3002',
     'http://localhost:3005',
+    'http://localhost:3010',
+    'http://localhost:3011',
     'https://propertydealer.pk',
     'http://propertydealer.pk',
     'https://www.propertydealer.pk',

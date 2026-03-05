@@ -4,7 +4,20 @@ import { Property } from '../data';
 export interface BackendProperty {
   _id: string;
   listingType: 'rent' | 'sale';
-  propertyType: 'house' | 'apartment' | 'flat' | 'commercial';
+  propertyType:
+    | 'house'
+    | 'apartment'
+    | 'flat'
+    | 'commercial'
+    | 'land'
+    | 'shop'
+    | 'office'
+    | 'warehouse'
+    | 'factory'
+    | 'hotel'
+    | 'restaurant'
+    | 'plot'
+    | 'other';
   city?: string; // Legacy field, may not be present
   slug?: string;
   area?: {
@@ -57,6 +70,13 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
     apartment: 'Apartment',
     flat: 'Flat',
     commercial: 'Commercial',
+    land: 'Land',
+    shop: 'Shop',
+    office: 'Office',
+    warehouse: 'Office', // Map warehouse to Office
+    factory: 'Factory',
+    hotel: 'Hotel',
+    restaurant: 'Restaurant',
     plot: 'Plot',
     other: 'Other'
   };

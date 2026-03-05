@@ -21,7 +21,6 @@ export class CreatePropertyDto {
     'land',
     'shop',
     'office',
-    'warehouse',
     'factory',
     'other',
     'hotel',
@@ -36,7 +35,6 @@ export class CreatePropertyDto {
     | 'land'
     | 'shop'
     | 'office'
-    | 'warehouse'
     | 'factory'
     | 'other'
     | 'hotel'

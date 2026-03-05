@@ -249,7 +249,7 @@ export default function AddProperty() {
       'Land': 'land',
       'Shop': 'shop',
       'Office': 'office',
-      'Warehouse': 'warehouse',
+      // 'Warehouse': 'warehouse',
       'Factory': 'factory',
       'Hotel': 'hotel',
       'Restaurant': 'restaurant',
@@ -415,7 +415,7 @@ export default function AddProperty() {
                   <SelectItem value="Land">Land</SelectItem>
                   <SelectItem value="Shop">Shop</SelectItem>
                   <SelectItem value="Office">Office</SelectItem>
-                  <SelectItem value="Warehouse">Warehouse</SelectItem>
+                  {/* <SelectItem value="Warehouse">Warehouse</SelectItem> */}
                   <SelectItem value="Factory">Factory</SelectItem>
                   <SelectItem value="Hotel">Hotel</SelectItem>
                   <SelectItem value="Restaurant">Restaurant</SelectItem>
