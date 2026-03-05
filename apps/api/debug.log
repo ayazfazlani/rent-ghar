@@ -144,3 +144,843 @@ Stack: ForbiddenException: No active subscription found. Please purchase a packa
 [2026-02-21T08:47:18.579Z] Service: Creating property model instance
 [2026-02-21T08:47:18.669Z] Service: Property saved successfully. ID: 6999711653b0ade1e0e50796
 [2026-02-21T08:47:18.670Z] Controller: property created successfully
+[2026-02-21T08:54:43.899Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-21T08:54:43.900Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-21T08:54:43.900Z] Service: Generated slug: test-property-after-issue-resolved
+[2026-02-21T08:54:43.900Z] Service: Creating property model instance
+[2026-02-21T08:54:44.003Z] Service: Property saved successfully. ID: 699972d3cefe64baa49da2e5
+[2026-02-21T08:54:44.003Z] Controller: property created successfully
+[2026-02-23T05:43:37.452Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T05:43:37.454Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T05:43:37.454Z] Service: Generated slug: 10-marla-house-for-rent-in-allama-iqbal-town-town-lahore
+[2026-02-23T05:43:37.454Z] Service: Creating property model instance
+[2026-02-23T05:43:37.556Z] Service: Property saved successfully. ID: 699be9093a53feab430cb5ad
+[2026-02-23T05:43:37.556Z] Controller: property created successfully
+[2026-02-23T05:55:29.839Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T05:55:29.839Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T05:55:29.839Z] Service: Generated slug: 3-marla-lower-portion-for-rent-in-kot-lakhpat-near-ali-park-lahore
+[2026-02-23T05:55:29.839Z] Service: Creating property model instance
+[2026-02-23T05:55:29.931Z] Service: Property saved successfully. ID: 699bebd13a53feab430cb5d1
+[2026-02-23T05:55:29.932Z] Controller: property created successfully
+[2026-02-23T06:03:57.743Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T06:03:57.744Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T06:03:57.744Z] Service: Generated slug: 5-marla-house-for-rent-in-eme-society-lahore
+[2026-02-23T06:03:57.744Z] Service: Creating property model instance
+[2026-02-23T06:03:57.831Z] Service: Property saved successfully. ID: 699bedcd3a53feab430cb5e1
+[2026-02-23T06:03:57.831Z] Controller: property created successfully
+[2026-02-23T06:16:11.816Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T06:16:11.816Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T06:16:11.817Z] Service: Generated slug: 1-bed-apartment-for-rent-in-bahria-town-nishtar-block-lahore
+[2026-02-23T06:16:11.817Z] Service: Creating property model instance
+[2026-02-23T06:16:11.896Z] Service: Property saved successfully. ID: 699bf0ab3a53feab430cb60b
+[2026-02-23T06:16:11.896Z] Controller: property created successfully
+[2026-02-23T06:23:34.816Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-23T06:23:34.817Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-23T06:23:34.817Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-executive-villas-multan
+[2026-02-23T06:23:34.817Z] Service: Creating property model instance
+[2026-02-23T06:23:34.904Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+[2026-02-23T06:23:34.922Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-23T06:26:03.825Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T06:26:03.825Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T06:26:03.825Z] Service: Generated slug: 5-marla-upper-portion-for-rent-in-cavalry-ground-lahore
+[2026-02-23T06:26:03.825Z] Service: Creating property model instance
+[2026-02-23T06:26:03.899Z] Service: Property saved successfully. ID: 699bf2fb3a53feab430cb61f
+[2026-02-23T06:26:03.900Z] Controller: property created successfully
+[2026-02-23T06:35:32.563Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T06:35:32.563Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T06:35:32.563Z] Service: Generated slug: 1-kanal-lower-portion-for-rent-in-formanites-housing-scheme-lahore
+[2026-02-23T06:35:32.563Z] Service: Creating property model instance
+[2026-02-23T06:35:32.664Z] Service: Property saved successfully. ID: 699bf5343a53feab430cb62f
+[2026-02-23T06:35:32.665Z] Controller: property created successfully
+[2026-02-23T06:45:43.932Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T06:45:43.932Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T06:45:43.933Z] Service: Generated slug: 1-bed-furnished-apartment-for-rent-in-bahria-town-sector-e-lahore
+[2026-02-23T06:45:43.933Z] Service: Creating property model instance
+[2026-02-23T06:45:44.024Z] Service: Property saved successfully. ID: 699bf7973a53feab430cb63f
+[2026-02-23T06:45:44.024Z] Controller: property created successfully
+[2026-02-23T06:51:57.431Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T06:51:57.431Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T06:51:57.431Z] Service: Generated slug: 4-marla-lower-portion-for-rent-in-cavalry-extension-lahore
+[2026-02-23T06:51:57.431Z] Service: Creating property model instance
+[2026-02-23T06:51:57.530Z] Service: Property saved successfully. ID: 699bf90d3a53feab430cb64f
+[2026-02-23T06:51:57.530Z] Controller: property created successfully
+[2026-02-23T07:04:17.584Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T07:04:17.584Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T07:04:17.584Z] Service: Generated slug: 5-marla-old-house-for-rent-in-bahria-orchard-phase-1-lahore
+[2026-02-23T07:04:17.584Z] Service: Creating property model instance
+[2026-02-23T07:04:17.678Z] Service: Property saved successfully. ID: 699bfbf13a53feab430cb65f
+[2026-02-23T07:04:17.678Z] Controller: property created successfully
+[2026-02-23T07:11:49.993Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-02-23T07:11:49.993Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-02-23T07:11:49.993Z] Service: Generated slug: 20-marla-house-for-rent-in-eme-society-block-e-lahore
+[2026-02-23T07:11:49.993Z] Service: Creating property model instance
+[2026-02-23T07:11:50.068Z] Service: Property saved successfully. ID: 699bfdb53a53feab430cb66f
+[2026-02-23T07:11:50.068Z] Controller: property created successfully
+[2026-02-24T10:08:18.191Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-24T10:08:18.192Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-24T10:08:18.192Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-executive-villas-multan
+[2026-02-24T10:08:18.192Z] Service: Creating property model instance
+[2026-02-24T10:08:18.263Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+[2026-02-24T10:08:18.265Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-24T10:08:33.764Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-24T10:08:33.765Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-24T10:08:33.765Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-executive-villas-multan
+[2026-02-24T10:08:33.765Z] Service: Creating property model instance
+[2026-02-24T10:08:33.835Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+[2026-02-24T10:08:33.835Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-24T10:34:58.789Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-24T10:34:58.789Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-24T10:34:58.789Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-executive-villas-multan
+[2026-02-24T10:34:58.790Z] Service: Creating property model instance
+[2026-02-24T10:34:58.889Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+[2026-02-24T10:34:58.890Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-24T11:06:25.224Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-24T11:06:25.224Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-24T11:06:25.224Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-executive-villas-multan
+[2026-02-24T11:06:25.224Z] Service: Creating property model instance
+[2026-02-24T11:06:25.307Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+[2026-02-24T11:06:25.308Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-executive-villas-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T08:11:18.030Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:11:18.031Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:11:18.031Z] Service: Generated slug: 5-marla-house-available-for-sale-in-grand-enclave-multan
+[2026-02-25T08:11:18.031Z] Service: Creating property model instance
+[2026-02-25T08:11:18.126Z] Service: Property saved successfully. ID: 699eaea6ce488394e8cd025a
+[2026-02-25T08:11:18.126Z] Controller: property created successfully
+[2026-02-25T08:22:34.770Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:22:34.771Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:22:34.771Z] Service: Generated slug: 5-marla-house-for-sale-in-grand-enclave-multan
+[2026-02-25T08:22:34.771Z] Service: Creating property model instance
+[2026-02-25T08:22:34.855Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+[2026-02-25T08:22:34.857Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T08:22:41.656Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:22:41.656Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:22:41.656Z] Service: Generated slug: 5-marla-house-for-sale-in-grand-enclave-multan
+[2026-02-25T08:22:41.656Z] Service: Creating property model instance
+[2026-02-25T08:22:41.728Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+[2026-02-25T08:22:41.728Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T08:23:36.459Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:23:36.459Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:23:36.459Z] Service: Generated slug: 5-marla-house-for-sale-in-grand-enclave-multan
+[2026-02-25T08:23:36.459Z] Service: Creating property model instance
+[2026-02-25T08:23:36.539Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+[2026-02-25T08:23:36.540Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T08:28:29.754Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:28:29.754Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:28:29.755Z] Service: Generated slug: 5-marla-house-for-sale-in-grand-enclave-multan
+[2026-02-25T08:28:29.755Z] Service: Creating property model instance
+[2026-02-25T08:28:29.838Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+[2026-02-25T08:28:29.838Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T08:29:03.720Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:29:03.720Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:29:03.720Z] Service: Generated slug: 5-marla-house-for-sale-in-grand-enclave-multan
+[2026-02-25T08:29:03.720Z] Service: Creating property model instance
+[2026-02-25T08:29:03.792Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+[2026-02-25T08:29:03.792Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T08:30:56.364Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:30:56.364Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:30:56.364Z] Service: Generated slug: 5-marla-house-for-sale-in-grand-enclave-multan
+[2026-02-25T08:30:56.364Z] Service: Creating property model instance
+[2026-02-25T08:30:56.447Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+[2026-02-25T08:30:56.448Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T08:32:42.448Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:32:42.448Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:32:42.448Z] Service: Generated slug: 5-marla-house-for-sale-in-grand-enclave-multan
+[2026-02-25T08:32:42.448Z] Service: Creating property model instance
+[2026-02-25T08:32:42.520Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+[2026-02-25T08:32:42.520Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T08:33:55.707Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:33:55.707Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:33:55.707Z] Service: Generated slug: 5-marla-house-for-sale-in-grand-enclave-multan
+[2026-02-25T08:33:55.707Z] Service: Creating property model instance
+[2026-02-25T08:33:55.791Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+[2026-02-25T08:33:55.791Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-grand-enclave-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T08:50:00.344Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T08:50:00.344Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T08:50:00.344Z] Service: Generated slug: 4-marla-brand-new-house-for-sale-in-bahadurpur-multan
+[2026-02-25T08:50:00.344Z] Service: Creating property model instance
+[2026-02-25T08:50:00.493Z] Service: Property saved successfully. ID: 699eb7b8ce488394e8cd027d
+[2026-02-25T08:50:00.493Z] Controller: property created successfully
+[2026-02-25T09:12:25.579Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T09:12:25.579Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T09:12:25.579Z] Service: Generated slug: 3-marla-double-storey-house-for-sale-in-northern-bypass-multan
+[2026-02-25T09:12:25.579Z] Service: Creating property model instance
+[2026-02-25T09:12:25.673Z] Service: Property saved successfully. ID: 699ebcf9ce488394e8cd028d
+[2026-02-25T09:12:25.673Z] Controller: property created successfully
+[2026-02-25T09:22:35.277Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T09:22:35.277Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T09:22:35.277Z] Service: Generated slug: 3-marla-house-for-sale-in-ma-jinnah-road-multan
+[2026-02-25T09:22:35.277Z] Service: Creating property model instance
+[2026-02-25T09:22:35.366Z] Service: Property saved successfully. ID: 699ebf5bce488394e8cd029d
+[2026-02-25T09:22:35.366Z] Controller: property created successfully
+[2026-02-25T09:33:14.568Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T09:33:14.568Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T09:33:14.568Z] Service: Generated slug: 3-marla-house-available-in-mattital-road-multan
+[2026-02-25T09:33:14.568Z] Service: Creating property model instance
+[2026-02-25T09:33:14.658Z] Service: Property saved successfully. ID: 699ec1dace488394e8cd02ad
+[2026-02-25T09:33:14.658Z] Controller: property created successfully
+[2026-02-25T09:40:16.794Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T09:40:16.794Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T09:40:16.794Z] Service: Generated slug: 5-marla-single-story-house-for-sale-in-tariq-abad-multan
+[2026-02-25T09:40:16.794Z] Service: Creating property model instance
+[2026-02-25T09:40:16.879Z] Service: Property saved successfully. ID: 699ec380ce488394e8cd02bd
+[2026-02-25T09:40:16.879Z] Controller: property created successfully
+[2026-02-25T09:49:35.091Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T09:49:35.091Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T09:49:35.091Z] Service: Generated slug: 4-marla-house-available-for-sale-in-satellite-town-multan
+[2026-02-25T09:49:35.092Z] Service: Creating property model instance
+[2026-02-25T09:49:35.178Z] Service: Property saved successfully. ID: 699ec5afce488394e8cd02cd
+[2026-02-25T09:49:35.178Z] Controller: property created successfully
+[2026-02-25T10:04:15.913Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T10:04:15.914Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T10:04:15.914Z] Service: Generated slug: 3-5-marla-new-double-story-house-available-for-sale-in-nawabpur-road-multan
+[2026-02-25T10:04:15.914Z] Service: Creating property model instance
+[2026-02-25T10:04:16.004Z] Service: Property saved successfully. ID: 699ec91fce488394e8cd02dd
+[2026-02-25T10:04:16.004Z] Controller: property created successfully
+[2026-02-25T10:09:34.168Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T10:09:34.168Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T10:09:34.168Z] Service: Generated slug: 5-marla-house-for-sale-in-multan-public-school-road-multan
+[2026-02-25T10:09:34.168Z] Service: Creating property model instance
+[2026-02-25T10:09:34.256Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-multan-public-school-road-multan" }
+[2026-02-25T10:09:34.257Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-multan-public-school-road-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-multan-public-school-road-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-25T10:20:43.801Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T10:20:43.801Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T10:20:43.801Z] Service: Generated slug: 6-marla-house-available-for-sale-in-bosan-road-multan
+[2026-02-25T10:20:43.801Z] Service: Creating property model instance
+[2026-02-25T10:20:43.892Z] Service: Property saved successfully. ID: 699eccfbce488394e8cd033c
+[2026-02-25T10:20:43.892Z] Controller: property created successfully
+[2026-02-25T10:26:32.339Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-25T10:26:32.339Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-25T10:26:32.339Z] Service: Generated slug: 5-marla-new-double-story-house-available-for-sale-in-new-shalimar-colony-multan
+[2026-02-25T10:26:32.339Z] Service: Creating property model instance
+[2026-02-25T10:26:32.426Z] Service: Property saved successfully. ID: 699ece58ce488394e8cd0354
+[2026-02-25T10:26:32.426Z] Controller: property created successfully
+[2026-02-27T08:41:44.470Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T08:41:44.470Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T08:41:44.470Z] Service: Generated slug: 10-marla-sami-commercial-house-for-sale-in-abdali-road-multan
+[2026-02-27T08:41:44.470Z] Service: Creating property model instance
+[2026-02-27T08:41:44.568Z] Service: Property saved successfully. ID: 69a158c8659500af3c1c16d8
+[2026-02-27T08:41:44.568Z] Controller: property created successfully
+[2026-02-27T09:12:13.927Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T09:12:13.928Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T09:12:13.928Z] Service: Generated slug: 7-5-marla-house-for-sale-in-buch-executive-villas-phase-1-multan
+[2026-02-27T09:12:13.928Z] Service: Creating property model instance
+[2026-02-27T09:12:14.023Z] Service: Property saved successfully. ID: 69a15fedb39ab7143dcd72be
+[2026-02-27T09:12:14.023Z] Controller: property created successfully
+[2026-02-27T09:20:26.036Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T09:20:26.036Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T09:20:26.036Z] Service: Generated slug: 1-kanal-plot-for-sale-in-dha-phase-1-sector-d-multan
+[2026-02-27T09:20:26.036Z] Service: Creating property model instance
+[2026-02-27T09:20:26.130Z] Service: Property saved successfully. ID: 69a161dacb18e60441e5d76d
+[2026-02-27T09:20:26.131Z] Controller: property created successfully
+[2026-02-27T09:27:54.140Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T09:27:54.140Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T09:27:54.140Z] Service: Generated slug: 21-marla-house-for-sale-in-royal-orchard-royal-orchard-block-c-multan
+[2026-02-27T09:27:54.140Z] Service: Creating property model instance
+[2026-02-27T09:27:54.224Z] Service: Property saved successfully. ID: 69a1639aab51efed0ce0b433
+[2026-02-27T09:27:54.224Z] Controller: property created successfully
+[2026-02-27T09:39:23.381Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T09:39:23.381Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T09:39:23.381Z] Service: Generated slug: 1-kanal-furnished-house-for-sale-in-dha-phase-1-sector-m-multan
+[2026-02-27T09:39:23.382Z] Service: Creating property model instance
+[2026-02-27T09:39:23.465Z] Service: Property saved successfully. ID: 69a1664bab51efed0ce0b4bb
+[2026-02-27T09:39:23.465Z] Controller: property created successfully
+[2026-02-27T09:52:32.910Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T09:52:32.910Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T09:52:32.910Z] Service: Generated slug: 20-marla-house-for-sale-in-royal-orchard-multan
+[2026-02-27T09:52:32.910Z] Service: Creating property model instance
+[2026-02-27T09:52:32.994Z] Service: Property saved successfully. ID: 69a16960ab51efed0ce0b594
+[2026-02-27T09:52:32.994Z] Controller: property created successfully
+[2026-02-27T10:03:18.315Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T10:03:18.315Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T10:03:18.315Z] Service: Generated slug: 24-marla-furnished-house-for-sale-in-royal-orchard-multan
+[2026-02-27T10:03:18.315Z] Service: Creating property model instance
+[2026-02-27T10:03:18.409Z] Service: Property saved successfully. ID: 69a16be6ab51efed0ce0b5ae
+[2026-02-27T10:03:18.409Z] Controller: property created successfully
+[2026-02-27T10:16:52.368Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T10:16:52.368Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T10:16:52.368Z] Service: Generated slug: 30-marla-corner-house-for-sale-in-dha-phase-1-sector-m-multan
+[2026-02-27T10:16:52.368Z] Service: Creating property model instance
+[2026-02-27T10:16:52.466Z] Service: Property saved successfully. ID: 69a16f14ab51efed0ce0b5cf
+[2026-02-27T10:16:52.466Z] Controller: property created successfully
+[2026-02-27T10:25:53.373Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T10:25:53.374Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T10:25:53.374Z] Service: Generated slug: 10-marla-house-for-sale-in-wapda-town-phase-1-block-a-multan
+[2026-02-27T10:25:53.374Z] Service: Creating property model instance
+[2026-02-27T10:25:53.460Z] Service: Property saved successfully. ID: 69a17131ab51efed0ce0b5ef
+[2026-02-27T10:25:53.460Z] Controller: property created successfully
+[2026-02-27T10:34:04.372Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T10:34:04.372Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T10:34:04.372Z] Service: Generated slug: 12-marla-double-storey-house-for-sale-in-shalimar-colony-multan
+[2026-02-27T10:34:04.372Z] Service: Creating property model instance
+[2026-02-27T10:34:04.461Z] Service: Property saved successfully. ID: 69a1731cab51efed0ce0b60f
+[2026-02-27T10:34:04.462Z] Controller: property created successfully
+[2026-02-27T10:46:27.855Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T10:46:27.855Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T10:46:27.855Z] Service: Generated slug: 5-marla-ultra-modern-house-available-for-rent-in-buch-executive-villas-multan
+[2026-02-27T10:46:27.855Z] Service: Creating property model instance
+[2026-02-27T10:46:27.951Z] Service: Property saved successfully. ID: 69a17603ab51efed0ce0b61b
+[2026-02-27T10:46:27.951Z] Controller: property created successfully
+[2026-02-27T10:55:53.019Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T10:55:53.019Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T10:55:53.019Z] Service: Generated slug: 10-marla-brand-new-house-available-for-rent-in-dha-phase-1-sector-v-multan
+[2026-02-27T10:55:53.019Z] Service: Creating property model instance
+[2026-02-27T10:55:53.110Z] Service: Property saved successfully. ID: 69a17839ab51efed0ce0b62b
+[2026-02-27T10:55:53.110Z] Controller: property created successfully
+[2026-02-27T11:03:10.785Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T11:03:10.785Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T11:03:10.786Z] Service: Generated slug: 5-marla-brand-new-double-story-house-for-rent-in-royal-orchard-multan
+[2026-02-27T11:03:10.786Z] Service: Creating property model instance
+[2026-02-27T11:03:10.875Z] Service: Property saved successfully. ID: 69a179eeab51efed0ce0b637
+[2026-02-27T11:03:10.875Z] Controller: property created successfully
+[2026-02-27T11:11:22.197Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T11:11:22.197Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T11:11:22.197Z] Service: Generated slug: 5-marla-double-story-house-available-for-rent-in-buch-executive-villas-multan
+[2026-02-27T11:11:22.197Z] Service: Creating property model instance
+[2026-02-27T11:11:22.288Z] Service: Property saved successfully. ID: 69a17bdaab51efed0ce0b643
+[2026-02-27T11:11:22.288Z] Controller: property created successfully
+[2026-02-27T11:19:44.635Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T11:19:44.635Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T11:19:44.635Z] Service: Generated slug: 2-kanal-furnished-farm-house-for-rent-in-bosan-road-multan
+[2026-02-27T11:19:44.635Z] Service: Creating property model instance
+[2026-02-27T11:19:44.725Z] Service: Property saved successfully. ID: 69a17dd0ab51efed0ce0b64f
+[2026-02-27T11:19:44.725Z] Controller: property created successfully
+[2026-02-27T11:27:30.057Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-27T11:27:30.057Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-27T11:27:30.057Z] Service: Generated slug: 20-marla-house-for-rent-in-northern-bypass-multan
+[2026-02-27T11:27:30.057Z] Service: Creating property model instance
+[2026-02-27T11:27:30.145Z] Service: Property saved successfully. ID: 69a17fa2ab51efed0ce0b65b
+[2026-02-27T11:27:30.145Z] Controller: property created successfully
+[2026-02-28T08:07:22.540Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T08:07:22.542Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T08:07:22.542Z] Service: Generated slug: 20-marla-house-for-sale-in-khan-village-ii-multan
+[2026-02-28T08:07:22.542Z] Service: Creating property model instance
+[2026-02-28T08:07:22.637Z] Service: Property saved successfully. ID: 69a2a23a115c68e4af5aab18
+[2026-02-28T08:07:22.638Z] Controller: property created successfully
+[2026-02-28T08:19:43.558Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T08:19:43.558Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T08:19:43.558Z] Service: Generated slug: 11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan
+[2026-02-28T08:19:43.558Z] Service: Creating property model instance
+[2026-02-28T08:19:43.659Z] Service: Property saved successfully. ID: 69a2a51f115c68e4af5aab28
+[2026-02-28T08:19:43.660Z] Controller: property created successfully
+[2026-02-28T08:28:04.715Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T08:28:04.715Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T08:28:04.715Z] Service: Generated slug: 12-marla-brand-new-house-available-for-sale-in-fatima-avenue-multan
+[2026-02-28T08:28:04.715Z] Service: Creating property model instance
+[2026-02-28T08:28:04.810Z] Service: Property saved successfully. ID: 69a2a714115c68e4af5aab39
+[2026-02-28T08:28:04.810Z] Controller: property created successfully
+[2026-02-28T08:53:24.848Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T08:53:24.848Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T08:53:24.848Z] Service: Generated slug: 11-marla-house-available-for-sale-in-kacheri-road-multan
+[2026-02-28T08:53:24.848Z] Service: Creating property model instance
+[2026-02-28T08:53:24.940Z] Service: Property saved successfully. ID: 69a2ad04115c68e4af5aab5d
+[2026-02-28T08:53:24.940Z] Controller: property created successfully
+[2026-02-28T09:06:14.517Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T09:06:14.517Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T09:06:14.517Z] Service: Generated slug: 5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan
+[2026-02-28T09:06:14.517Z] Service: Creating property model instance
+[2026-02-28T09:06:14.609Z] Service: Property saved successfully. ID: 69a2b006115c68e4af5aab6a
+[2026-02-28T09:06:14.609Z] Controller: property created successfully
+[2026-02-28T09:14:43.564Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T09:14:43.564Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T09:14:43.564Z] Service: Generated slug: 5-marla-house-for-sale-in-atc-villas-multan
+[2026-02-28T09:14:43.564Z] Service: Creating property model instance
+[2026-02-28T09:14:43.647Z] Service: Property saved successfully. ID: 69a2b203115c68e4af5aabba
+[2026-02-28T09:14:43.647Z] Controller: property created successfully
+[2026-02-28T10:03:06.528Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T10:03:06.528Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T10:03:06.528Z] Service: Generated slug: 5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan
+[2026-02-28T10:03:06.528Z] Service: Creating property model instance
+[2026-02-28T10:03:06.617Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan" }
+[2026-02-28T10:03:06.630Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-28T10:03:09.634Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T10:03:09.634Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T10:03:09.634Z] Service: Generated slug: 5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan
+[2026-02-28T10:03:09.635Z] Service: Creating property model instance
+[2026-02-28T10:03:09.706Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan" }
+[2026-02-28T10:03:09.707Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-02-28T10:27:21.763Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T10:27:21.763Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T10:27:21.763Z] Service: Generated slug: 10-marla-plot-for-sale-in-dha-phase-1-sector-u-block-1-multan
+[2026-02-28T10:27:21.763Z] Service: Creating property model instance
+[2026-02-28T10:27:21.855Z] Service: Property saved successfully. ID: 69a2c309115c68e4af5aac8d
+[2026-02-28T10:27:21.855Z] Controller: property created successfully
+[2026-02-28T10:34:52.681Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T10:34:52.681Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T10:34:52.681Z] Service: Generated slug: 20-marla-residential-plot-available-in-dha-phase-1-sector-u-multan
+[2026-02-28T10:34:52.681Z] Service: Creating property model instance
+[2026-02-28T10:34:52.768Z] Service: Property saved successfully. ID: 69a2c4cc115c68e4af5aac9d
+[2026-02-28T10:34:52.769Z] Controller: property created successfully
+[2026-02-28T10:48:16.152Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T10:48:16.152Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T10:48:16.152Z] Service: Generated slug: 10-marla-double-storey-house-for-sale-in-dream-garden-multan
+[2026-02-28T10:48:16.153Z] Service: Creating property model instance
+[2026-02-28T10:48:16.245Z] Service: Property saved successfully. ID: 69a2c7f0115c68e4af5aacbc
+[2026-02-28T10:48:16.245Z] Controller: property created successfully
+[2026-02-28T11:01:41.044Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-02-28T11:01:41.044Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-02-28T11:01:41.044Z] Service: Generated slug: 8-marla-brand-new-house-available-for-sale-in-dream-garden-multan
+[2026-02-28T11:01:41.044Z] Service: Creating property model instance
+[2026-02-28T11:01:41.124Z] Service: Property saved successfully. ID: 69a2cb15115c68e4af5aacd3
+[2026-02-28T11:01:41.124Z] Controller: property created successfully
+[2026-03-02T08:45:53.503Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T08:45:53.505Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T08:45:53.505Z] Service: Generated slug: 10-marla-brand-new-double-story-house-for-rent-in-royal-orchard-multan
+[2026-03-02T08:45:53.505Z] Service: Creating property model instance
+[2026-03-02T08:45:53.599Z] Service: Property saved successfully. ID: 69a54e4105975ad1e0a8666f
+[2026-03-02T08:45:53.599Z] Controller: property created successfully
+[2026-03-02T08:56:04.883Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T08:56:04.883Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T08:56:04.883Z] Service: Generated slug: 10-marla-house-for-sale-in-buch-villas-phase-2-manik-block-multan
+[2026-03-02T08:56:04.883Z] Service: Creating property model instance
+[2026-03-02T08:56:04.964Z] Service: Property saved successfully. ID: 69a550a405975ad1e0a867d8
+[2026-03-02T08:56:04.964Z] Controller: property created successfully
+[2026-03-02T09:05:07.761Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T09:05:07.761Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T09:05:07.761Z] Service: Generated slug: 10-marla-house-for-sale-in-buch-villas-phase-2-afzal-block-multan
+[2026-03-02T09:05:07.761Z] Service: Creating property model instance
+[2026-03-02T09:05:07.851Z] Service: Property saved successfully. ID: 69a552c305975ad1e0a868db
+[2026-03-02T09:05:07.851Z] Controller: property created successfully
+[2026-03-02T09:28:35.781Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T09:28:35.781Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T09:28:35.782Z] Service: Generated slug: 10-marla-house-for-sale-in-buch-villas-phase-2-afzal-block-multan
+[2026-03-02T09:28:35.782Z] Service: Creating property model instance
+[2026-03-02T09:28:35.861Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "10-marla-house-for-sale-in-buch-villas-phase-2-afzal-block-multan" }
+[2026-03-02T09:28:35.868Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "10-marla-house-for-sale-in-buch-villas-phase-2-afzal-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "10-marla-house-for-sale-in-buch-villas-phase-2-afzal-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-02T09:39:58.547Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T09:39:58.547Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T09:39:58.548Z] Service: Generated slug: 6-marla-house-for-sale-in-buch-executive-villas-phase-1-multan
+[2026-03-02T09:39:58.548Z] Service: Creating property model instance
+[2026-03-02T09:39:58.642Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "6-marla-house-for-sale-in-buch-executive-villas-phase-1-multan" }
+[2026-03-02T09:39:58.643Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "6-marla-house-for-sale-in-buch-executive-villas-phase-1-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "6-marla-house-for-sale-in-buch-executive-villas-phase-1-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-02T09:44:22.811Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T09:44:22.811Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T09:44:22.811Z] Service: Generated slug: 6-marla-house-for-sale-in-buch-executive-villas-phase-1-multan
+[2026-03-02T09:44:22.811Z] Service: Creating property model instance
+[2026-03-02T09:44:22.895Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "6-marla-house-for-sale-in-buch-executive-villas-phase-1-multan" }
+[2026-03-02T09:44:22.896Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "6-marla-house-for-sale-in-buch-executive-villas-phase-1-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "6-marla-house-for-sale-in-buch-executive-villas-phase-1-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-02T10:19:09.415Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T10:19:09.415Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T10:19:09.415Z] Service: Generated slug: 5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan
+[2026-03-02T10:19:09.415Z] Service: Creating property model instance
+[2026-03-02T10:19:09.503Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan" }
+[2026-03-02T10:19:09.504Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-brand-new-double-story-house-for-sale-in-royal-orchard-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-02T10:32:13.451Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T10:32:13.451Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T10:32:13.451Z] Service: Generated slug: 7-marla-house-available-for-sale-in-buch-executive-villas-multan
+[2026-03-02T10:32:13.451Z] Service: Creating property model instance
+[2026-03-02T10:32:13.542Z] Service: Property saved successfully. ID: 69a5672d6918708e800dfec4
+[2026-03-02T10:32:13.542Z] Controller: property created successfully
+[2026-03-02T10:39:22.818Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T10:39:22.818Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T10:39:22.818Z] Service: Generated slug: 5-marla-double-story-house-for-rent-in-buch-executive-villas-multan
+[2026-03-02T10:39:22.818Z] Service: Creating property model instance
+[2026-03-02T10:39:22.903Z] Service: Property saved successfully. ID: 69a568da6918708e800dfee1
+[2026-03-02T10:39:22.904Z] Controller: property created successfully
+[2026-03-02T10:46:28.474Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T10:46:28.474Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T10:46:28.474Z] Service: Generated slug: 8-marla-double-storey-house-for-rent-in-buch-executive-villas-multan
+[2026-03-02T10:46:28.474Z] Service: Creating property model instance
+[2026-03-02T10:46:28.547Z] Service: Property saved successfully. ID: 69a56a846918708e800dffbb
+[2026-03-02T10:46:28.547Z] Controller: property created successfully
+[2026-03-02T10:57:52.029Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T10:57:52.030Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T10:57:52.030Z] Service: Generated slug: 7-5-marla-house-for-rent-in-buch-executive-villas-multan
+[2026-03-02T10:57:52.030Z] Service: Creating property model instance
+[2026-03-02T10:57:52.122Z] Service: Property saved successfully. ID: 69a56d306918708e800e00cc
+[2026-03-02T10:57:52.122Z] Controller: property created successfully
+[2026-03-02T11:05:37.207Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T11:05:37.207Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T11:05:37.207Z] Service: Generated slug: 20-marla-double-storyhouse-for-rent-in-model-town-block-b-multan
+[2026-03-02T11:05:37.207Z] Service: Creating property model instance
+[2026-03-02T11:05:37.293Z] Service: Property saved successfully. ID: 69a56f016918708e800e0105
+[2026-03-02T11:05:37.293Z] Controller: property created successfully
+[2026-03-02T11:16:46.969Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T11:16:46.970Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T11:16:46.970Z] Service: Generated slug: 12-marla-house-available-for-rent-in-dha-villas-multan
+[2026-03-02T11:16:46.970Z] Service: Creating property model instance
+[2026-03-02T11:16:47.062Z] Service: Property saved successfully. ID: 69a5719e6918708e800e0124
+[2026-03-02T11:16:47.062Z] Controller: property created successfully
+[2026-03-02T11:32:22.925Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T11:32:22.925Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T11:32:22.925Z] Service: Generated slug: 20-marla-house-for-rent-in-northern-bypass-multan
+[2026-03-02T11:32:22.925Z] Service: Creating property model instance
+[2026-03-02T11:32:23.015Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "20-marla-house-for-rent-in-northern-bypass-multan" }
+[2026-03-02T11:32:23.016Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "20-marla-house-for-rent-in-northern-bypass-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "20-marla-house-for-rent-in-northern-bypass-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-02T11:40:23.669Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-02T11:40:23.669Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-02T11:40:23.669Z] Service: Generated slug: 5-marla-upper-portion-for-rent-in-wapda-town-phase-2-block-n-multan
+[2026-03-02T11:40:23.669Z] Service: Creating property model instance
+[2026-03-02T11:40:23.744Z] Service: Property saved successfully. ID: 69a577276918708e800e016a
+[2026-03-02T11:40:23.745Z] Controller: property created successfully
+[2026-03-03T07:17:06.356Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T07:17:06.357Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T07:17:06.357Z] Service: Generated slug: 8-marla-house-for-sale-in-buch-executive-villas-multan
+[2026-03-03T07:17:06.357Z] Service: Creating property model instance
+[2026-03-03T07:17:06.449Z] Service: Property saved successfully. ID: 69a68af20e7c3c609015bd85
+[2026-03-03T07:17:06.449Z] Controller: property created successfully
+[2026-03-03T07:31:11.936Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T07:31:11.936Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T07:31:11.936Z] Service: Generated slug: 7-marla-house-for-sale-in-teachers-colony-multan
+[2026-03-03T07:31:11.936Z] Service: Creating property model instance
+[2026-03-03T07:31:12.030Z] Service: Property saved successfully. ID: 69a68e3f0e7c3c609015bd95
+[2026-03-03T07:31:12.030Z] Controller: property created successfully
+[2026-03-03T08:46:50.755Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T08:46:50.756Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T08:46:50.756Z] Service: Generated slug: 7-marla-available-for-sale-in-buch-executive-villas-multan
+[2026-03-03T08:46:50.756Z] Service: Creating property model instance
+[2026-03-03T08:46:50.855Z] Service: Property saved successfully. ID: 69a69ffa0e7c3c609015be20
+[2026-03-03T08:46:50.855Z] Controller: property created successfully
+[2026-03-03T08:57:03.616Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T08:57:03.616Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T08:57:03.616Z] Service: Generated slug: 2-marla-house-for-sale-in-gulgasht-colony-multan
+[2026-03-03T08:57:03.616Z] Service: Creating property model instance
+[2026-03-03T08:57:03.704Z] Service: Property saved successfully. ID: 69a6a25f0e7c3c609015be3e
+[2026-03-03T08:57:03.704Z] Controller: property created successfully
+[2026-03-03T09:09:28.851Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T09:09:28.851Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T09:09:28.851Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-manik-block-multan
+[2026-03-03T09:09:28.851Z] Service: Creating property model instance
+[2026-03-03T09:09:28.938Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-manik-block-multan" }
+[2026-03-03T09:09:28.947Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-manik-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-manik-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T09:34:06.553Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T09:34:06.553Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T09:34:06.553Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan
+[2026-03-03T09:34:06.553Z] Service: Creating property model instance
+[2026-03-03T09:34:06.652Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+[2026-03-03T09:34:06.654Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T09:34:39.179Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T09:34:39.179Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T09:34:39.179Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan
+[2026-03-03T09:34:39.179Z] Service: Creating property model instance
+[2026-03-03T09:34:39.251Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+[2026-03-03T09:34:39.252Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T09:34:41.724Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T09:34:41.725Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T09:34:41.725Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan
+[2026-03-03T09:34:41.725Z] Service: Creating property model instance
+[2026-03-03T09:34:41.796Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+[2026-03-03T09:34:41.797Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T09:34:44.161Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T09:34:44.161Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T09:34:44.161Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan
+[2026-03-03T09:34:44.161Z] Service: Creating property model instance
+[2026-03-03T09:34:44.233Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+[2026-03-03T09:34:44.234Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T09:34:49.285Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T09:34:49.285Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T09:34:49.285Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan
+[2026-03-03T09:34:49.285Z] Service: Creating property model instance
+[2026-03-03T09:34:49.358Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+[2026-03-03T09:34:49.358Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T09:34:51.686Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T09:34:51.686Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T09:34:51.686Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan
+[2026-03-03T09:34:51.686Z] Service: Creating property model instance
+[2026-03-03T09:34:51.758Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+[2026-03-03T09:34:51.759Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T09:35:46.406Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T09:35:46.406Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T09:35:46.406Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan
+[2026-03-03T09:35:46.406Z] Service: Creating property model instance
+[2026-03-03T09:35:46.480Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+[2026-03-03T09:35:46.480Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T09:56:33.710Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T09:56:33.710Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T09:56:33.710Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block
+[2026-03-03T09:56:33.710Z] Service: Creating property model instance
+[2026-03-03T09:56:33.805Z] Service: Property saved successfully. ID: 69a6b0510e7c3c609015bf2e
+[2026-03-03T09:56:33.805Z] Controller: property created successfully
+[2026-03-03T10:08:36.235Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T10:08:36.235Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T10:08:36.235Z] Service: Generated slug: 11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan
+[2026-03-03T10:08:36.235Z] Service: Creating property model instance
+[2026-03-03T10:08:36.322Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+[2026-03-03T10:08:36.323Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T10:08:40.649Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T10:08:40.649Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T10:08:40.649Z] Service: Generated slug: 11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan
+[2026-03-03T10:08:40.649Z] Service: Creating property model instance
+[2026-03-03T10:08:40.720Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+[2026-03-03T10:08:40.721Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T10:09:39.008Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T10:09:39.008Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T10:09:39.008Z] Service: Generated slug: 11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan
+[2026-03-03T10:09:39.008Z] Service: Creating property model instance
+[2026-03-03T10:09:39.081Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+[2026-03-03T10:09:39.081Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T10:14:58.866Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T10:14:58.866Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T10:14:58.866Z] Service: Generated slug: 11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan
+[2026-03-03T10:14:58.866Z] Service: Creating property model instance
+[2026-03-03T10:14:58.936Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+[2026-03-03T10:14:58.937Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "11-marla-tripple-storey-house-for-sale-in-bukhari-colony-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T10:20:16.021Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T10:20:16.021Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T10:20:16.021Z] Service: Generated slug: 11-marla-house-for-sale-in-bukhari-colony-multan
+[2026-03-03T10:20:16.021Z] Service: Creating property model instance
+[2026-03-03T10:20:16.110Z] Service: Property saved successfully. ID: 69a6b5e00e7c3c609015bf8a
+[2026-03-03T10:20:16.110Z] Controller: property created successfully
+[2026-03-03T10:30:42.673Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T10:30:42.673Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T10:30:42.673Z] Service: Generated slug: 10-marla-double-story-house-for-sale-in-classic-villas-multan
+[2026-03-03T10:30:42.673Z] Service: Creating property model instance
+[2026-03-03T10:30:42.764Z] Service: Property saved successfully. ID: 69a6b8520e7c3c609015bf9a
+[2026-03-03T10:30:42.765Z] Controller: property created successfully
+[2026-03-03T10:49:35.370Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T10:49:35.370Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T10:49:35.370Z] Service: Generated slug: 5-marla-residential-plot-for-sale-in-dha-phase-1-sector-t-multan
+[2026-03-03T10:49:35.370Z] Service: Creating property model instance
+[2026-03-03T10:49:35.460Z] Service: Property saved successfully. ID: 69a6bcbf0e7c3c609015bfbe
+[2026-03-03T10:49:35.460Z] Controller: property created successfully
+[2026-03-03T11:08:15.679Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T11:08:15.680Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T11:08:15.680Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan
+[2026-03-03T11:08:15.680Z] Service: Creating property model instance
+[2026-03-03T11:08:15.767Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+[2026-03-03T11:08:15.768Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T11:20:25.615Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T11:20:25.615Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T11:20:25.615Z] Service: Generated slug: 5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan
+[2026-03-03T11:20:25.615Z] Service: Creating property model instance
+[2026-03-03T11:20:25.705Z] Service Error: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+[2026-03-03T11:20:25.705Z] Controller Error: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+Stack: MongoServerError: E11000 duplicate key error collection: rent-ghar.properties index: slug_1 dup key: { slug: "5-marla-house-for-sale-in-buch-villas-phase-2-hamid-block-multan" }
+    at InsertOneOperation.handleOk (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at tryOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at executeOperation (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+    at Collection.insertOne (/home/propertydealer/htdocs/propertydealer.pk/node_modules/mongodb/src/collection.ts:294:12)
+[2026-03-03T11:26:17.125Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T11:26:17.126Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T11:26:17.126Z] Service: Generated slug: 24-marla-building-for-rent-in-bosan-road-multan
+[2026-03-03T11:26:17.126Z] Service: Creating property model instance
+[2026-03-03T11:26:17.215Z] Service: Property saved successfully. ID: 69a6c5590e7c3c609015bff1
+[2026-03-03T11:26:17.215Z] Controller: property created successfully
+[2026-03-03T11:33:19.535Z] Controller: processing create request for user 6989abe05fa8858b32ba2b36
+[2026-03-03T11:33:19.535Z] Service: Start create. User: 6989abe05fa8858b32ba2b36, Role: ADMIN
+[2026-03-03T11:33:19.535Z] Service: Generated slug: 110-marla-wear-house-for-rent-in-bahawalpur-road-multan
+[2026-03-03T11:33:19.535Z] Service: Creating property model instance
+[2026-03-03T11:33:19.620Z] Service: Property saved successfully. ID: 69a6c6ff0e7c3c609015c001
+[2026-03-03T11:33:19.620Z] Controller: property created successfully
+[2026-03-05T08:32:47.855Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-03-05T08:32:47.855Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-03-05T08:32:47.855Z] Service: Generated slug: 7-marla-house-for-sale-in-jinnah-gardens-phase-1-islamabad
+[2026-03-05T08:32:47.855Z] Service: Creating property model instance
+[2026-03-05T08:32:47.939Z] Service: Property saved successfully. ID: 69a93faf639fb0c1d5653626
+[2026-03-05T08:32:47.940Z] Controller: property created successfully
+[2026-03-05T08:51:32.235Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-03-05T08:51:32.236Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-03-05T08:51:32.236Z] Service: Generated slug: 10-marla-double-unit-house-for-rent-in-multi-gardens-islamabad
+[2026-03-05T08:51:32.236Z] Service: Creating property model instance
+[2026-03-05T08:51:32.315Z] Service: Property saved successfully. ID: 69a94414639fb0c1d5653638
+[2026-03-05T08:51:32.315Z] Controller: property created successfully
+[2026-03-05T09:07:55.802Z] Controller: processing create request for user 69958f43a74095809a22577b
+[2026-03-05T09:07:55.802Z] Service: Start create. User: 69958f43a74095809a22577b, Role: ADMIN
+[2026-03-05T09:07:55.802Z] Service: Generated slug: 5-marla-house-for-sale-in-faisal-town-phase-1-islamabad
+[2026-03-05T09:07:55.802Z] Service: Creating property model instance
+[2026-03-05T09:07:55.893Z] Service: Property saved successfully. ID: 69a947eb639fb0c1d565365b
+[2026-03-05T09:07:55.894Z] Controller: property created successfully
