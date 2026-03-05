@@ -155,7 +155,7 @@ export default function PropertiesListing({
     if (allPropertyTypes && allPropertyTypes.length > 0) {
       return allPropertyTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1)).sort();
     }
-    const validTypes: Property['type'][] = ['House', 'Apartment', 'Flat', 'Commercial'];
+    const validTypes: Property['type'][] = ['House', 'Apartment', 'Flat', 'Commercial', 'Office', 'Plot', 'Land', 'Shop', 'Factory', 'Hotel', 'Restaurant', 'Other'];
     const uniqueTypes = Array.from(new Set(
       properties
         .map((p: Property) => p.type)

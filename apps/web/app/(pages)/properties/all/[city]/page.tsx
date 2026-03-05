@@ -2,6 +2,7 @@ import PropertiesListing from '@/components/PropertiesListing';
 import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { serverApi } from '@/lib/server-api';
+import { toTitleCase } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{
@@ -18,18 +19,25 @@ export async function generateMetadata(
   try {
     const cityData = await serverApi.getCityByName(citySlug);
 
-    if (!cityData) return { title: `All Properties in ${citySlug} ` };
+    const purpose = 'Rent & Sale';
+    if (!cityData) {
+      return { title: `Properties in ${toTitleCase(citySlug)} | Property Dealer` };
+    }
+
+    const cityName = toTitleCase(cityData.name);
+    const title = cityData.metaTitle || `Properties for ${purpose} in ${cityName} | Property Dealer`;
+    const description = cityData.metaDescription || `Explore all properties for ${purpose.toLowerCase()} in ${cityName}. Find your dream home with Property Dealer.`;
 
     return {
-      title: cityData.metaTitle || `Properties in ${cityData.name} `,
-      description: cityData.metaDescription || `Browse all properties for rent and sale in ${cityData.name}. Find your ideal home with Property Dealer.`,
+      title,
+      description,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
       },
     };
   } catch (error) {
     return {
-      title: `Properties in ${citySlug} `,
+      title: `Properties in ${toTitleCase(citySlug)} | Property Dealer`,
     };
   }
 }

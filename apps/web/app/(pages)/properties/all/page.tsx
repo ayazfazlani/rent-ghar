@@ -2,6 +2,7 @@ import PropertiesListing from '@/components/PropertiesListing';
 import { serverApi } from '@/lib/server-api';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
+import { toTitleCase } from '@/lib/utils';
 
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -12,21 +13,29 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const cityName = (params.city as string) || '';
   const type = (params.type as string) || '';
 
-  let title = 'Properties for Sale & Rent in Pakistan ';
-  let description = 'Search and find properties for sale and rent across Pakistan. Browse houses, apartments, plots and commercial properties on Property Dealer.';
+  const purpose = 'Rent & Sale';
+  let title = `Properties for ${purpose} in Pakistan | Property Dealer`;
+  let description = `Search and find properties for ${purpose.toLowerCase()} across Pakistan. Browse houses, apartments, plots and commercial properties on Property Dealer.`;
 
   if (cityName) {
     try {
       const cityData = await serverApi.getCityByName(cityName);
       if (cityData) {
-        // Use custom meta if available, otherwise construct one
-        title = cityData.metaTitle || `${type && type !== 'all' ? type.charAt(0).toUpperCase() + type.slice(1) : 'Properties'} in ${cityData.name} `;
-        description = cityData.metaDescription || `Find the latest properties in ${cityData.name}. Browse real estate listings for sale and rent in ${cityData.name}, Pakistan on Property Dealer.`;
+        const typeName = type && type !== 'all' ? toTitleCase(type) : 'Properties';
+        const formattedCity = toTitleCase(cityData.name);
+
+        title = `${typeName} in ${formattedCity} | Property Dealer`;
+        description = `Find the latest ${typeName.toLowerCase()} in ${formattedCity}. Browse real estate listings for ${purpose.toLowerCase()} in ${formattedCity}, Pakistan on Property Dealer.`;
+
+        // If city has custom meta, use it if no type is selected
+        if (type === 'all' || !type) {
+          if (cityData.metaTitle) title = cityData.metaTitle;
+          if (cityData.metaDescription) description = cityData.metaDescription;
+        }
       }
     } catch (e) {
-      // Fallback if city not found or API fails
-      const formattedCity = cityName.charAt(0).toUpperCase() + cityName.slice(1);
-      title = `Properties in ${formattedCity} `;
+      const formattedCity = toTitleCase(cityName);
+      title = `Properties in ${formattedCity} | Property Dealer`;
     }
   }
 

@@ -2,6 +2,7 @@ import PropertiesListing from '@/components/PropertiesListing';
 import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { serverApi } from '@/lib/server-api';
+import { toTitleCase } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{
@@ -19,18 +20,25 @@ export async function generateMetadata(
     // Attempt to fetch city data by name (slug)
     const cityData = await serverApi.getCityByName(citySlug);
 
-    if (!cityData) return { title: `Properties in ${citySlug} ` };
+    const purpose = 'Rent';
+    if (!cityData) {
+      return { title: `Properties for ${purpose} in ${toTitleCase(citySlug)} | Property Dealer` };
+    }
+
+    const cityName = toTitleCase(cityData.name);
+    const title = cityData.rentMetaTitle || `Properties for ${purpose} in ${cityName} | Property Dealer`;
+    const description = cityData.rentMetaDescription || `Find the best properties for ${purpose.toLowerCase()} in ${cityName}. Browse the latest houses, flats, and more on Property Dealer.`;
 
     return {
-      title: cityData.rentMetaTitle || cityData.metaTitle || `Properties for Rent in ${cityData.name} `,
-      description: cityData.rentMetaDescription || cityData.metaDescription || `Find the best properties for rent in ${cityData.name}. Browse houses, flats, and more on Property Dealer.`,
+      title,
+      description,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
       },
     };
   } catch (error) {
     return {
-      title: `Properties for Rent in ${citySlug} `,
+      title: `Properties for Rent in ${toTitleCase(citySlug)} | Property Dealer`,
     };
   }
 }

@@ -2,6 +2,7 @@ import PropertiesListing from '@/components/PropertiesListing';
 import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { serverApi } from '@/lib/server-api';
+import { toTitleCase } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{
@@ -18,18 +19,25 @@ export async function generateMetadata(
   try {
     const cityData = await serverApi.getCityByName(citySlug);
 
-    if (!cityData) return { title: `Properties for Sale in ${citySlug} ` };
+    const purpose = 'Sale';
+    if (!cityData) {
+      return { title: `Properties for ${purpose} in ${toTitleCase(citySlug)} | Property Dealer` };
+    }
+
+    const cityName = toTitleCase(cityData.name);
+    const title = cityData.saleMetaTitle || `Properties for ${purpose} in ${cityName} | Property Dealer`;
+    const description = cityData.saleMetaDescription || `Find properties for ${purpose.toLowerCase()} in ${cityName}. Browse the latest houses, plots, and commercial listings on Property Dealer.`;
 
     return {
-      title: cityData.saleMetaTitle || cityData.metaTitle || `Properties for Sale in ${cityData.name} `,
-      description: cityData.saleMetaDescription || cityData.metaDescription || `Find properties for sale in ${cityData.name}. Best real estate listings in Pakistan on Property Dealer.`,
+      title,
+      description,
       alternates: {
         canonical: cityData.canonicalUrl || undefined,
       },
     };
   } catch (error) {
     return {
-      title: `Properties for Sale in ${citySlug} `,
+      title: `Properties for Sale in ${toTitleCase(citySlug)} | Property Dealer`,
     };
   }
 }

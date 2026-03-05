@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { serverApi } from '@/lib/server-api';
 import { notFound } from 'next/navigation';
+import { toTitleCase } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{
@@ -50,26 +51,36 @@ export async function generateMetadata(
   const { cityData, isPropertyType, areaData, propertyType } = await resolveTypeOrArea(citySlug, type);
 
   if (!cityData) {
-    return { title: `Properties for Rent in ${citySlug} ` };
+    return { title: `Properties for Rent in ${toTitleCase(citySlug)} | Property Dealer` };
   }
 
+  const purpose = 'Rent';
+  const cityName = toTitleCase(cityData.name);
+
   if (isPropertyType && propertyType) {
-    const typeCapitalized = propertyType.charAt(0).toUpperCase() + propertyType.slice(1);
+    const typeName = toTitleCase(propertyType);
+    const title = `${typeName} for ${purpose} in ${cityName} | Property Dealer`;
+    const description = `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse the latest listings and verified properties on Property Dealer.`;
+    
     return {
-      title: cityData.rentMetaTitle || cityData.metaTitle
-        ? `${typeCapitalized} - ${cityData.rentMetaTitle || cityData.metaTitle}`
-        : `${typeCapitalized} for Rent in ${cityData.name} `,
-      description: cityData.rentMetaDescription || cityData.metaDescription || `Find the best ${propertyType} for rent in ${cityData.name}. Browse latest listings on Property Dealer.`,
+      title,
+      description,
       alternates: {
-        canonical: cityData.canonicalUrl || undefined,
+        canonical: cityData.canonicalUrl 
+          ? `${cityData.canonicalUrl.replace(/\/$/, '')}/${type.toLowerCase()}` 
+          : undefined,
       },
     };
   }
 
   if (areaData) {
+    const areaName = toTitleCase(areaData.name);
+    const title = `Properties for ${purpose} in ${areaName}, ${cityName} | Property Dealer`;
+    const description = `Discover properties for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. View photos, prices, and details of the latest listings on Property Dealer.`;
+    
     return {
-      title: areaData.metaTitle || `Properties for Rent in ${areaData.name}, ${cityData.name} `,
-      description: areaData.metaDescription || `Find properties for rent in ${areaData.name}, ${cityData.name}. Browse latest listings on Property Dealer.`,
+      title: areaData.metaTitle || title,
+      description: areaData.metaDescription || description,
       alternates: {
         canonical: areaData.canonicalUrl || undefined,
       },
@@ -77,7 +88,7 @@ export async function generateMetadata(
   }
 
   return {
-    title: `Properties for Rent in ${citySlug} `,
+    title: `Properties for ${purpose} in ${cityName} | Property Dealer`,
   };
 }
 
