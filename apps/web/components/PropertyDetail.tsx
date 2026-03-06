@@ -854,7 +854,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
           {/* Related Properties by Same Agency - Horizontal Scroll */}
           {relatedByOwner.length > 0 && (
-            <section className="pt-8 border-t">
+            <section className="pt-8 border-t max-w-min">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl md:text-2xl font-bold">
                   More properties by {backendProperty?.owner?.name || 'this Agency'}
@@ -872,7 +872,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
           {/* Related Properties Matching City - Horizontal Scroll */}
           {relatedByCity.length > 0 && (
-            <section className="pt-8 border-t">
+            <section className="pt-8 border-t max-w-min">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl md:text-2xl font-bold">
                   Similar {toTitleCase(property.type)}s in {toTitleCase(property.city)}
