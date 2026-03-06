@@ -27,6 +27,28 @@ export class PropertyService {
           .replace(/^-+|-+$/g, '');
       }
 
+    private async generateUniqueSlug(baseSlug: string, excludeId?: string): Promise<string> {
+        if (!baseSlug) return '';
+        let slug = baseSlug;
+        let isUnique = false;
+        let counter = 1;
+        
+        while (!isUnique) {
+            const query: any = { slug };
+            if (excludeId) {
+                query._id = { $ne: excludeId };
+            }
+            const existing = await this.propertyModel.findOne(query).select('_id').lean().exec();
+            if (!existing) {
+                isUnique = true;
+            } else {
+                slug = `${baseSlug}-${counter}`;
+                counter++;
+            }
+        }
+        return slug;
+    }
+
     private isValidObjectId(value: unknown): boolean {
         return typeof value === 'string' && Types.ObjectId.isValid(value);
       }
@@ -49,8 +71,9 @@ export class PropertyService {
         }
 
         await Promise.all(
-            toUpdate.map(p => {
-                const slug = this.toSlug(p.title);
+            toUpdate.map(async p => {
+                const baseSlug = this.toSlug(p.title);
+                const slug = await this.generateUniqueSlug(baseSlug, p._id.toString());
                 p.slug = slug;
                 return this.propertyModel.updateOne({ _id: p._id }, { slug }).exec();
             })
@@ -99,7 +122,8 @@ export class PropertyService {
           }
         }
 
-        const slug = dto.slug ? this.toSlug(dto.slug) : (dto.title ? this.toSlug(dto.title) : undefined);
+        const baseSlug = dto.slug ? this.toSlug(dto.slug) : (dto.title ? this.toSlug(dto.title) : undefined);
+        const slug = baseSlug ? await this.generateUniqueSlug(baseSlug) : undefined;
         fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Service: Generated slug: ${slug}\n`);        
         
         try {
@@ -524,11 +548,20 @@ export class PropertyService {
             longitude: dto.longitude ? Number(dto.longitude) : undefined,
           };
 
-          if (dto.slug) {
-            updateData.slug = this.toSlug(dto.slug);
-          } else if (dto.title) {
-            updateData.slug = this.toSlug(dto.title);
+          if (dto.slug && dto.slug.trim() !== '') {
+            // Explicitly requested a new slug
+            const baseSlug = this.toSlug(dto.slug);
+            updateData.slug = await this.generateUniqueSlug(baseSlug, id);
+          } else if (dto.title && dto.title !== property.title) {
+            // Title has changed, update the slug based on the new title
+            const baseSlug = this.toSlug(dto.title);
+            updateData.slug = await this.generateUniqueSlug(baseSlug, id);
+          } else if (!property.slug && dto.title) {
+            // Only generate from title if the property somehow lacks a slug
+            const baseSlug = this.toSlug(dto.title);
+            updateData.slug = await this.generateUniqueSlug(baseSlug, id);
           }
+          // Otherwise, we maintain the existing slug.
 
           // Only update photos if new ones are provided
           if (mainPhotoUrl) {
