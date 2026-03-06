@@ -1,5 +1,13 @@
 import api from '../../api'
 
+export interface TypeContent {
+  propertyType: string;
+  purpose: 'rent' | 'sale' | 'all';
+  metaTitle?: string;
+  metaDescription?: string;
+  content?: string;
+}
+
 export interface CreateCityData {
   name: string;
   state?: string;
@@ -16,6 +24,7 @@ export interface CreateCityData {
   saleContent?: string;
   buyContent?: string;
   thumbnail?: string;
+  typeContents?: TypeContent[];
 }
 
 export interface UpdateCityData {
@@ -34,6 +43,7 @@ export interface UpdateCityData {
   saleContent?: string;
   buyContent?: string;
   thumbnail?: string;
+  typeContents?: TypeContent[];
 }
 
 export const cityApi = {

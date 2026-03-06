@@ -60,4 +60,13 @@ export class UpdateCityDto {
     @IsOptional()
     @IsString()
     thumbnail?: string;
+
+    @IsOptional()
+    typeContents?: {
+        propertyType: string;
+        purpose: 'rent' | 'sale' | 'all';
+        metaTitle?: string;
+        metaDescription?: string;
+        content?: string;
+    }[];
 }

@@ -188,7 +188,7 @@ export const propertyApi = {
 
   // Get property by slug
   getPropertyBySlug: async (params: { slug: string }) => {
-    const response = await api.get(`/properties/${params.slug}`);
+    const response = await api.get(`/properties/slug/${params.slug}`);
     return response.data;
   },
 

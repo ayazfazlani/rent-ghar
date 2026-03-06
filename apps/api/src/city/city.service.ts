@@ -51,6 +51,7 @@ export class CityService {
             if (createCityDto.saleContent) cityData.saleContent = createCityDto.saleContent;
             if (createCityDto.buyContent) cityData.buyContent = createCityDto.buyContent;
             if (createCityDto.thumbnail) cityData.thumbnail = createCityDto.thumbnail;
+            if (createCityDto.typeContents) cityData.typeContents = createCityDto.typeContents;
             
             const createdCity = new this.cityModel(cityData);
             return await createdCity.save();
@@ -141,6 +142,7 @@ export class CityService {
             if (updateCityDto.saleContent !== undefined) updateData.saleContent = updateCityDto.saleContent;
             if (updateCityDto.buyContent !== undefined) updateData.buyContent = updateCityDto.buyContent;
             if (updateCityDto.thumbnail !== undefined) updateData.thumbnail = updateCityDto.thumbnail;
+            if (updateCityDto.typeContents !== undefined) updateData.typeContents = updateCityDto.typeContents;
 
             const city = await this.cityModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
             if (!city) {

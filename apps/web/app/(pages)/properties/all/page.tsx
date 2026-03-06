@@ -31,6 +31,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
         if (type === 'all' || !type) {
           if (cityData.metaTitle) title = cityData.metaTitle;
           if (cityData.metaDescription) description = cityData.metaDescription;
+        } else {
+          // Check for specific property type content
+          const specificContent = cityData.typeContents?.find(
+            (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && tc.purpose === 'all'
+          );
+          if (specificContent?.metaTitle) title = specificContent.metaTitle;
+          if (specificContent?.metaDescription) description = specificContent.metaDescription;
         }
       }
     } catch (e) {
@@ -64,7 +71,13 @@ export default async function AllRootPage({ searchParams }: PageProps) {
   if (cityName) {
     try {
       const cityData = await serverApi.getCityByName(cityName);
-      cityRichDescription = cityData?.description || '';
+      const type = (params.type as string) || '';
+
+      const specificContent = type && type !== 'all' && cityData?.typeContents?.find(
+        (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && tc.purpose === 'all'
+      );
+
+      cityRichDescription = specificContent?.content || cityData?.description || '';
     } catch (e) {
       console.warn('Could not fetch city content for SEO:', e);
     }

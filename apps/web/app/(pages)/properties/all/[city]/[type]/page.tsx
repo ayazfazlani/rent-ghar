@@ -60,8 +60,14 @@ export async function generateMetadata(
 
   if (isPropertyType && propertyType) {
     const typeName = toTitleCase(propertyType);
-    const title = `${typeName} for ${purpose} in ${cityName} | Property Dealer`;
-    const description = `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse the latest listings and verified properties on Property Dealer.`;
+    
+    // Find specific content for this property type and purpose
+    const specificContent = cityData.typeContents?.find(
+      (tc: any) => tc.propertyType.toLowerCase() === propertyType.toLowerCase() && tc.purpose === 'all'
+    );
+
+    const title = specificContent?.metaTitle || `${typeName} for ${purpose} in ${cityName} | Property Dealer`;
+    const description = specificContent?.metaDescription || `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse the latest listings and verified properties on Property Dealer.`;
 
     return {
       title,
@@ -112,6 +118,12 @@ export default async function AllCityTypePage(props: PageProps) {
   const areaId = areaData?._id;
   const description = areaData?.description || cityData?.description;
 
+  const specificContent = isPropertyType && propertyType && cityData?.typeContents?.find(
+    (tc: any) => tc.propertyType.toLowerCase() === propertyType.toLowerCase() && tc.purpose === 'all'
+  );
+
+  const richDescription = areaData?.description || specificContent?.content || cityData?.description;
+
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -124,7 +136,7 @@ export default async function AllCityTypePage(props: PageProps) {
         type={listingType}
         areaId={areaId}
         useCleanUrls={true}
-        richDescription={description}
+        richDescription={richDescription}
       />
     </Suspense>
   );

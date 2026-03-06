@@ -27,8 +27,18 @@ import { Image as ImageIcon, X } from "lucide-react";
 import { useState } from "react";
 
 // Assuming this is your API client (adjust path/name if different)
-import cityApi from "@/lib/api/city/city.api"; // or "@/lib/api/city/city.api"
+import cityApi from "@/lib/api/city/city.api";
+import { propertyApi } from "@/lib/api";
 import { toTitleCase } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Trash2, PlusCircle } from "lucide-react";
+import { useEffect } from "react";
 
 // Zod schema – only name is required, state and country are optional
 const formSchema = z.object({
@@ -47,6 +57,13 @@ const formSchema = z.object({
   saleContent: z.string().optional(),
   buyContent: z.string().optional(),
   thumbnail: z.string().optional(),
+  typeContents: z.array(z.object({
+    propertyType: z.string().min(1, "Type is required"),
+    purpose: z.enum(['rent', 'sale', 'all']),
+    metaTitle: z.string().optional(),
+    metaDescription: z.string().optional(),
+    content: z.string().optional(),
+  })).optional(),
 });
 
 export default function AddCityPage() {
@@ -71,8 +88,35 @@ export default function AddCityPage() {
       saleContent: "",
       buyContent: "",
       thumbnail: "",
+      typeContents: [],
     },
   });
+
+  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const types = await propertyApi.getTypes();
+        setAvailableTypes(types || []);
+      } catch (error) {
+        console.error("Error fetching property types:", error);
+      }
+    };
+    fetchTypes();
+  }, []);
+
+  const addTypeContent = () => {
+    const current = form.getValues("typeContents") || [];
+    form.setValue("typeContents", [
+      ...current,
+      { propertyType: "", purpose: "rent", metaTitle: "", metaDescription: "", content: "" }
+    ]);
+  };
+
+  const removeTypeContent = (index: number) => {
+    const current = form.getValues("typeContents") || [];
+    form.setValue("typeContents", current.filter((_, i) => i !== index));
+  };
 
   const isLoading = form.formState.isSubmitting;
 
@@ -103,6 +147,9 @@ export default function AddCityPage() {
       if (values.saleContent?.trim()) payload.saleContent = values.saleContent.trim();
       if (values.buyContent?.trim()) payload.buyContent = values.buyContent.trim();
       if (values.thumbnail?.trim()) payload.thumbnail = values.thumbnail.trim();
+      if (values.typeContents && values.typeContents.length > 0) {
+        payload.typeContents = values.typeContents;
+      }
 
       await cityApi.create(payload);
 
@@ -418,6 +465,141 @@ export default function AddCityPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Property Type Specific Content */}
+                <div className="mt-8 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-800">Property Type Specific Content</h3>
+                      <p className="text-sm text-gray-500">Add custom content for specific combinations like "House for Rent in {form.watch('name') || 'City'}"</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addTypeContent}
+                      className="flex items-center gap-2"
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                      Add Specific Type Content
+                    </Button>
+                  </div>
+
+                  {form.watch("typeContents")?.map((_, index) => (
+                    <div key={index} className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm space-y-4 relative group">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeTypeContent(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`typeContents.${index}.propertyType`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Property Type</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {availableTypes.map((t) => (
+                                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`typeContents.${index}.purpose`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Purpose</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select purpose" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="rent">Rent</SelectItem>
+                                  <SelectItem value="sale">Sale</SelectItem>
+                                  <SelectItem value="all">All</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`typeContents.${index}.metaTitle`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Meta Title</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="SEO Title" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`typeContents.${index}.metaDescription`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Meta Description</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="SEO Description" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name={`typeContents.${index}.content`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Rich Content</FormLabel>
+                            <FormControl>
+                              <RichEditor
+                                value={field.value || ""}
+                                onChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ))}
+
+                  {(!form.watch("typeContents") || form.watch("typeContents")?.length === 0) && (
+                    <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                      <p className="text-gray-500 italic">No specific property type content added yet.</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Image Picker Dialog */}

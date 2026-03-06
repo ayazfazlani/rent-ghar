@@ -49,6 +49,24 @@ export class City {
   @Prop({ trim: true })
   buyContent?: string; // Rich Text for Buy
 
+  @Prop({
+    type: [{
+      propertyType: { type: String, required: true },
+      purpose: { type: String, enum: ['rent', 'sale', 'all'], required: true },
+      metaTitle: String,
+      metaDescription: String,
+      content: String
+    }],
+    default: []
+  })
+  typeContents?: {
+    propertyType: string;
+    purpose: 'rent' | 'sale' | 'all';
+    metaTitle?: string;
+    metaDescription?: string;
+    content?: string;
+  }[];
+
   @Prop({ trim: true })
   thumbnail?: string; // City Image URL
 

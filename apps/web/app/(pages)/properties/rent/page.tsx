@@ -31,6 +31,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
         if (type === 'all' || !type) {
           if (cityData.rentMetaTitle) title = cityData.rentMetaTitle;
           if (cityData.rentMetaDescription) description = cityData.rentMetaDescription;
+        } else {
+          // Check for specific property type content
+          const specificContent = cityData.typeContents?.find(
+            (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && tc.purpose === 'rent'
+          );
+          if (specificContent?.metaTitle) title = specificContent.metaTitle;
+          if (specificContent?.metaDescription) description = specificContent.metaDescription;
         }
       }
     } catch (e) {
@@ -64,7 +71,13 @@ export default async function RentRootPage({ searchParams }: PageProps) {
   if (cityName) {
     try {
       const cityData = await serverApi.getCityByName(cityName);
-      cityRichDescription = cityData?.rentContent || '';
+      const type = (params.type as string) || '';
+      
+      const specificContent = type && type !== 'all' && cityData?.typeContents?.find(
+        (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && tc.purpose === 'rent'
+      );
+
+      cityRichDescription = specificContent?.content || cityData?.rentContent || '';
     } catch (e) {
       console.warn('Could not fetch city content for SEO:', e);
     }
