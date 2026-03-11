@@ -350,11 +350,30 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
     'Other Nearby Places'
   ];
 
+  const getSchemaType = (type: string) => {
+    switch ((type || '').toLowerCase()) {
+      case 'house': return 'SingleFamilyResidence';
+      case 'apartment':
+      case 'flat': return 'Apartment';
+      case 'plot':
+      case 'land': return 'Landform';
+      case 'shop':
+      case 'commercial':
+      case 'office':
+      case 'factory': return 'Place';
+      case 'hotel': return 'Hotel';
+      case 'restaurant': return 'Restaurant';
+      default: return 'Accommodation';
+    }
+  };
+
   const jsonLd = property ? {
     '@context': 'https://schema.org',
-    '@type': property.type === 'House' ? 'SingleFamilyResidence' : (property.type === 'Apartment' || property.type === 'Flat' ? 'Apartment' : 'Accommodation'),
+    '@type': getSchemaType(property.type),
     'name': property.name,
-    'description': property.description || `${property.name} in ${toTitleCase(property.location)}, ${toTitleCase(property.city)}`,
+    'description': property.description
+      ? property.description.replace(/<[^>]*>?/gm, '').substring(0, 300).trim() + '...'
+      : `${property.name} in ${toTitleCase(property.location)}, ${toTitleCase(property.city)}`,
     'image': images,
     'address': {
       '@type': 'PostalAddress',
@@ -362,8 +381,8 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
       'addressRegion': toTitleCase(property.location),
       'addressCountry': 'PK'
     },
-    'numberOfBedrooms': property.bedrooms,
-    'numberOfBathrooms': property.bathrooms,
+    ...(property.bedrooms && property.bedrooms > 0 ? { 'numberOfBedrooms': property.bedrooms } : {}),
+    ...(property.bathrooms && property.bathrooms > 0 ? { 'numberOfBathrooms': property.bathrooms } : {}),
     'floorSize': {
       '@type': 'QuantitativeValue',
       'value': property.area,
@@ -375,7 +394,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
       'priceCurrency': 'PKR',
       'businessFunction': property.purpose === 'buy' ? 'http://purl.org/goodrelations/v1#Sell' : 'http://purl.org/goodrelations/v1#LeaseOut',
       'availability': 'https://schema.org/InStock',
-      'url': ''
+      'url': typeof window !== 'undefined' ? window.location.href : ''
     }
   } : null;
 

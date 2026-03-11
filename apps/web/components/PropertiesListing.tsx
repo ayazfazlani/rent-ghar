@@ -35,6 +35,7 @@ interface PropertiesListingProps {
   useCleanUrls?: boolean; // If true, navigate using /properties/rent/city/type format
   richDescription?: string;
   areaId?: string;
+  areaSlug?: string; // The area slug used in clean URLs (e.g. 'model-town')
 }
 
 export default function PropertiesListing({
@@ -43,7 +44,8 @@ export default function PropertiesListing({
   type: initialType = 'all',
   useCleanUrls = false,
   richDescription,
-  areaId: initialAreaId
+  areaId: initialAreaId,
+  areaSlug: initialAreaSlug
 }: PropertiesListingProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -280,7 +282,7 @@ export default function PropertiesListing({
     setTempCity(initialCity);
     setTempType(initialType);
     setCurrentPage(1); // Reset to first page on URL/filter change
-  }, [initialCity, initialType, purpose, searchParams, initialAreaId]);
+  }, [initialCity, initialType, purpose, searchParams, initialAreaId, initialAreaSlug]);
 
 
   // Match temp city for the filter dropdown
@@ -427,6 +429,7 @@ export default function PropertiesListing({
                 city={matchedCity}
                 purpose={purpose}
                 currentAreaId={currentAreaId}
+                currentAreaSlug={initialAreaSlug}
                 currentType={type}
 
                 onAreaSelect={(areaId, areaSlug) => {
@@ -439,15 +442,17 @@ export default function PropertiesListing({
                     const purposePath = currentPurpose === 'buy' ? 'sale' : currentPurpose;
                     const citySlug = cityToSlug(matchedCity);
 
-                    // If unselecting, go to city page
+                    // If unselecting, go back to city (or city/type if type is active)
                     if (isUnselecting) {
-                      router.push(`/properties/${purposePath}/${citySlug}`);
+                      const typeSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
+                      router.push(`/properties/${purposePath}/${citySlug}${typeSlug}`);
                       return;
                     }
 
-                    // If selecting and we have a slug, go to area page
+                    // If selecting and we have a slug, go to area page (preserve active type)
                     if (areaSlug) {
-                      router.push(`/properties/${purposePath}/${citySlug}/${areaSlug}`);
+                      const typeSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
+                      router.push(`/properties/${purposePath}/${citySlug}/${areaSlug}${typeSlug}`);
                       return;
                     }
                   }
@@ -459,27 +464,17 @@ export default function PropertiesListing({
                     params.set('areaId', areaId);
                   }
 
-                  // Use standardized updateFilters logic for navigation
                   const queryString = params.toString();
                   const currentPath = window.location.pathname;
-                  // If we are on a clean URL for an area (e.g. /model-town) and we switch to another area via query param (fallback)
-                  // We should probably redirect to base city URL + query param, but keeping current path might be okay if next.js handles it.
-                  // But if next.js treats current path as [type], adding ?areaId might be confusing but valid.
-                  // However, if we unselect, we want to clear the area. 
-                  // If we are at /model-town and unselect, we want to go up to /multan.
-                  // The useCleanUrls block above handles this for unselecting if we have city matched.
-
                   router.push(`${currentPath}${queryString ? `?${queryString}` : ''}`);
                 }}
                 onTypeSelect={(newType) => {
-                  // When selecting from summary (city-wide context), clear areaId
                   const params = new URLSearchParams(searchParams.toString());
                   params.delete('areaId');
 
                   const currentPurpose = purpose;
-                  const shouldUseCleanUrl = useCleanUrls; // Allow clean URLs for all purposes including 'all'
 
-                  if (shouldUseCleanUrl) {
+                  if (useCleanUrls) {
                     const purposePath = currentPurpose === 'buy' ? 'sale' : currentPurpose;
                     const citySlug = cityToSlug(matchedCity);
                     const typeSlug = newType && newType !== 'all' ? `/${newType.toLowerCase()}` : '';
@@ -490,7 +485,20 @@ export default function PropertiesListing({
 
                     const queryString = params.toString();
                     const suffix = queryString ? `?${queryString}` : '';
-                    router.push(`/properties/${purposePath}/${citySlug}${typeSlug}${suffix}`);
+
+                    // If we are currently viewing a specific area, stay in area context
+                    if (initialAreaSlug) {
+                      if (newType && newType !== 'all') {
+                        // Navigate to area/type
+                        router.push(`/properties/${purposePath}/${citySlug}/${initialAreaSlug}${typeSlug}${suffix}`);
+                      } else {
+                        // Selecting 'Total' clears the type but keeps area
+                        router.push(`/properties/${purposePath}/${citySlug}/${initialAreaSlug}${suffix}`);
+                      }
+                    } else {
+                      // City-wide type selection
+                      router.push(`/properties/${purposePath}/${citySlug}${typeSlug}${suffix}`);
+                    }
                   } else {
                     if (currentPurpose !== 'all') params.set('purpose', currentPurpose);
                     if (matchedCity) params.set('city', matchedCity);

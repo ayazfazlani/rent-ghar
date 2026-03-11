@@ -20,6 +20,7 @@ interface LocationExplorerProps {
   city: string;
   purpose: 'rent' | 'buy' | 'all';
   currentAreaId?: string;
+  currentAreaSlug?: string; // slug of the currently selected area (for area+type URLs)
   onAreaSelect: (areaId: string, slug?: string) => void;
   onTypeSelect: (type: string) => void;
   onPurposeChange?: (purpose: 'rent' | 'buy') => void;
@@ -43,6 +44,7 @@ export default function LocationExplorer({
   city,
   purpose,
   currentAreaId,
+  currentAreaSlug,
   onAreaSelect,
   onTypeSelect,
   onPurposeChange,
@@ -57,13 +59,16 @@ export default function LocationExplorer({
     if (city) {
       fetchStats();
     }
-  }, [city, purpose]);
+  }, [city, purpose, currentType, currentAreaSlug]);
 
   const fetchStats = async () => {
     try {
       setLoading(true);
       const listingType = purpose === 'buy' ? 'sale' : (purpose === 'rent' ? 'rent' : undefined);
-      const data = await propertyApi.getLocationStats(city, listingType);
+      // When a specific type is selected at city level, pass it so we get
+      // the areas that actually have properties of that type
+      const typeFilter = currentType && currentType !== 'all' ? currentType : undefined;
+      const data = await propertyApi.getLocationStats(city, listingType, typeFilter);
       setStats(data);
     } catch (error) {
       console.error('Error fetching explorer stats:', error);
@@ -90,9 +95,11 @@ export default function LocationExplorer({
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b pb-6">
         <div className="flex-1 min-w-0">
           <h2 className="text-xl md:text-3xl font-bold text-foreground mb-4 leading-tight capitalize">
-            {stats?.total.toLocaleString() || 0} Properties for {
-              purpose === 'all' ? 'Rent & Sale' : (purpose === 'buy' ? 'Sale' : 'Rent')
-            } in {city}
+            {stats?.total.toLocaleString() || 0}{' '}
+            {currentType && currentType !== 'all'
+              ? `${currentType.charAt(0).toUpperCase() + currentType.slice(1)}s`
+              : 'Properties'}{' '}
+            for {purpose === 'all' ? 'Rent & Sale' : (purpose === 'buy' ? 'Sale' : 'Rent')} in {city}
           </h2>
 
           <div className="flex flex-wrap gap-2 items-center">
@@ -160,7 +167,9 @@ export default function LocationExplorer({
               <MapPin className="w-4 h-4 text-primary" />
             </div>
             <h3 className="text-base md:text-lg font-semibold leading-tight">
-              Popular Locations
+              {currentType && currentType !== 'all'
+                ? `Areas with ${currentType.charAt(0).toUpperCase() + currentType.slice(1)}s`
+                : 'Popular Locations'}
             </h3>
           </div>
           <div className="flex flex-wrap items-center gap-1 bg-background/50 p-1 rounded-lg border">

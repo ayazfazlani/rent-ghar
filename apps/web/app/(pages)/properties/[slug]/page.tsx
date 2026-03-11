@@ -1,10 +1,14 @@
 import PropertyDetail from '@/components/PropertyDetail';
 import { serverApi } from '@/lib/server-api';
 import { Metadata } from 'next';
+import { toTitleCase } from '@/lib/utils';
+import { buildPropertySchema, buildBreadcrumbSchema } from '@/lib/schema/listing-schema';
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://rent-ghar.com';
 
 type PageProps = {
-  params: Promise<{ slug: string }>
-}
+  params: Promise<{ slug: string }>;
+};
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -18,7 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       };
     }
 
-    const title = `${property.title}`;
+    const title = property.title;
     const description = property.description?.substring(0, 160) || `View details for property: ${property.title}`;
     const imageUrl = property.mainPhotoUrl || '/og-image.jpg';
 
@@ -38,14 +42,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         images: [imageUrl],
       },
       alternates: {
-        canonical: `/properties/${slug}`,
+        canonical: `/p/${slug}`,
       },
     };
   } catch (error) {
     console.error('Error generating metadata for property:', error);
     return {
       title: 'Property Details',
-      description: 'View property details on PropertyDealer',
+      description: 'View property details on Property Dealer',
     };
   }
 }
@@ -53,12 +57,81 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PropertyDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  let property = null;
+  let property: any = null;
   try {
     property = await serverApi.getPropertyBySlug(slug);
   } catch (error) {
     console.error('Error fetching property for page:', error);
   }
 
-  return <PropertyDetail slug={slug} initialProperty={property} />;
+  // Build structured data schemas
+  let propertySchema = null;
+  let breadcrumbSchema = null;
+
+  if (property) {
+    // Extract city/area names from populated area object
+    const areaObj = typeof property.area === 'object' ? property.area : null;
+    const areaName = areaObj?.name;
+    const areaSlug = areaObj?.areaSlug;
+    const cityName = areaObj?.city?.name || property.city;
+    const citySlug = areaObj?.city?.areaSlug;
+    const isSale = property.listingType === 'sale';
+    const purposePath = isSale ? 'sale' : 'rent';
+
+    propertySchema = buildPropertySchema({
+      id: property._id,
+      slug: property.slug,
+      title: property.title,
+      description: property.description,
+      propertyType: property.propertyType,
+      listingType: property.listingType,
+      price: property.price,
+      location: property.location,
+      city: cityName,
+      areaName,
+      bedrooms: property.bedrooms,
+      bathrooms: property.bathrooms,
+      areaSize: property.areaSize,
+      marla: property.marla,
+      mainPhotoUrl: property.mainPhotoUrl,
+      additionalPhotosUrls: property.additionalPhotosUrls,
+      latitude: property.latitude,
+      longitude: property.longitude,
+      createdAt: property.createdAt,
+      features: property.features,
+    });
+
+    // Build breadcrumb: Home > Properties > City > Area (optional) > Property
+    const crumbs: Array<{ name: string; url: string }> = [
+      { name: 'Home', url: BASE_URL },
+      { name: `Properties for ${isSale ? 'Sale' : 'Rent'}`, url: `${BASE_URL}/properties/${purposePath}` },
+    ];
+    if (citySlug && cityName) {
+      crumbs.push({ name: toTitleCase(cityName), url: `${BASE_URL}/properties/${purposePath}/${citySlug}` });
+    }
+    if (citySlug && areaSlug && areaName) {
+      crumbs.push({ name: toTitleCase(areaName), url: `${BASE_URL}/properties/${purposePath}/${citySlug}/${areaSlug}` });
+    }
+    crumbs.push({ name: property.title, url: `${BASE_URL}/p/${slug}` });
+
+    breadcrumbSchema = buildBreadcrumbSchema(crumbs);
+  }
+
+  return (
+    <>
+      {propertySchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(propertySchema) }}
+        />
+      )}
+      {breadcrumbSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+      )}
+      <PropertyDetail slug={slug} initialProperty={property} />
+    </>
+  );
 }

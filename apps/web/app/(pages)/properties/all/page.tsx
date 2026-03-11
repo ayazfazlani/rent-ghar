@@ -14,7 +14,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const type = (params.type as string) || '';
 
   const purpose = 'Rent & Sale';
-  let title = `Properties for ${purpose} in Pakistan | Property Dealer`;
+  let title = `Properties for ${purpose} in Pakistan `;
   let description = `Search and find properties for ${purpose.toLowerCase()} across Pakistan. Browse houses, apartments, plots and commercial properties on Property Dealer.`;
 
   if (cityName) {
@@ -24,7 +24,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
         const typeName = type && type !== 'all' ? toTitleCase(type) : 'Properties';
         const formattedCity = toTitleCase(cityData.name);
 
-        title = `${typeName} in ${formattedCity} | Property Dealer`;
+        title = `${typeName} in ${formattedCity} `;
         description = `Find the latest ${typeName.toLowerCase()} in ${formattedCity}. Browse real estate listings for ${purpose.toLowerCase()} in ${formattedCity}, Pakistan on Property Dealer.`;
 
         // If city has custom meta, use it if no type is selected
@@ -42,7 +42,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       }
     } catch (e) {
       const formattedCity = toTitleCase(cityName);
-      title = `Properties in ${formattedCity} | Property Dealer`;
+      title = `Properties in ${formattedCity} `;
     }
   }
 
