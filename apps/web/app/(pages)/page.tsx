@@ -16,6 +16,9 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Property Dealer | Buy, Sell & Rent Property",
   description: "Property Dealer is a property buying and selling marketplace across Pakistan, connecting buyers and sellers for residential and commercial real estate.",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 // Home Page - Server Component

@@ -14,6 +14,9 @@ export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
   return {
     title: `Property Details - ${id}`,
-    description: 'View property details'
+    description: 'View property details',
+    alternates: {
+      canonical: `/listing-detail/${id}`,
+    },
   };
 }

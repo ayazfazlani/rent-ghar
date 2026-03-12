@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         type: 'article',
       },
       alternates: {
-        canonical: `/p/${slug}`,
+        canonical: `/${slug}`,
       },
     };
   } catch (error) {

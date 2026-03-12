@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         images: [imageUrl],
       },
       alternates: {
-        canonical: `/p/${slug}`,
+        canonical: `/${slug}`,
       },
     };
   } catch (error) {
@@ -112,7 +112,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     if (citySlug && areaSlug && areaName) {
       crumbs.push({ name: toTitleCase(areaName), url: `${BASE_URL}/properties/${purposePath}/${citySlug}/${areaSlug}` });
     }
-    crumbs.push({ name: property.title, url: `${BASE_URL}/p/${slug}` });
+    crumbs.push({ name: property.title, url: `${BASE_URL}/${slug}` });
 
     breadcrumbSchema = buildBreadcrumbSchema(crumbs);
   }
