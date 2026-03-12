@@ -14,7 +14,7 @@ export class IndexNowService {
   }
 
   private get host() {
-    return this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+    return this.configService.get<string>('APP_HOST') || 'propertydealer.pk';
   }
 
   private get keyLocation() {

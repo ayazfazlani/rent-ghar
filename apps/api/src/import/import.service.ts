@@ -87,7 +87,7 @@ export class ImportService {
     let importedCount = 0;
     let skippedCount = 0;
     const importedUrls: string[] = [];
-    const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+    const host = this.configService.get<string>('APP_HOST') || 'propertydealer.pk';
 
     for (const item of listings) {
       try {

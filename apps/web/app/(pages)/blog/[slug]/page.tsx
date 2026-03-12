@@ -156,6 +156,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
+import { buildBlogPostSchema } from '@/lib/schema/blog-schema';
+
 // Server Component - passes params to client component
 export default async function BlogPostPage({ params }: PageProps) {
   // Next.js 15: params is now a Promise, must await it
@@ -172,132 +174,35 @@ export default async function BlogPostPage({ params }: PageProps) {
     console.error('Error fetching blog for structured data:', error);
   }
 
-  // Generate JSON-LD structured data for SEO
-  const generateStructuredData = () => {
-    if (!blog) return null;
-
-    const authorName = typeof blog.author === 'object' && blog.author !== null && 'name' in blog.author
-      ? blog.author.name
-      : 'RentGhar Team';
-
-    const authorEmail = typeof blog.author === 'object' && blog.author !== null && 'email' in blog.author
-      ? blog.author.email
-      : 'info@rentghar.com';
-
-    const categories = Array.isArray(blog.categories) && blog.categories.length > 0
-      ? blog.categories.map(cat => typeof cat === 'object' && 'name' in cat ? cat.name : 'Uncategorized')
-      : ['Uncategorized'];
-
+  // --- Schema ---
+  let blogSchema: any = null;
+  if (blog) {
+    const publishedDate = blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString();
+    const modifiedDate = blog.updatedAt ? new Date(blog.updatedAt).toISOString() : publishedDate;
     const imageUrl = blog.featuredImage
       ? (blog.featuredImage.startsWith('http')
         ? blog.featuredImage
         : `${baseUrl}${blog.featuredImage.startsWith('/') ? '' : '/'}${blog.featuredImage}`)
       : `${baseUrl}/default-blog.jpg`;
 
-    const pageUrl = `${baseUrl}/blog/${blog.slug}`;
-    const publishedDate = blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString();
-    const modifiedDate = blog.updatedAt ? new Date(blog.updatedAt).toISOString() : publishedDate;
-
-    // Article structured data
-    const articleSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'BlogPosting',
-      headline: blog.metaTitle || blog.title,
+    blogSchema = buildBlogPostSchema({
+      url: `${baseUrl}/blog/${blog.slug}`,
+      title: blog.metaTitle || blog.title,
       description: blog.metaDescription || blog.excerpt || blog.title.substring(0, 160),
       image: imageUrl,
-      datePublished: publishedDate,
-      dateModified: modifiedDate,
-      author: {
-        '@type': 'Person',
-        name: authorName,
-        email: authorEmail,
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'RentGhar',
-        logo: {
-          '@type': 'ImageObject',
-          url: `${baseUrl}/logo.png`,
-        },
-      },
-      mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': pageUrl,
-      },
-      articleSection: categories[0] || 'General',
-      keywords: blog.tags?.join(', ') || categories.join(', '),
-      wordCount: blog.content ? blog.content.split(/\s+/).length : 0,
-      inLanguage: 'en-US',
-      url: pageUrl,
-    };
-
-    // Breadcrumb structured data
-    const breadcrumbSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        {
-          '@type': 'ListItem',
-          position: 1,
-          name: 'Home',
-          item: baseUrl,
-        },
-        {
-          '@type': 'ListItem',
-          position: 2,
-          name: 'Blog',
-          item: `${baseUrl}/blog`,
-        },
-        {
-          '@type': 'ListItem',
-          position: 3,
-          name: blog.title,
-          item: pageUrl,
-        },
-      ],
-    };
-
-    // Organization structured data
-    const organizationSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: 'RentGhar',
-      url: baseUrl,
-      logo: `${baseUrl}/logo.png`,
-      sameAs: [
-        // Add social media links if available
-        // 'https://www.facebook.com/rentghar',
-        // 'https://twitter.com/rentghar',
-      ],
-    };
-
-    return {
-      article: articleSchema,
-      breadcrumb: breadcrumbSchema,
-      organization: organizationSchema,
-    };
-  };
-
-  const structuredData = blog ? generateStructuredData() : null;
+      publishedAt: publishedDate,
+      updatedAt: modifiedDate,
+    });
+  }
 
   return (
     <>
       {/* JSON-LD Structured Data for SEO */}
-      {structuredData && (
-        <>
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData.article) }}
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData.breadcrumb) }}
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData.organization) }}
-          />
-        </>
+      {blogSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }}
+        />
       )}
       <BlogPostClient slug={slug} />
     </>

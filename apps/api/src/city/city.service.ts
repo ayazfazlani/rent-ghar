@@ -46,6 +46,10 @@ export class CityService {
             if (createCityDto.metaTitle) cityData.metaTitle = createCityDto.metaTitle;
             if (createCityDto.metaDescription) cityData.metaDescription = createCityDto.metaDescription;
             if (createCityDto.canonicalUrl) cityData.canonicalUrl = createCityDto.canonicalUrl;
+            if (createCityDto.rentMetaTitle) cityData.rentMetaTitle = createCityDto.rentMetaTitle;
+            if (createCityDto.rentMetaDescription) cityData.rentMetaDescription = createCityDto.rentMetaDescription;
+            if (createCityDto.saleMetaTitle) cityData.saleMetaTitle = createCityDto.saleMetaTitle;
+            if (createCityDto.saleMetaDescription) cityData.saleMetaDescription = createCityDto.saleMetaDescription;
             if (createCityDto.description) cityData.description = createCityDto.description;
             if (createCityDto.rentContent) cityData.rentContent = createCityDto.rentContent;
             if (createCityDto.saleContent) cityData.saleContent = createCityDto.saleContent;
@@ -137,6 +141,10 @@ export class CityService {
             if (updateCityDto.metaTitle !== undefined) updateData.metaTitle = updateCityDto.metaTitle;
             if (updateCityDto.metaDescription !== undefined) updateData.metaDescription = updateCityDto.metaDescription;
             if (updateCityDto.canonicalUrl !== undefined) updateData.canonicalUrl = updateCityDto.canonicalUrl;
+            if (updateCityDto.rentMetaTitle !== undefined) updateData.rentMetaTitle = updateCityDto.rentMetaTitle;
+            if (updateCityDto.rentMetaDescription !== undefined) updateData.rentMetaDescription = updateCityDto.rentMetaDescription;
+            if (updateCityDto.saleMetaTitle !== undefined) updateData.saleMetaTitle = updateCityDto.saleMetaTitle;
+            if (updateCityDto.saleMetaDescription !== undefined) updateData.saleMetaDescription = updateCityDto.saleMetaDescription;
             if (updateCityDto.description !== undefined) updateData.description = updateCityDto.description;
             if (updateCityDto.rentContent !== undefined) updateData.rentContent = updateCityDto.rentContent;
             if (updateCityDto.saleContent !== undefined) updateData.saleContent = updateCityDto.saleContent;

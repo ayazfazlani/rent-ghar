@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { toTitleCase } from '@/lib/utils';
 import { buildPropertySchema, buildBreadcrumbSchema } from '@/lib/schema/listing-schema';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://rent-ghar.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://propertydealer.pk';
 
 type PageProps = {
   params: Promise<{ slug: string }>;

@@ -502,7 +502,7 @@ export class PropertyService {
         const property = await this.propertyModel.findByIdAndUpdate(id, { status: 'approved' }, { new: true }).exec();
         
         if (property && property.status === 'approved' && property.slug) {
-            const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+            const host = this.configService.get<string>('APP_HOST') || 'propertydealer.pk';
             const url = `https://${host}/p/${property.slug}`;
             this.indexNowService.submitUrl(url).catch(err => {
                 console.error('Failed to submit URL to IndexNow:', err);

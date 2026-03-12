@@ -3,9 +3,9 @@ import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { serverApi } from '@/lib/server-api';
 import { toTitleCase } from '@/lib/utils';
-import { buildItemListSchema, buildBreadcrumbSchema } from '@/lib/schema/listing-schema';
+import { buildCollectionPageSchema } from '@/lib/schema/listing-schema';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://rent-ghar.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://propertydealer.pk';
 
 interface PageProps {
   params: Promise<{
@@ -67,18 +67,26 @@ export async function generateMetadata(
   const purpose = 'Rent & Sale';
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(citySlug);
 
+  // Helper: find typeContent matching type + purpose (all page accepts 'all' OR any specific purpose)
+  const findTypeContent = (type: string) =>
+    cityData?.typeContents?.find(
+      (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase()
+    ) || null;
+
   if (areaData && propertyType) {
+    // area + type → area's meta first, then auto-generated
     const areaName = toTitleCase(areaData.name);
     const typeName = toTitleCase(propertyType);
     return {
-      title: `${typeName} for ${purpose} in ${areaName}, ${cityName}`,
-      description: `Find ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. Browse verified listings on Property Dealer.`,
+      title: areaData.metaTitle || `${typeName} for ${purpose} in ${areaName}, ${cityName}`,
+      description: areaData.metaDescription || `Find ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. Browse verified listings on Property Dealer.`,
       alternates: { canonical: `/properties/all/${citySlug}/${segments.join('/')}` },
     };
   }
 
   if (areaData) {
     const areaName = toTitleCase(areaData.name);
+    // For 'all' purpose, prefer general metaTitle, fallback to auto-generated
     return {
       title: areaData.metaTitle || `Properties in ${areaName}, ${cityName}`,
       description: areaData.metaDescription || `Discover properties in ${areaName}, ${cityName}. View photos, prices, and details on Property Dealer.`,
@@ -88,12 +96,13 @@ export async function generateMetadata(
 
   if (propertyType) {
     const typeName = toTitleCase(propertyType);
-    const specificContent = cityData?.typeContents?.find(
-      (tc: any) => tc.propertyType.toLowerCase() === propertyType.toLowerCase() && tc.purpose === 'all'
-    );
+    const tc = findTypeContent(propertyType);
+    // Use custom meta if set, otherwise auto-generate
+    const titleText = tc?.metaTitle?.trim() || `${typeName} for ${purpose} in ${cityName}`;
+    const descText = tc?.metaDescription?.trim() || `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse verified listings on Property Dealer.`;
     return {
-      title: specificContent?.metaTitle || `${typeName} for ${purpose} in ${cityName}`,
-      description: specificContent?.metaDescription || `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse verified listings on Property Dealer.`,
+      title: titleText,
+      description: descText,
       alternates: { canonical: `/properties/all/${citySlug}/${segments[0]}` },
     };
   }
@@ -110,17 +119,23 @@ export default async function AllCitySegmentsPage(props: PageProps) {
   const listingType = propertyType || 'all';
   const areaId = areaData?._id;
 
-  const specificContent = propertyType && !areaData && cityData?.typeContents?.find(
-    (tc: any) => tc.propertyType.toLowerCase() === propertyType.toLowerCase() && tc.purpose === 'all'
-  );
+  // Find typeContent: match by type name (any purpose is fine for 'all' route)
+  const specificContent = propertyType && !areaData
+    ? cityData?.typeContents?.find(
+      (tc: any) => tc.propertyType.toLowerCase() === propertyType.toLowerCase()
+    ) || null
+    : null;
 
-  // Show rich content only when context is unambiguous:
-  // - area-only page  → area description
-  // - type-only page  → city typeContent for that type
-  // - area+type page  → nothing (no generic content, avoids confusion)
+  // richDescription rules:
+  // - area+type page  → nothing (no content shown)
+  // - area-only page  → areaData.description (if set)
+  // - type-only page  → specificContent.content ONLY if explicitly set by admin (no city fallback)
+  // - city-only page  → city description (handled by [city]/page.tsx, not here)
   const richDescription = areaData && propertyType
     ? undefined
-    : areaData?.description || (specificContent as any)?.content || cityData?.description;
+    : areaData
+      ? (areaData.description || undefined)
+      : (specificContent?.content?.trim() ? specificContent.content : undefined);
 
   // --- Schema.org ---
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(city);
@@ -146,26 +161,14 @@ export default async function AllCitySegmentsPage(props: PageProps) {
       id: p._id,
       slug: p.slug,
       name: p.title,
-      type: p.propertyType,
-      price: p.price,
-      purpose: p.listingType,
-      city: typeof p.area === 'object' ? p.area?.city?.name || city : city,
-      location: p.location,
-      bedrooms: p.bedrooms,
-      bathrooms: p.bathrooms,
-      area: p.areaSize,
-      image: p.mainPhotoUrl,
-      createdAt: p.createdAt,
     }));
   } catch {
     // Schema is non-critical — fail silently
   }
 
-  const itemListSchema = buildItemListSchema(schemaProperties, pageUrl, pageTitle);
-
   // Breadcrumb
   const breadcrumbs = [
-    { name: 'Home', url: BASE_URL },
+    { name: 'Home', url: `${BASE_URL}/` },
     { name: 'Properties', url: `${BASE_URL}/properties/all` },
     { name: cityName, url: `${BASE_URL}/properties/all/${city}` },
     ...(areaName ? [{ name: areaName, url: `${BASE_URL}/properties/all/${city}/${areaSlug}` }] : []),
@@ -175,17 +178,24 @@ export default async function AllCitySegmentsPage(props: PageProps) {
         ? [{ name: `${typeName}s`, url: `${BASE_URL}/properties/all/${city}/${segments[0]}` }]
         : []),
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const collectionSchema = buildCollectionPageSchema({
+    url: pageUrl,
+    title: pageTitle,
+    cityName,
+    properties: schemaProperties.map(p => ({
+      title: p.name,
+      url: `${BASE_URL}/p/${p.slug || p.id}`
+    })),
+    totalItems: schemaProperties.length,
+    crumbs: breadcrumbs
+  });
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
       />
       <Suspense fallback={
         <div className="min-h-screen bg-background flex items-center justify-center">

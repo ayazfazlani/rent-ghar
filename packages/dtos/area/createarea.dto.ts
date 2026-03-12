@@ -28,4 +28,28 @@ export class CreateAreaDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  rentMetaTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  rentMetaDescription?: string;
+
+  @IsOptional()
+  @IsString()
+  rentContent?: string;
+
+  @IsOptional()
+  @IsString()
+  saleMetaTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  saleMetaDescription?: string;
+
+  @IsOptional()
+  @IsString()
+  saleContent?: string;
 }

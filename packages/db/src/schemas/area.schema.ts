@@ -26,7 +26,27 @@ export class Area {
   canonicalUrl?: string;
 
   @Prop({ trim: true })
-  description?: string; // Rich Text
+  description?: string; // Rich Text (general)
+
+  // Rent-specific SEO & content
+  @Prop({ trim: true })
+  rentMetaTitle?: string;
+
+  @Prop({ trim: true })
+  rentMetaDescription?: string;
+
+  @Prop({ trim: true })
+  rentContent?: string; // Rich Text for rent pages
+
+  // Sale-specific SEO & content
+  @Prop({ trim: true })
+  saleMetaTitle?: string;
+
+  @Prop({ trim: true })
+  saleMetaDescription?: string;
+
+  @Prop({ trim: true })
+  saleContent?: string; // Rich Text for sale pages
 
   // Properties are optional - an area can exist without properties initially
   // Properties will reference the area, not the other way around

@@ -257,11 +257,21 @@ export default function PropertiesListing({
     fetchData();
   }, [matchedCity, purpose, type, advancedFilters, searchParams, currentPage, initialAreaId]);
 
-  // Derive richDescription from allCities based on purpose if not explicitly provided
+  // Derive richDescription from allCities based on purpose if not explicitly provided.
+  // IMPORTANT: Only fall back to city-level content when:
+  //   - No type filter is active (type === 'all' or empty) AND
+  //   - No area filter is active
+  // Otherwise content shown would be misleading (e.g. city rent content on offices page).
   const effectiveRichDescription = useMemo(() => {
+    // If an explicit richDescription was passed from the server page, always use it
     if (richDescription) return richDescription;
 
-    // Only attempt to derive if we have a city matched
+    // Suppress fallback when a specific type or area filter is active
+    const hasTypeFilter = type && type !== 'all';
+    const hasAreaFilter = !!(initialAreaId || initialAreaSlug);
+    if (hasTypeFilter || hasAreaFilter) return undefined;
+
+    // City-only page: derive from city data
     if (!matchedCity || allCities.length === 0) return undefined;
 
     const cityData = allCities.find(c => c.name.toLowerCase() === matchedCity.toLowerCase());
@@ -271,7 +281,7 @@ export default function PropertiesListing({
     if (purpose === 'buy') return cityData.saleContent;
 
     return cityData.description;
-  }, [richDescription, matchedCity, allCities, purpose]);
+  }, [richDescription, matchedCity, allCities, purpose, type, initialAreaId, initialAreaSlug]);
 
 
   // Update state when props change
@@ -517,6 +527,13 @@ export default function PropertiesListing({
 
 
 
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
+                {type !== 'all' ? `${type.charAt(0).toUpperCase() + type.slice(1)}s` : 'Properties'}
+                {purpose === 'rent' ? ' for Rent ' : purpose === 'buy' ? ' for Sale ' : ' '}
+                in {matchedCity || 'Pakistan'}
+              </h1>
+
+
               {/* Properties Grid */}
               <div className="pt-4">
                 <div className="flex items-center justify-between mb-6">
@@ -629,11 +646,7 @@ export default function PropertiesListing({
               {/* <p className="text-[10px] md:text-sm font-bold text-primary mb-1 uppercase tracking-widest opacity-70">
                 Property Search
               </p> */}
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
-                {type !== 'all' ? `${type.charAt(0).toUpperCase() + type.slice(1)}s` : 'Properties'}
-                {purpose === 'rent' ? ' for Rent ' : purpose === 'buy' ? ' for Sale ' : ' '}
-                in {matchedCity || 'Pakistan'}
-              </h1>
+
               {effectiveRichDescription && (
                 <div
                   className="mt-6 prose prose-sm max-w-4xl text-muted-foreground prose-headings:text-foreground prose-a:text-primary"

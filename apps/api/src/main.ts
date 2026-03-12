@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import 'tsconfig-paths/register';
 import { NestFactory } from '@nestjs/core';
+// Reload triggered by Antigravity at 2026-03-11
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';

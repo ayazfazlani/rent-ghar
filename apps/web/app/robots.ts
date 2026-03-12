@@ -6,11 +6,25 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
+      allow: [
+        '/',
+        '/properties',
+        '/blog',
+        '/images/',
+        '/assets/',
+        '/css/',
+        '/js/',
+      ],
       disallow: [
-        '/dashboard/',
-        '/api/',
+        '/search',
+        '/*?*',
+        '/filter',
+        '/tag',
+        '/admin',
         '/login',
+        '/register',
+        '/dashboard',
+        '/*page=',
       ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,

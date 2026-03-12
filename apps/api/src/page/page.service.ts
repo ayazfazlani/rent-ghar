@@ -59,7 +59,7 @@ export class PageService {
                 const savedPage = await page.save();
                 
                 if (savedPage.status === 'PUBLISHED' && savedPage.slug) {
-                    const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+                    const host = this.configService.get<string>('APP_HOST') || 'propertydealer.pk';
                     const url = `https://${host}/${savedPage.slug}`;
                     this.indexNowService.submitUrl(url).catch(err => {
                         console.error('Failed to submit URL to IndexNow:', err);
@@ -169,7 +169,7 @@ export class PageService {
         }
 
         if (page.status === 'PUBLISHED' && page.slug) {
-            const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+            const host = this.configService.get<string>('APP_HOST') || 'propertydealer.pk';
             const url = `https://${host}/${page.slug}`;
             this.indexNowService.submitUrl(url).catch(err => {
                 console.error('Failed to submit URL to IndexNow:', err);

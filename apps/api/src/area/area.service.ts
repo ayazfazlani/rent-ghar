@@ -29,6 +29,12 @@ export class AreaService {
       areaData.canonicalUrl = createAreaDto.canonicalUrl;
     if (createAreaDto.description)
       areaData.description = createAreaDto.description;
+    if (createAreaDto.rentMetaTitle) areaData.rentMetaTitle = createAreaDto.rentMetaTitle;
+    if (createAreaDto.rentMetaDescription) areaData.rentMetaDescription = createAreaDto.rentMetaDescription;
+    if (createAreaDto.rentContent) areaData.rentContent = createAreaDto.rentContent;
+    if (createAreaDto.saleMetaTitle) areaData.saleMetaTitle = createAreaDto.saleMetaTitle;
+    if (createAreaDto.saleMetaDescription) areaData.saleMetaDescription = createAreaDto.saleMetaDescription;
+    if (createAreaDto.saleContent) areaData.saleContent = createAreaDto.saleContent;
 
     const createdArea = new this.areaModel(areaData);
     return await createdArea.save();
@@ -125,13 +131,34 @@ export class AreaService {
     if (!isValidObjectId(id)) {
       throw new NotFoundException('Invalid area ID');
     }
-    const area = await this.areaModel
-      .findByIdAndUpdate(id, updateAreaDto, { new: true })
-      .populate('city', 'name state country')
-      .exec();
+
+    console.log('UpdateArea Input:', JSON.stringify(updateAreaDto, null, 2));
+
+    // Construct update object to avoid overwriting fields with undefined
+    const updateData: any = {};
+    Object.keys(updateAreaDto).forEach(key => {
+      if (updateAreaDto[key] !== undefined) {
+        updateData[key] = updateAreaDto[key];
+      }
+    });
+
+    const area = await this.areaModel.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).populate('city', 'name state country').exec();
+
     if (!area) {
       throw new NotFoundException('Area not found');
     }
+
+    console.log('UpdateArea Success. Updated fields:', {
+      rentMetaTitle: area.rentMetaTitle,
+      saleMetaTitle: area.saleMetaTitle,
+      rentMetaDescription: area.rentMetaDescription,
+      saleMetaDescription: area.saleMetaDescription
+    });
+
     return area;
   }
 

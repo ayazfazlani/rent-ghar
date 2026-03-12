@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+// Force reload of Area Module and its Schema
 import { MongooseModule } from '@nestjs/mongoose';
 import { AreaController } from './area.controller';
 import { AreaService } from './area.service';

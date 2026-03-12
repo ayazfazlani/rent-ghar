@@ -4,10 +4,19 @@ export interface CreateAreaData {
   name: string;
   city: string; // City ID
   areaSlug: string;
+  // General SEO
   metaTitle?: string;
   metaDescription?: string;
   canonicalUrl?: string;
   description?: string;
+  // Rent-specific
+  rentMetaTitle?: string;
+  rentMetaDescription?: string;
+  rentContent?: string;
+  // Sale-specific
+  saleMetaTitle?: string;
+  saleMetaDescription?: string;
+  saleContent?: string;
 }
 
 export const areaApi = {

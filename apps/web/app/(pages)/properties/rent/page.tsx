@@ -4,6 +4,10 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { toTitleCase } from '@/lib/utils';
 
+import { buildCollectionPageSchema } from '@/lib/schema/listing-schema';
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://propertydealer.pk';
+
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
@@ -66,35 +70,69 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 export default async function RentRootPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const cityName = (params.city as string) || '';
+  const type = (params.type as string) || '';
 
   let cityRichDescription = '';
+  let cityDetails: any = null;
   if (cityName) {
     try {
-      const cityData = await serverApi.getCityByName(cityName);
-      const type = (params.type as string) || '';
-      
-      const specificContent = type && type !== 'all' && cityData?.typeContents?.find(
+      cityDetails = await serverApi.getCityByName(cityName);
+
+      const specificContent = type && type !== 'all' && cityDetails?.typeContents?.find(
         (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && tc.purpose === 'rent'
       );
 
-      cityRichDescription = specificContent?.content || cityData?.rentContent || '';
+      cityRichDescription = specificContent?.content || cityDetails?.rentContent || '';
     } catch (e) {
       console.warn('Could not fetch city content for SEO:', e);
     }
   }
 
+  // --- Schema ---
+  const pageUrl = `${BASE_URL}/properties/rent${cityName ? `/${cityName.toLowerCase()}` : ''}${type && type !== 'all' ? `/${type.toLowerCase()}` : ''}`;
+  const pageTitle = `Properties for Rent${cityName ? ` in ${toTitleCase(cityName)}` : ' in Pakistan'}`;
+
+  let schemaProperties: any[] = [];
+  try {
+    const q = cityName ? `city=${cityName}&purpose=rent&limit=20` : 'purpose=rent&limit=20';
+    const res = await serverApi.getProperties(q);
+    const rawProps: any[] = Array.isArray(res) ? res : (res as any).properties || [];
+    schemaProperties = rawProps.map((p: any) => ({
+      id: p._id, slug: p.slug, name: p.title
+    }));
+  } catch { /* skip schema failing */ }
+
+  const collectionSchema = buildCollectionPageSchema({
+    url: pageUrl,
+    title: pageTitle,
+    cityName: cityName || 'Pakistan',
+    properties: schemaProperties.map(p => ({
+      title: p.name,
+      url: `${BASE_URL}/p/${p.slug || p.id}`
+    })),
+    totalItems: schemaProperties.length,
+    crumbs: [
+      { name: 'Home', url: `${BASE_URL}/` },
+      { name: 'Properties for Rent', url: `${BASE_URL}/properties/rent` },
+      ...(cityName ? [{ name: toTitleCase(cityName), url: `${BASE_URL}/properties/rent/${cityName.toLowerCase()}` }] : [])
+    ]
+  });
+
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    }>
-      <PropertiesListing
-        purpose="rent"
-        useCleanUrls={true}
-        city={cityName}
-        richDescription={cityRichDescription}
-      />
-    </Suspense>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }} />
+      <Suspense fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <PropertiesListing
+          purpose="rent"
+          useCleanUrls={true}
+          city={cityName}
+          richDescription={cityRichDescription}
+        />
+      </Suspense>
+    </>
   );
 }

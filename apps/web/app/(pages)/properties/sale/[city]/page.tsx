@@ -3,9 +3,9 @@ import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { serverApi } from '@/lib/server-api';
 import { toTitleCase } from '@/lib/utils';
-import { buildItemListSchema, buildBreadcrumbSchema, buildSearchActionSchema } from '@/lib/schema/listing-schema';
+import { buildCollectionPageSchema } from '@/lib/schema/listing-schema';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://rent-ghar.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://propertydealer.pk';
 
 interface PageProps {
   params: Promise<{ city: string }>;
@@ -58,19 +58,25 @@ export default async function SaleCityPage(props: PageProps) {
     }));
   } catch { /* non-critical */ }
 
-  const itemListSchema = buildItemListSchema(schemaProperties, pageUrl, pageTitle);
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: 'Home', url: BASE_URL },
-    { name: 'Properties for Sale', url: `${BASE_URL}/properties/sale` },
-    { name: cityName, url: pageUrl },
-  ]);
-  const searchActionSchema = buildSearchActionSchema(cityName, city);
+  const collectionSchema = buildCollectionPageSchema({
+    url: pageUrl,
+    title: pageTitle,
+    cityName,
+    properties: schemaProperties.map(p => ({
+      title: p.name,
+      url: `${BASE_URL}/p/${p.slug || p.id}`
+    })),
+    totalItems: schemaProperties.length,
+    crumbs: [
+      { name: 'Home', url: BASE_URL },
+      { name: 'Properties for Sale', url: `${BASE_URL}/properties/sale` },
+      { name: cityName, url: pageUrl },
+    ]
+  });
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(searchActionSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }} />
       <Suspense fallback={
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

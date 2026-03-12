@@ -105,7 +105,7 @@ export class BlogService {
         console.log('✅ Blog created successfully with ID:', blog._id);
 
         if (blog.status === 'published' && blog.slug) {
-            const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+            const host = this.configService.get<string>('APP_HOST') || 'propertydealer.pk';
             const url = `https://${host}/blog/${blog.slug}`;
             this.indexNowService.submitUrl(url).catch(err => {
                 console.error('Failed to submit URL to IndexNow:', err);
@@ -214,7 +214,7 @@ export class BlogService {
         }
 
         if (blog.status === 'published' && blog.slug) {
-            const host = this.configService.get<string>('APP_HOST') || 'rent-ghar.com';
+            const host = this.configService.get<string>('APP_HOST') || 'propertydealer.pk';
             const url = `https://${host}/blog/${blog.slug}`;
             this.indexNowService.submitUrl(url).catch(err => {
                 console.error('Failed to submit URL to IndexNow:', err);
