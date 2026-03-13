@@ -74,6 +74,7 @@ export default function AddProperty() {
   const [whatsappNumber, setWhatsappNumber] = useState('')
   const [latitude, setLatitude] = useState<number | undefined>()
   const [longitude, setLongitude] = useState<number | undefined>()
+  const [videoUrl, setVideoUrl] = useState('')
 
   // Cities and Areas state
   const [cities, setCities] = useState<City[]>([])
@@ -323,6 +324,7 @@ export default function AddProperty() {
 
       if (latitude !== undefined) formData.append('latitude', latitude.toString())
       if (longitude !== undefined) formData.append('longitude', longitude.toString())
+      if (videoUrl) formData.append('videoUrl', videoUrl)
 
       // Add features (filter out empty strings)
       const validFeatures = features.filter(f => f.trim() !== '')
@@ -822,7 +824,22 @@ export default function AddProperty() {
               </label>
               {/* rich editor */}
               <RichEditor value={description} onChange={setDescription} />
+            </div>
 
+            {/* Video URL */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                YouTube Video URL (Optional)
+              </label>
+              <input
+                type="url"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=..."
+                disabled={isLoading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <p className="text-xs text-gray-500 mt-1">Provide a YouTube link to showcase a video of your property.</p>
             </div>
 
             {/* Features */}

@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation';
-import { MapPin, Bed, Bath, Maximize } from 'lucide-react';
+import { MapPin, Bed, Bath, Maximize, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Property } from '@/lib/data';
 import { toTitleCase } from '@/lib/utils';
@@ -71,6 +71,12 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           <span className="px-2 md:px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 animate-in fade-in slide-in-from-left duration-500">
             {property.purpose === 'buy' ? 'For Sale' : 'For Rent'}
           </span>
+          {property.videoUrl && (
+            <span className="flex items-center gap-1 px-2 md:px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full shadow-lg shadow-red-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-red-900/40 animate-in fade-in slide-in-from-left duration-700">
+              <Play className="w-3 h-3 fill-current" />
+              Video
+            </span>
+          )}
         </div>
 
         {/* Type Badge with Animation */}

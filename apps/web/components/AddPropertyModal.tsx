@@ -28,6 +28,7 @@ const AddPropertyModal = ({ open, onClose }: AddPropertyModalProps) => {
     bathrooms: '',
     area: '',
     description: '',
+    videoUrl: '',
   });
 
   const [cities, setCities] = useState<any[]>([]);
@@ -74,6 +75,7 @@ const AddPropertyModal = ({ open, onClose }: AddPropertyModalProps) => {
       bathrooms: '',
       area: '',
       description: '',
+      videoUrl: '',
     });
   };
 
@@ -210,6 +212,17 @@ const AddPropertyModal = ({ open, onClose }: AddPropertyModalProps) => {
               rows={4}
               value={formData.description}
               onChange={(e) => updateField('description', e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="prop-video">YouTube Video URL (Optional)</Label>
+            <Input
+              id="prop-video"
+              type="url"
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={formData.videoUrl}
+              onChange={(e) => updateField('videoUrl', e.target.value)}
             />
           </div>
 

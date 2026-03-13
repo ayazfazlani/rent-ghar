@@ -24,6 +24,7 @@ export interface Property {
   latitude?: number;
   whatsappNumber?: string;
   contactNumber?: string;
+  videoUrl?: string | null;
 }
 
 export interface Hotel {

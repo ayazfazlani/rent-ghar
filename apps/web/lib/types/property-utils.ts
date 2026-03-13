@@ -52,6 +52,7 @@ export interface BackendProperty {
   updatedAt?: string;
   latitude?: number;
   longitude?: number;
+  videoUrl?: string | null;
 }
 
 export const PROPERTY_TYPE_ORDER = [
@@ -173,6 +174,7 @@ export function mapBackendToFrontendProperty(backend: BackendProperty): Property
     longitude: backend.longitude,
     whatsappNumber: backend.whatsappNumber,
     contactNumber: backend.contactNumber,
+    videoUrl: backend.videoUrl,
   };
 }
 

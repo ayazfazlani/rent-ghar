@@ -618,6 +618,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     { id: 'overview-section', label: 'Overview' },
                     { id: 'description-section', label: 'Description' },
                     { id: 'features-section', label: 'Features & Amenities' },
+                    ...(property.videoUrl ? [{ id: 'video-section', label: 'Video' }] : []),
                     { id: 'location-section', label: 'Location' },
                   ].map((tab) => (
                     <button
@@ -736,6 +737,40 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   )}
                 </CardContent>
               </Card>
+
+              {property.videoUrl && (
+                <Card id="video-section" className="scroll-mt-28">
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-bold mb-4">Property Video</h2>
+                    <div className="relative aspect-video rounded-lg overflow-hidden bg-secondary">
+                      {(() => {
+                        const url = property.videoUrl || '';
+                        let videoId = '';
+                        if (url.includes('v=')) {
+                          videoId = url.split('v=')[1]?.split('&')[0] || '';
+                        } else if (url.includes('youtu.be/')) {
+                          videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+                        } else {
+                          videoId = url.split('/').pop() || '';
+                        }
+
+                        return (
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            src={`https://www.youtube.com/embed/${videoId}`}
+                            title="Property Video"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="absolute inset-0"
+                          />
+                        );
+                      })()}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Location */}
               <Card id="location-section" className="scroll-mt-28">
