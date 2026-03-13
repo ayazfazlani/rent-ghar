@@ -10,7 +10,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Search, Loader2 } from 'lucide-react';
 import { propertyApi, cityApi } from '@/lib/api';
-import { BackendProperty, mapBackendToFrontendProperty } from '@/lib/types/property-utils';
+import { BackendProperty, mapBackendToFrontendProperty, sortPropertyTypes } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 import { cn, toTitleCase } from '@/lib/utils';
 import {
@@ -121,11 +121,12 @@ export default function PropertiesFilterBar() {
 
   const propertyTypes = useMemo(() => {
     if (allPropertyTypes && allPropertyTypes.length > 0) {
-      // Capitalize first letter of each type for display
-      return allPropertyTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1)).sort();
+      // Capitalize first letter of each type for display and apply custom sort
+      const mapped = allPropertyTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1));
+      return sortPropertyTypes(mapped, t => t);
     }
     const uniqueTypes = Array.from(new Set(properties.map((p: Property) => p.type).filter(Boolean))) as string[];
-    return uniqueTypes.sort();
+    return sortPropertyTypes(uniqueTypes, t => t);
   }, [properties, allPropertyTypes]);
 
   // Helper functions for city slug conversion

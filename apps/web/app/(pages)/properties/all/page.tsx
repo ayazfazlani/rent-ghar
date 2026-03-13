@@ -18,18 +18,23 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const type = (params.type as string) || '';
 
   const purpose = 'Rent & Sale';
-  let title = `Properties for ${purpose} in Pakistan `;
-  let description = `Search and find properties for ${purpose.toLowerCase()} across Pakistan. Browse houses, apartments, plots and commercial properties on Property Dealer.`;
+  const typeName = type && type !== 'all'
+    ? (type.toLowerCase() === 'house' ? 'Property' : toTitleCase(type))
+    : 'Properties';
+  let title = `${typeName} for ${purpose} in Pakistan `;
+  let description = `Search and find ${typeName.toLowerCase()} for ${purpose.toLowerCase()} across Pakistan. Browse houses, apartments, plots and commercial properties on Property Dealer.`;
 
   if (cityName) {
     try {
       const cityData = await serverApi.getCityByName(cityName);
       if (cityData) {
-        const typeName = type && type !== 'all' ? toTitleCase(type) : 'Properties';
+        const typeName = type && type !== 'all'
+          ? (type.toLowerCase() === 'house' ? 'Property' : toTitleCase(type))
+          : 'Properties';
         const formattedCity = toTitleCase(cityData.name);
 
-        title = `${typeName} in ${formattedCity} `;
-        description = `Find the latest ${typeName.toLowerCase()} in ${formattedCity}. Browse real estate listings for ${purpose.toLowerCase()} in ${formattedCity}, Pakistan on Property Dealer.`;
+        title = `${typeName} for ${purpose} in ${formattedCity} `;
+        description = `Find the latest ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${formattedCity}. Browse real estate listings for ${purpose.toLowerCase()} in ${formattedCity}, Pakistan on Property Dealer.`;
 
         // If city has custom meta, use it if no type is selected
         if (type === 'all' || !type) {
@@ -89,8 +94,11 @@ export default async function AllRootPage({ searchParams }: PageProps) {
   }
 
   // --- Schema ---
+  const typeName = type && type !== 'all'
+    ? (type.toLowerCase() === 'house' ? 'Property' : toTitleCase(type))
+    : 'Properties';
   const pageUrl = `${BASE_URL}/properties/all${cityName ? `/${cityName.toLowerCase()}` : ''}${type && type !== 'all' ? `/${type.toLowerCase()}` : ''}`;
-  const pageTitle = `Properties for Rent & Sale${cityName ? ` in ${toTitleCase(cityName)}` : ' in Pakistan'}`;
+  const pageTitle = `${typeName} for Rent & Sale${cityName ? ` in ${toTitleCase(cityName)}` : ' in Pakistan'}`;
 
   let schemaProperties: any[] = [];
   try {

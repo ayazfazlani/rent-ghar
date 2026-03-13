@@ -18,14 +18,19 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const type = (params.type as string) || '';
 
   const purpose = 'Sale';
-  let title = `Properties for ${purpose} in Pakistan `;
-  let description = `Find your dream home with Property Dealer. Browse thousands of houses, plots, and commercial properties for ${purpose.toLowerCase()} in Pakistan.`;
+  const typeName = type && type !== 'all'
+    ? (type.toLowerCase() === 'house' ? 'Property' : toTitleCase(type))
+    : 'Properties';
+  let title = `${typeName} for ${purpose} in Pakistan `;
+  let description = `Find your dream home with Property Dealer. Browse thousands of houses, plots, and commercial ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in Pakistan.`;
 
   if (cityName) {
     try {
       const cityData = await serverApi.getCityByName(cityName);
       if (cityData) {
-        const typeName = type && type !== 'all' ? toTitleCase(type) : 'Properties';
+        const typeName = type && type !== 'all'
+          ? (type.toLowerCase() === 'house' ? 'Property' : toTitleCase(type))
+          : 'Properties';
         const formattedCity = toTitleCase(cityData.name);
 
         title = `${typeName} for ${purpose} in ${formattedCity} `;
@@ -89,8 +94,11 @@ export default async function SaleRootPage({ searchParams }: PageProps) {
   }
 
   // --- Schema ---
+  const typeName = type && type !== 'all'
+    ? (type.toLowerCase() === 'house' ? 'Property' : toTitleCase(type))
+    : 'Properties';
   const pageUrl = `${BASE_URL}/properties/sale${cityName ? `/${cityName.toLowerCase()}` : ''}${type && type !== 'all' ? `/${type.toLowerCase()}` : ''}`;
-  const pageTitle = `Properties for Sale${cityName ? ` in ${toTitleCase(cityName)}` : ' in Pakistan'}`;
+  const pageTitle = `${typeName} for Sale${cityName ? ` in ${toTitleCase(cityName)}` : ' in Pakistan'}`;
 
   let schemaProperties: any[] = [];
   try {

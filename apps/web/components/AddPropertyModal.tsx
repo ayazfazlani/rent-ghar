@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { cityApi, propertyApi } from '@/lib/api';
+import { sortPropertyTypes } from '@/lib/types/property-utils';
 
 interface AddPropertyModalProps {
   open: boolean;
@@ -42,8 +43,9 @@ const AddPropertyModal = ({ open, onClose }: AddPropertyModalProps) => {
           propertyApi.getTypes()
         ]);
         setCities(citiesData);
-        // Capitalize for display
-        setPropertyTypes(typesData.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1)));
+        // Capitalize and sort
+        const mapped = typesData.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1));
+        setPropertyTypes(sortPropertyTypes(mapped, t => t));
       } catch (error) {
         console.error('Error fetching data for modal:', error);
       } finally {

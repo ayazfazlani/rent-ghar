@@ -528,7 +528,9 @@ export default function PropertiesListing({
 
 
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
-                {type !== 'all' ? `${type.charAt(0).toUpperCase() + type.slice(1)}s` : 'Properties'}
+                {type !== 'all'
+                  ? (type.toLowerCase() === 'house' ? 'Property' : `${type.charAt(0).toUpperCase() + type.slice(1)}s`)
+                  : 'Properties'}
                 {purpose === 'rent' ? ' for Rent ' : purpose === 'buy' ? ' for Sale ' : ' '}
                 in {matchedCity || 'Pakistan'}
               </h1>

@@ -77,7 +77,7 @@ export async function generateMetadata(
 
   if (areaData && propertyType) {
     const areaName = toTitleCase(areaData.name);
-    const typeName = toTitleCase(propertyType);
+    const typeName = propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType);
     // area+type: prefer rent-specific meta, then general area meta
     return {
       title: areaData.rentMetaTitle?.trim() || areaData.metaTitle || `${typeName} for ${purpose} in ${areaName}, ${cityName}`,
@@ -96,7 +96,7 @@ export async function generateMetadata(
   }
 
   if (propertyType) {
-    const typeName = toTitleCase(propertyType);
+    const typeName = propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType);
     const tc = findTypeContent(propertyType);
     const titleText = tc?.metaTitle?.trim() || `${typeName} for ${purpose} in ${cityName}`;
     const descText = tc?.metaDescription?.trim() || `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse verified listings on Property Dealer.`;
@@ -141,10 +141,10 @@ export default async function RentCitySegmentsPage(props: PageProps) {
   // --- Schema.org ---
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(city);
   const areaName = areaData ? toTitleCase(areaData.name) : null;
-  const typeName = propertyType ? toTitleCase(propertyType) : null;
+  const typeName = propertyType ? (propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType)) : null;
   const pageUrl = `${BASE_URL}/properties/rent/${city}/${segments.join('/')}`;
   const pageTitle = [
-    typeName ? `${typeName}s` : 'Properties',
+    typeName ? (typeName === 'Property' ? 'Property' : `${typeName}s`) : 'Properties',
     'for Rent',
     areaName ? `in ${areaName}, ${cityName}` : `in ${cityName}`,
   ].join(' ');
@@ -168,9 +168,9 @@ export default async function RentCitySegmentsPage(props: PageProps) {
     { name: cityName, url: `${BASE_URL}/properties/rent/${city}` },
     ...(areaName ? [{ name: areaName, url: `${BASE_URL}/properties/rent/${city}/${areaSlug}` }] : []),
     ...(typeName && areaName
-      ? [{ name: `${typeName}s`, url: `${BASE_URL}/properties/rent/${city}/${areaSlug}/${segments[1]}` }]
+      ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/rent/${city}/${areaSlug}/${segments[1]}` }]
       : typeName
-        ? [{ name: `${typeName}s`, url: `${BASE_URL}/properties/rent/${city}/${segments[0]}` }]
+        ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/rent/${city}/${segments[0]}` }]
         : []),
   ];
 

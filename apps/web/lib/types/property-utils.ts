@@ -54,6 +54,35 @@ export interface BackendProperty {
   longitude?: number;
 }
 
+export const PROPERTY_TYPE_ORDER = [
+  'house',
+  'apartment',
+  'shop',
+  'office',
+  'flat',
+  'commercial',
+  'plot',
+  'land',
+  'factory',
+  'hotel',
+  'restaurant',
+  'other'
+];
+
+export function sortPropertyTypes<T>(types: T[], getTypeValue: (t: T) => string): T[] {
+  return [...types].sort((a, b) => {
+    const valA = getTypeValue(a).toLowerCase();
+    const valB = getTypeValue(b).toLowerCase();
+    const indexA = PROPERTY_TYPE_ORDER.indexOf(valA);
+    const indexB = PROPERTY_TYPE_ORDER.indexOf(valB);
+
+    if (indexA === -1 && indexB === -1) return valA.localeCompare(valB);
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+}
+
 function toSlug(value: string): string {
   return value
     .toLowerCase()

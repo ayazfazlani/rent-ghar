@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, X, MapPin, Home, Loader2, Map } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { propertyApi, cityApi, areaApi } from '@/lib/api';
-import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
+import { mapBackendToFrontendProperty, BackendProperty, sortPropertyTypes } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 import { toTitleCase } from '@/lib/utils';
 
@@ -30,7 +30,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
   const [allProperties, setAllProperties] = useState<Property[]>(initialProperties || []);
   const [cityList, setCityList] = useState<{ _id: string; name: string }[]>(initialCities || []);
   const [areaList, setAreaList] = useState<{ _id: string; name: string; areaSlug: string }[]>([]);
-  const [propertyTypes, setPropertyTypes] = useState<string[]>(initialTypes || []);
+  const [propertyTypes, setPropertyTypes] = useState<string[]>(initialTypes ? sortPropertyTypes(initialTypes, t => t) : []);
   const [loading, setLoading] = useState(!initialCities || !initialProperties || !initialTypes);
   const [loadingAreas, setLoadingAreas] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -88,7 +88,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ initialCities, initialPropert
         const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
         setAllProperties(transformedProperties);
 
-        setPropertyTypes(typesData.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1)).sort());
+        const mappedTypes = typesData.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1));
+        setPropertyTypes(sortPropertyTypes(mappedTypes, t => t));
 
         if (sortedCities.length > 0 && !city) {
           setCity(sortedCities[0].name);

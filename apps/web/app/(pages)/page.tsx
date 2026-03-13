@@ -9,7 +9,7 @@ import WhyChooseUs from "@/components/WhyChooseUs";
 import AgentSignupSection from "@/components/AgentSignupSection";
 import FAQSection from "@/components/FAQSection";
 import { serverApi } from "@/lib/server-api";
-import { mapBackendToFrontendProperty } from "@/lib/types/property-utils";
+import { mapBackendToFrontendProperty, sortPropertyTypes } from "@/lib/types/property-utils";
 import { transformBlogsToPosts } from "@/lib/utils/blog-utils";
 import { Metadata } from "next";
 
@@ -166,8 +166,9 @@ export default async function Home() {
   // 4. Pre-process Types for HeroSection
   const processedTypes = typesData
     .filter((t: any) => typeof t === "string")
-    .map((t: string) => t.charAt(0).toUpperCase() + t.slice(1))
-    .sort();
+    .map((t: string) => t.charAt(0).toUpperCase() + t.slice(1));
+
+  const sortedProcessedTypes = sortPropertyTypes(processedTypes, t => t);
 
   // 5. Pre-process Blogs for BlogSection
   const processedBlogs = transformBlogsToPosts(blogsData).slice(0, 6);
@@ -179,7 +180,7 @@ export default async function Home() {
           .map((c: any) => ({ _id: c._id, name: c.name }))
           .sort((a: any, b: any) => a.name.localeCompare(b.name))}
         initialProperties={transformedProperties}
-        initialTypes={processedTypes}
+        initialTypes={sortedProcessedTypes}
       />
       <PopularLocations initialCities={processedCities} />
       <FeaturedSection initialProperties={featuredProperties} />

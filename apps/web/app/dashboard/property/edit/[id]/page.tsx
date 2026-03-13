@@ -349,12 +349,12 @@ export default function EditProperty() {
     const mapping: Record<string, string> = {
       'House': 'house',
       'Apartment': 'apartment',
+      'Shop': 'shop',
+      'Office': 'office',
       'Flat': 'flat',
       'Commercial': 'commercial',
       'Plot': 'plot',
       'Land': 'land',
-      'Shop': 'shop',
-      'Office': 'office',
       'Factory': 'factory',
       'Hotel': 'hotel',
       'Restaurant': 'restaurant',
@@ -503,16 +503,16 @@ export default function EditProperty() {
                 <SelectContent>
                   <SelectItem value="House">House</SelectItem>
                   <SelectItem value="Apartment">Apartment</SelectItem>
-                  <SelectItem value="Flat">Flat</SelectItem>
-                  <SelectItem value="Plot">Plot</SelectItem>
-                  <SelectItem value="Land">Land</SelectItem>
                   <SelectItem value="Shop">Shop</SelectItem>
                   <SelectItem value="Office">Office</SelectItem>
+                  <SelectItem value="Flat">Flat</SelectItem>
+                  <SelectItem value="Commercial">Commercial</SelectItem>
+                  <SelectItem value="Plot">Plot</SelectItem>
+                  <SelectItem value="Land">Land</SelectItem>
                   <SelectItem value="Factory">Factory</SelectItem>
                   <SelectItem value="Hotel">Hotel</SelectItem>
                   <SelectItem value="Restaurant">Restaurant</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
-                  <SelectItem value="Commercial">Commercial</SelectItem>
                 </SelectContent>
               </Select>
             </div>

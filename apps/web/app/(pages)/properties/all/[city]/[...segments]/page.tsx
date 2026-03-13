@@ -67,16 +67,16 @@ export async function generateMetadata(
   const purpose = 'Rent & Sale';
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(citySlug);
 
-  // Helper: find typeContent matching type + purpose (all page accepts 'all' OR any specific purpose)
+  // Helper: find typeContent matching type for 'all' purpose
   const findTypeContent = (type: string) =>
     cityData?.typeContents?.find(
-      (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase()
+      (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && tc.purpose === 'all'
     ) || null;
 
   if (areaData && propertyType) {
     // area + type → area's meta first, then auto-generated
     const areaName = toTitleCase(areaData.name);
-    const typeName = toTitleCase(propertyType);
+    const typeName = propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType);
     return {
       title: areaData.metaTitle || `${typeName} for ${purpose} in ${areaName}, ${cityName}`,
       description: areaData.metaDescription || `Find ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. Browse verified listings on Property Dealer.`,
@@ -95,7 +95,7 @@ export async function generateMetadata(
   }
 
   if (propertyType) {
-    const typeName = toTitleCase(propertyType);
+    const typeName = propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType);
     const tc = findTypeContent(propertyType);
     // Use custom meta if set, otherwise auto-generate
     const titleText = tc?.metaTitle?.trim() || `${typeName} for ${purpose} in ${cityName}`;
@@ -119,10 +119,12 @@ export default async function AllCitySegmentsPage(props: PageProps) {
   const listingType = propertyType || 'all';
   const areaId = areaData?._id;
 
-  // Find typeContent: match by type name (any purpose is fine for 'all' route)
+  // Find typeContent: match by type name + 'all' purpose
   const specificContent = propertyType && !areaData
     ? cityData?.typeContents?.find(
-      (tc: any) => tc.propertyType.toLowerCase() === propertyType.toLowerCase()
+      (tc: any) =>
+        tc.propertyType.toLowerCase() === propertyType.toLowerCase() &&
+        tc.purpose === 'all'
     ) || null
     : null;
 
@@ -140,10 +142,10 @@ export default async function AllCitySegmentsPage(props: PageProps) {
   // --- Schema.org ---
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(city);
   const areaName = areaData ? toTitleCase(areaData.name) : null;
-  const typeName = propertyType ? toTitleCase(propertyType) : null;
+  const typeName = propertyType ? (propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType)) : null;
   const pageUrl = `${BASE_URL}/properties/all/${city}/${segments.join('/')}`;
   const pageTitle = [
-    typeName ? `${typeName}s` : 'Properties',
+    typeName ? (typeName === 'Property' ? 'Property' : `${typeName}s`) : 'Properties',
     'for Rent & Sale',
     areaName ? `in ${areaName}, ${cityName}` : `in ${cityName}`,
   ].join(' ');
@@ -173,9 +175,9 @@ export default async function AllCitySegmentsPage(props: PageProps) {
     { name: cityName, url: `${BASE_URL}/properties/all/${city}` },
     ...(areaName ? [{ name: areaName, url: `${BASE_URL}/properties/all/${city}/${areaSlug}` }] : []),
     ...(typeName && areaName
-      ? [{ name: `${typeName}s`, url: `${BASE_URL}/properties/all/${city}/${areaSlug}/${segments[1]}` }]
+      ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/all/${city}/${areaSlug}/${segments[1]}` }]
       : typeName
-        ? [{ name: `${typeName}s`, url: `${BASE_URL}/properties/all/${city}/${segments[0]}` }]
+        ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/all/${city}/${segments[0]}` }]
         : []),
   ];
 
