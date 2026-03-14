@@ -121,7 +121,9 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
     // Observer for sticky contact buttons on mobile
     const contactObserver = new IntersectionObserver(
-      ([entry]) => {
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
         // Show sticky bar when original buttons are NOT fully visible and we have scrolled down
         setShowStickyContact(!entry.isIntersecting && entry.boundingClientRect.top < 0);
       },
