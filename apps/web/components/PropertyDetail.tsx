@@ -17,7 +17,7 @@ import dynamic from 'next/dynamic';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 import PropertyCard from '@/components/PropertyCard';
 import { toLowerCase } from 'zod';
-import { Description } from '@radix-ui/react-dialog';
+import useEmblaCarousel from 'embla-carousel-react';
 
 const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
   ssr: false,
@@ -52,8 +52,10 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
   const [relatedByOwner, setRelatedByOwner] = useState<Property[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [showStickyContact, setShowStickyContact] = useState(false);
+  const contactButtonsRef = useRef<HTMLDivElement>(null);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 25 });
 
   const getTimeAgo = (dateString?: string) => {
     if (!dateString) return 'Recently';
@@ -117,14 +119,47 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
       });
     }, 100);
 
+    // Observer for sticky contact buttons on mobile
+    const contactObserver = new IntersectionObserver(
+      ([entry]) => {
+        // Show sticky bar when original buttons are NOT fully visible and we have scrolled down
+        setShowStickyContact(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+      },
+      { threshold: 0 }
+    );
+
+    if (contactButtonsRef.current) {
+      contactObserver.observe(contactButtonsRef.current);
+    }
+
     return () => {
       clearTimeout(timeout);
       sections.forEach((id) => {
         const element = document.getElementById(id);
         if (element) observer.unobserve(element);
       });
+      contactObserver.disconnect();
     };
   }, [property]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    
+    const onSelect = () => {
+      setSelectedImage(emblaApi.selectedScrollSnap());
+    };
+    
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (isLightboxOpen && emblaApi) {
+      emblaApi.scrollTo(selectedImage);
+    }
+  }, [isLightboxOpen, emblaApi, selectedImage]);
 
   useEffect(() => {
     const fetchRelatedProperties = async () => {
@@ -531,7 +566,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                       <div className="text-center">
                         <Bed className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
                         <p className="text-sm font-semibold">{property.bedrooms}</p>
-                        <p className="text-xs text-muted-foreground">Beds</p>
+                        <p className="text-xs text-muted-foreground"> Beds</p>
                       </div>
                       <div className="text-center">
                         <Bath className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
@@ -556,19 +591,32 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     className="relative w-full h-[250px] md:h-[600px]  overflow-hidden bg-secondary cursor-zoom-in"
                   >
                     {images.length > 0 && images[selectedImage] ? (
-                      <img
-                        src={images[selectedImage]}
-                        alt={`${property.name} - Image ${selectedImage + 1}`}
-                        className="w-full h-full object-cover transition-opacity duration-300"
-                        onClick={() => setIsLightboxOpen(true)}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          const placeholder = getPlaceholderImages(property.type)[selectedImage] || getPlaceholderImages(property.type)[0];
-                          if (placeholder && target.src !== placeholder) {
-                            target.src = placeholder;
-                          }
-                        }}
-                      />
+                      <div className="relative w-full h-full">
+                        <img
+                          src={images[selectedImage]}
+                          alt={`${property.name} - Image ${selectedImage + 1}`}
+                          className="w-full h-full object-cover transition-opacity duration-300"
+                          onClick={() => setIsLightboxOpen(true)}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            const placeholder = getPlaceholderImages(property.type)[selectedImage] || getPlaceholderImages(property.type)[0];
+                            if (placeholder && target.src !== placeholder) {
+                              target.src = placeholder;
+                            }
+                          }}
+                        />
+                        {/* Price Overlay - Mobile Only */}
+                        <div className="md:hidden absolute bottom-4 left-4 z-20">
+                          <div className="bg-primary/80 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg shadow-xl font-bold text-lg border border-white/20">
+                            Rs. {property.price >= 10000000
+                              ? `${(property.price / 10000000).toLocaleString('en-PK', { maximumFractionDigits: 2 })} Crore`
+                              : property.price >= 100000
+                                ? `${(property.price / 100000).toLocaleString('en-PK', { maximumFractionDigits: 2 })} Lac`
+                                : formatPrice(property.price)
+                            }
+                          </div>
+                        </div>
+                      </div>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <p className="text-muted-foreground">No image available</p>
@@ -581,7 +629,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                         <Button
                           variant="outline"
                           size="icon"
-                          className={`absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg ${isLightboxOpen ? 'opacity-0' : 'opacity-50 lg:opacity-0 group-hover:opacity-100 transition-opacity z-100'}`}
+                          className={`absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg ${isLightboxOpen ? 'opacity-0' : 'opacity-50 lg:opacity-0 group-hover:opacity-100 transition-opacity z-10'}`}
                           onClick={prevImage}
                         >
                           <ChevronLeft className="md:w-6 md:h-6 w-2 h-2" />
@@ -589,7 +637,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                         <Button
                           variant="outline"
                           size="icon"
-                          className={`absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg ${isLightboxOpen ? 'opacity-0' : 'opacity-50 lg:opacity-0 group-hover:opacity-100 transition-opacity z-100'}`}
+                          className={`absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg ${isLightboxOpen ? 'opacity-0' : 'opacity-50 lg:opacity-0 group-hover:opacity-100 transition-opacity z-10'}`}
                           onClick={nextImage}
                         >
                           <ChevronRight className="md:w-6 md:h-6 w-2 h-2" />
@@ -655,28 +703,16 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               {/* give call and message button etc for mobile  */}
 
               <div className="md:hidden flex flex-col -mt-2 space-y-3">
-                <div className='flex justify-between items-center px-4'>
-                  <p className="text-xl font-bold text-primary">
-                    <span className='text-sm text-foreground/80 font-medium mr-1'>PKR:</span>
-                    {property.price >= 10000000
-                      ? `${(property.price / 10000000).toLocaleString('en-PK', { maximumFractionDigits: 2 })} Crore`
-                      : property.price >= 100000
-                        ? `${(property.price / 100000).toLocaleString('en-PK', { maximumFractionDigits: 2 })} Lac`
-                        : property.price >= 1000
-                          ? `${(property.price / 1000).toLocaleString('en-PK', { maximumFractionDigits: 2 })} Thousand`
-                          : formatPrice(property.price)
-                    }
-                  </p>
-                  <Button variant="ghost" size="icon" onClick={handleShare} className="-mr-2">
+                <div className="px-4 flex items-center justify-between font-medium text-sm text-muted-foreground">
+                  <div className="flex items-start">
+                    <MapPin className="w-4 h-4 mr-1 mt-0.5 shrink-0 text-primary" />
+                    <div className="line-clamp-1">
+                      {toTitleCase(property.location)}{property.city ? `, ${toTitleCase(property.city)}` : ''}
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={handleShare} className="-mr-2 text-primary hover:bg-primary/10">
                     <Share2 className="w-5 h-5" />
                   </Button>
-                </div>
-
-                <div className="px-4 flex items-start font-medium text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4 mr-1 mt-0.5 shrink-0 text-primary" />
-                  <div>
-                    {toTitleCase(property.location)}{property.city ? `, ${toTitleCase(property.city)}` : ''}
-                  </div>
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-secondary rounded-none border-y">
@@ -709,7 +745,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   )}
                 </div>
 
-                <div className="flex px-4 py-1">
+                <div className="flex px-4 py-1" ref={contactButtonsRef}>
                   <div className="flex space-x-3 w-full">
                     <Button
                       className="flex-1 bg-[#25D366] rounded-sm hover:bg-[#128C7E] text-white border-none shadow-sm"
@@ -738,7 +774,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
               {/* Sticky Navigation Bar */}
               <div className="sticky mx-1 max-w-full overflow-x-auto top-[64px] md:top-[80px] z-30 bg-black/80 backdrop-blur-sm border-b pb-0 mb-2 md:mb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 transition-all">
-                <div ref={tabsRef} className="flex gap-6 overflow-x-auto scrollbar-none">
+                <div ref={tabsRef} className="flex gap-6 overflow-x-auto scrollbar-hide">
                   {[
                     { id: 'overview-section', label: 'Overview' },
                     { id: 'description-section', label: 'Description' },
@@ -767,7 +803,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 <CardContent className="p-4 md:p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold">Details & Overview</h2>
-                    <Button
+                    {/* <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setIsDescriptionModalOpen(true)}
@@ -775,7 +811,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     >
                       Read Description
                       <ChevronRight className="w-4 h-4" />
-                    </Button>
+                    </Button> */}
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -868,7 +904,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
               {/* Description */}
               <Card id="description-section" className="scroll-mt-32">
-                <CardContent className="p-6 hidden md:block">
+                <CardContent className="p-6">
 
                   <h2 className="text-xl font-bold mb-4">Description</h2>
                   <div className={`overflow-hidden transition-all duration-300 ${!isDescriptionExpanded ? 'max-h-[150px] relative' : 'max-h-full'}`}>
@@ -1066,7 +1102,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
           </div>
           {/* Related Properties Matching Area - Horizontal Scroll */}
           {relatedByArea.length > 0 && (
-            <section className="pt-8 border-t max-w-full overflow-x-hidden px-2">
+            <section className="pt-8 border-t max-w-full overflow-x-hidden mx-2">
               <div className="flex items-center justify-between mb-6 max-w-full">
                 <h2 className="text-lg text-wrap md:text-2xl font-bold">
                   Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
@@ -1075,7 +1111,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   View All
                 </Button>
               </div>
-              <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+              <div className="flex mx-2 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
                 {relatedByArea.map((item) => (
                   <div key={item.id} className="min-w-[200px] max-w-1/4 md:min-w-[300px] snap-start">
                     <PropertyCard property={item} />
@@ -1086,7 +1122,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
           )}
 
           {/* Related Properties by Same Agency - Horizontal Scroll */}
-          <div className="max-w-full overflow-x-auto px-2">
+          <div className="max-w-full overflow-x-auto mx-2">
             {relatedByOwner.length > 0 && (
               <section className="pt-8 border-t">
                 <div className="flex items-center justify-between mb-6">
@@ -1094,7 +1130,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     More properties by {backendProperty?.owner?.name || 'this Agency'}
                   </h2>
                 </div>
-                <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+                <div className="flex mx-2 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
                   {relatedByOwner.map((item) => (
                     <div key={item.id} className="min-w-[200px] max-w-1/4 md:min-w-[300px] snap-start">
                       <PropertyCard property={item} />
@@ -1105,7 +1141,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
             )}
           </div>
           {/* Related Properties Matching City - Horizontal Scroll */}
-          <div className="max-w-full overflow-x-hidden px-2">
+          <div className="max-w-full overflow-x-hidden mx-2">
             {relatedByCity.length > 0 && (
               <section className="pt-8 border-t max-w-full">
                 <div className="flex items-center justify-between mb-6">
@@ -1116,7 +1152,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     View All
                   </Button>
                 </div>
-                <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+                <div className="flex mx-2 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
                   {relatedByCity.map((item) => (
                     <div key={item.id} className="min-w-[200px] max-w-1/4 md:min-w-[300px] snap-start">
                       <PropertyCard property={item} />
@@ -1178,130 +1214,146 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
         </DialogContent>
       </Dialog>
 
-      {/* Description Modal for Mobile - Triggered from Overview */}
-      <Dialog open={isDescriptionModalOpen} onOpenChange={setIsDescriptionModalOpen}>
-        <DialogContent className="sm:max-w-none w-full h-full max-h-screen p-0 flex flex-col rounded-none md:hidden overflow-hidden">
-          <DialogHeader className="p-4 border-b flex flex-row items-center space-y-0 gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsDescriptionModalOpen(false)}
-              className="h-8 w-8"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <DialogTitle className="text-lg font-bold">Property Description</DialogTitle>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto p-4 pb-32">
-            <h2 className="text-lg font-bold mb-4">{property.name}</h2>
-            <div
-              className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{
-                __html: property.description || `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${toTitleCase(property.location)}, ${toTitleCase(property.city)}.`
-              }}
-            />
-          </div>
-
-          {/* Sticky CTAs at bottom of Modal */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
-            <div className="grid grid-cols-2 gap-3 mb-2">
-              {/* <Button variant="outline" className="w-full flex items-center justify-center gap-2" asChild>
-                <a href={`mailto:?subject=Inquiry about ${encodeURIComponent(property.name)}&body=I am interested in this property: ${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}>
-                  <Mail className="w-4 h-4" />
-                  Email
-                </a>
-              </Button>
-              <Button variant="outline" className="w-full flex items-center justify-center gap-2" asChild>
-                <a href={`sms:${property.contactNumber}?body=I am interested in ${encodeURIComponent(property.name)}: ${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}>
-                  <MessageSquare className="w-4 h-4" />
-                  SMS
-                </a>
-              </Button> */}
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full flex items-center justify-center gap-2 border-primary text-primary" asChild>
-                <a href={`tel:${property.contactNumber}`}>
-                  <Phone className="w-4 h-4" />
-                  Call
-                </a>
-              </Button>
-              <Button className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white border-none" onClick={() => {
-                const message = encodeURIComponent(`I want to know more about this property: ${property.name}\nLink: ${window.location.href}`);
-                const waNumber = property.whatsappNumber || property.contactNumber || '923123456789';
-                const cleanNumber = waNumber.replace(/\D/g, '');
-                window.open(`https://wa.me/${cleanNumber.startsWith('92') ? cleanNumber : '92' + cleanNumber.replace(/^0/, '')}?text=${message}`, '_blank');
-              }}>
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                </svg>
-                WhatsApp
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Sticky Mobile Contact Bar */}
+      <div
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-in-out ${showStickyContact ? 'translate-y-0' : 'translate-y-full'
+          }`}
+      >
+        <div className="grid grid-cols-2 gap-3 p-4">
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2 border-primary text-primary hover:bg-primary/5 h-12"
+            asChild
+          >
+            <a href={`tel:${property.contactNumber}`}>
+              <Phone className="w-4 h-4" />
+              Call
+            </a>
+          </Button>
+          <Button
+            className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white border-none h-12 font-semibold"
+            onClick={() => {
+              const message = encodeURIComponent(`I want to know more about this property: ${property.name}\nLink: ${window.location.href}`);
+              const waNumber = property.whatsappNumber || property.contactNumber || '923123456789';
+              const cleanNumber = waNumber.replace(/\D/g, '');
+              window.open(`https://wa.me/${cleanNumber.startsWith('92') ? cleanNumber : '92' + cleanNumber.replace(/^0/, '')}?text=${message}`, '_blank');
+            }}
+          >
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
+            WhatsApp
+          </Button>
+        </div>
+      </div>
 
 
 
       {/* Image Lightbox */}
       <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
-        <DialogContent showCloseButton={false} className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-black/95 border-none flex items-center justify-center rounded-none overflow-hidden sm:max-w-[100vw]">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 text-white hover:bg-white/10 z-50 rounded-full h-12 w-12"
-            onClick={() => setIsLightboxOpen(false)}
-          >
-            <X className="w-8 h-8" />
-          </Button>
-
-          {images.length > 1 && (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full border h-12 w-12"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  prevImage();
-                }}
-              >
-                <ChevronLeft className="w-10 h-10" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full border h-12 w-12"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  nextImage();
-                }}
-              >
-                <ChevronRight className="w-10 h-10" />
-              </Button>
-
-
-            </>
-          )}
-
-          <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
-            <img
-              src={images[selectedImage]}
-              alt={`${property.name} - Full Image ${selectedImage + 1}`}
-              className="w-full max-h-full object-contain select-none"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-
-          {images.length > 1 && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm font-medium border border-white/10 backdrop-blur-md">
+        <DialogContent showCloseButton={false} className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-black/98 border-none flex flex-col items-center justify-center rounded-none overflow-hidden sm:max-w-[100vw] z-[9999]">
+          
+          {/* Top Bar with Counter and Close Button */}
+          <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-4 bg-gradient-to-b from-black/80 to-transparent z-50">
+            <div className="text-white font-medium">
               {selectedImage + 1} / {images.length}
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/10 rounded-full h-10 w-10 flex items-center justify-center"
+              onClick={() => setIsLightboxOpen(false)}
+            >
+              <X className="w-6 h-6" />
+            </Button>
+          </div>
+
+          {/* Slider Container */}
+          <div className="flex-1 w-full relative overflow-hidden flex items-center justify-center" ref={emblaRef}>
+            <div className="flex h-full w-full">
+              {images.map((img, idx) => (
+                <div key={idx} className="flex-[0_0_100%] min-w-0 relative h-full flex items-center justify-center p-2 md:p-12">
+                  <img
+                    src={img}
+                    alt={`${property.name} - Full Image ${idx + 1}`}
+                    className="w-full max-h-full object-contain select-none"
+                    onClick={(e) => e.stopPropagation()}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      const placeholder = getPlaceholderImages(property.type)[idx] || getPlaceholderImages(property.type)[0];
+                      if (placeholder && target.src !== placeholder) {
+                        target.src = placeholder;
+                      }
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Arrows - Desktop Only Visibility managed by embla usually, but here manually */}
+            {images.length > 1 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full border border-white/20 h-14 w-14"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    emblaApi?.scrollPrev();
+                  }}
+                >
+                  <ChevronLeft className="w-8 h-8" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full border border-white/20 h-14 w-14"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    emblaApi?.scrollNext();
+                  }}
+                >
+                  <ChevronRight className="w-8 h-8" />
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Bottom Thumbnail Strip - Mobile Optimized */}
+          {images.length > 1 && (
+            <div className="w-full bg-black/90 p-4 pb-8 overflow-hidden z-20">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-start px-2">
+                {images.map((img, idx) => (
+                  <div
+                    key={idx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      emblaApi?.scrollTo(idx);
+                    }}
+                    className={`shrink-0 cursor-pointer rounded-sm overflow-hidden border-2 transition-all w-20 h-14 ${
+                      selectedImage === idx
+                        ? 'border-primary ring-1 ring-primary'
+                        : 'border-white/10 opacity-40 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`Thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const placeholder = getPlaceholderImages(property.type)[idx] || getPlaceholderImages(property.type)[0];
+                        if (placeholder && target.src !== placeholder) {
+                          target.src = placeholder;
+                        }
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
-
         </DialogContent>
-
       </Dialog>
     </div>
   );
