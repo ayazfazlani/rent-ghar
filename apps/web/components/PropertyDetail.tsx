@@ -2,7 +2,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { MapPin, Bed, Bath, Maximize, Share2, Heart, Phone, Mail, Calendar, CheckCircle2, X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Bed, Bath, Maximize, Share2, Heart, Phone, Mail, Calendar, CheckCircle2, X, Loader2, ChevronLeft, ChevronRight, MessageSquare, ArrowLeft, House, Tag, LayoutDashboard, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,6 +17,7 @@ import dynamic from 'next/dynamic';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 import PropertyCard from '@/components/PropertyCard';
 import { toLowerCase } from 'zod';
+import { Description } from '@radix-ui/react-dialog';
 
 const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
   ssr: false,
@@ -51,7 +52,31 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
   const [relatedByOwner, setRelatedByOwner] = useState<Property[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  const getTimeAgo = (dateString?: string) => {
+    if (!dateString) return 'Recently';
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInMs = now.getTime() - date.getTime();
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+      if (diffInHours < 1) return 'Just now';
+      if (diffInHours < 24) return `${diffInHours} hours ago`;
+
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays === 1) return 'Yesterday';
+      if (diffInDays < 30) return `${diffInDays} days ago`;
+
+      const diffInMonths = Math.floor(diffInDays / 30);
+      if (diffInMonths === 1) return '1 month ago';
+      return `${diffInMonths} months ago`;
+    } catch (e) {
+      return 'Recently';
+    }
+  };
 
   const tabsRef = useRef<HTMLDivElement>(null);
 
@@ -84,7 +109,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
       { rootMargin: '-120px 0px -50% 0px' }
     );
 
-    const sections = ['overview-section', 'description-section', 'features-section', 'location-section'];
+    const sections = ['overview-section', 'description-section', 'features-section', 'video-section', 'location-section'];
     const timeout = setTimeout(() => {
       sections.forEach((id) => {
         const element = document.getElementById(id);
@@ -698,18 +723,18 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     >
                       <svg className="w-4 h-4 mr-2 fill-current" viewBox="0 0 24 24">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                    WhatsApp
-                  </Button>
-                  <Button variant="outline" className="flex-1 rounded-sm border-primary text-primary hover:bg-primary/5 shadow-sm" size="lg" asChild>
-                    <a href={`tel:${property.contactNumber}`}>
-                      <Phone className="w-4 h-4 mr-2" />
-                      Call
-                    </a>
-                  </Button>
+                      </svg>
+                      WhatsApp
+                    </Button>
+                    <Button variant="outline" className="flex-1 rounded-sm border-primary text-primary hover:bg-primary/5 shadow-sm" size="lg" asChild>
+                      <a href={`tel:${property.contactNumber}`}>
+                        <Phone className="w-4 h-4 mr-2" />
+                        Call
+                      </a>
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
 
               {/* Sticky Navigation Bar */}
               <div className="sticky mx-1 max-w-full overflow-x-auto top-[64px] md:top-[80px] z-30 bg-black/80 backdrop-blur-sm border-b pb-0 mb-2 md:mb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 transition-all">
@@ -728,7 +753,8 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                       className={`md:pb-3 pb-2 text-white whitespace-nowrap font-semibold transition-all border-b-2 m-2 ${activeSection === tab.id
                         ? 'border-white text-white'
                         : 'border-transparent text-muted-foreground hover:text-gray-200 hover:border-primary/50'
-                        }`}
+                        }`
+                      }
                     >
                       {tab.label}
                     </button>
@@ -736,52 +762,103 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 </div>
               </div>
 
-              {/* Overview will be table like  with size location and more features like of the zameen.com*/}
-              <Card id="overview-section" className="scroll-mt-20">
-                <CardContent className="md:p-6">
-                  <h2 className="text-xl font-bold mb-4">Overview</h2>
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-1 border p-4 rounded-lg">
-                      <table className="w-full text-sm">
-                        <tbody className="divide-y divide-border">
-                          <tr>
-                            <td className="py-2 text-muted-foreground font-medium">Type</td>
-                            <td className="py-2 text-right font-semibold">{property.type}</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 text-muted-foreground font-medium">Location</td>
-                            <td className="py-2 text-right font-semibold">{toTitleCase(property.location)}</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 text-muted-foreground font-medium">Area</td>
-                            <td className="py-2 text-right font-semibold">
-                              {property.marla && property.marla > 0 ? `${property.marla} marla` : `${property.area} sq ft`}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 text-muted-foreground font-medium">Bedrooms</td>
-                            <td className="py-2 text-right font-semibold">{property.bedrooms}</td>
-                          </tr>
-                        </tbody>
-                      </table>
+              {/* Overview Section - Zameen.com style */}
+              <Card id="overview-section" className="scroll-mt-32">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold">Details & Overview</h2>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsDescriptionModalOpen(true)}
+                      className="md:hidden flex items-center gap-2 border-primary text-primary hover:bg-primary/5"
+                    >
+                      Read Description
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <House className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase font-medium">Type</p>
+                        <p className="font-semibold">{property.type}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 border p-4 rounded-lg">
-                      <table className="w-full text-sm">
-                        <tbody className="divide-y divide-border">
-                          <tr>
-                            <td className="py-2 text-muted-foreground font-medium">Purpose</td>
-                            <td className="py-2 text-right font-semibold">{property.purpose === 'buy' ? 'For Sale' : 'For Rent'}</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 text-muted-foreground font-medium">Price</td>
-                            <td className="py-2 text-right font-semibold">Rs. {formatPrice(property.price)}</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 text-muted-foreground font-medium">Bathrooms</td>
-                            <td className="py-2 text-right font-semibold">{property.bathrooms}</td>
-                          </tr>
-                        </tbody>
-                      </table>
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <Tag className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase font-medium">Price</p>
+                        <p className="font-semibold text-primary">Rs. {formatPrice(property.price)}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <Maximize className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase font-medium">Area</p>
+                        <p className="font-semibold">
+                          {property.marla && property.marla > 0 ? `${property.marla} Marla` : `${property.area} Sq Ft`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <LayoutDashboard className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase font-medium">Purpose</p>
+                        <p className="font-semibold">{property.purpose === 'buy' ? 'For Sale' : 'For Rent'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <Bed className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase font-medium">Bedrooms</p>
+                        <p className="font-semibold">{property.bedrooms}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <Bath className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase font-medium">Bathrooms</p>
+                        <p className="font-semibold">{property.bathrooms}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase font-medium">Added</p>
+                        <p className="font-semibold">{getTimeAgo(backendProperty?.createdAt)}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <MapPin className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase font-medium">Location</p>
+                        <p className="font-semibold line-clamp-1">{toTitleCase(property.location)}</p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -790,8 +867,8 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
 
               {/* Description */}
-              <Card id="description-section" className="scroll-mt-28">
-                <CardContent className="p-6">
+              <Card id="description-section" className="scroll-mt-32">
+                <CardContent className="p-6 hidden md:block">
 
                   <h2 className="text-xl font-bold mb-4">Description</h2>
                   <div className={`overflow-hidden transition-all duration-300 ${!isDescriptionExpanded ? 'max-h-[150px] relative' : 'max-h-full'}`}>
@@ -822,7 +899,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               </Card>
 
               {/* Features */}
-              <Card id="features-section" className="scroll-mt-28">
+              <Card id="features-section" className="scroll-mt-32">
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-4">Features & Amenities</h2>
                   {backendProperty?.features && backendProperty.features.length > 0 ? (
@@ -841,7 +918,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               </Card>
 
               {property.videoUrl && (
-                <Card id="video-section" className="scroll-mt-28">
+                <Card id="video-section" className="scroll-mt-32">
                   <CardContent className="p-6">
                     <h2 className="text-xl font-bold mb-4">Property Video</h2>
                     <div className="relative aspect-video rounded-lg overflow-hidden bg-secondary">
@@ -875,7 +952,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               )}
 
               {/* Location */}
-              <Card id="location-section" className="scroll-mt-28">
+              <Card id="location-section" className="scroll-mt-32">
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold mb-4">Location</h2>
                   {property.latitude && property.longitude ? (
@@ -1100,6 +1177,71 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Description Modal for Mobile - Triggered from Overview */}
+      <Dialog open={isDescriptionModalOpen} onOpenChange={setIsDescriptionModalOpen}>
+        <DialogContent className="sm:max-w-none w-full h-full max-h-screen p-0 flex flex-col rounded-none md:hidden overflow-hidden">
+          <DialogHeader className="p-4 border-b flex flex-row items-center space-y-0 gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsDescriptionModalOpen(false)}
+              className="h-8 w-8"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <DialogTitle className="text-lg font-bold">Property Description</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto p-4 pb-32">
+            <h2 className="text-lg font-bold mb-4">{property.name}</h2>
+            <div
+              className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{
+                __html: property.description || `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${toTitleCase(property.location)}, ${toTitleCase(property.city)}.`
+              }}
+            />
+          </div>
+
+          {/* Sticky CTAs at bottom of Modal */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
+            <div className="grid grid-cols-2 gap-3 mb-2">
+              {/* <Button variant="outline" className="w-full flex items-center justify-center gap-2" asChild>
+                <a href={`mailto:?subject=Inquiry about ${encodeURIComponent(property.name)}&body=I am interested in this property: ${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}>
+                  <Mail className="w-4 h-4" />
+                  Email
+                </a>
+              </Button>
+              <Button variant="outline" className="w-full flex items-center justify-center gap-2" asChild>
+                <a href={`sms:${property.contactNumber}?body=I am interested in ${encodeURIComponent(property.name)}: ${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}>
+                  <MessageSquare className="w-4 h-4" />
+                  SMS
+                </a>
+              </Button> */}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="w-full flex items-center justify-center gap-2 border-primary text-primary" asChild>
+                <a href={`tel:${property.contactNumber}`}>
+                  <Phone className="w-4 h-4" />
+                  Call
+                </a>
+              </Button>
+              <Button className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white border-none" onClick={() => {
+                const message = encodeURIComponent(`I want to know more about this property: ${property.name}\nLink: ${window.location.href}`);
+                const waNumber = property.whatsappNumber || property.contactNumber || '923123456789';
+                const cleanNumber = waNumber.replace(/\D/g, '');
+                window.open(`https://wa.me/${cleanNumber.startsWith('92') ? cleanNumber : '92' + cleanNumber.replace(/^0/, '')}?text=${message}`, '_blank');
+              }}>
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+                WhatsApp
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
 
 
       {/* Image Lightbox */}
