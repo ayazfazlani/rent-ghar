@@ -399,7 +399,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
   } : null;
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden max-w-full">
+    <div className="min-h-screen bg-background max-w-full">
       {isMounted && jsonLd && (
         <script
           type="application/ld+json"
@@ -698,7 +698,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               </div>
 
               {/* Sticky Navigation Bar */}
-              <div className="sticky top-[30px] md:top-[88px] z-30 bg-black/80 backdrop-blur-sm border-b pb-0 mb-2 md:mb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 transition-all">
+              <div className="sticky top-[64px] md:top-[80px] z-30 bg-black/80 backdrop-blur-sm border-b pb-0 mb-2 md:mb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 transition-all">
                 <div className="flex gap-6 overflow-x-auto scrollbar-none">
                   {[
                     { id: 'overview-section', label: 'Overview' },
