@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { propertyApi } from '@/lib/api'; // Ensure propertyApi has getStats or similar
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,11 +32,26 @@ export function LocationStats({ city = 'Multan', purpose }: LocationStatsProps) 
     purpose === 'rent' ? 'rent' : 'sale'
   );
 
+  const tabsRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (purpose) {
       setListingType(purpose === 'rent' ? 'rent' : 'sale');
     }
   }, [purpose]);
+
+  useEffect(() => {
+    if (tabsRef.current) {
+      const activeTabElement = tabsRef.current.querySelector(`[data-tab="${activeTab}"]`) as HTMLElement;
+      if (activeTabElement) {
+        activeTabElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+      }
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     fetchStats();
@@ -90,9 +105,10 @@ export function LocationStats({ city = 'Multan', purpose }: LocationStatsProps) 
         </div>
       </div>
 
-      <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
+      <div ref={tabsRef} className="flex gap-4 mb-6 overflow-x-auto pb-2 scrollbar-none">
         <button
           onClick={() => setActiveTab('all')}
+          data-tab="all"
           className={`px-4 py-2 rounded-full whitespace-nowrap ${activeTab === 'all'
             ? 'bg-primary text-white'
             : 'bg-white text-gray-600 hover:bg-gray-100'
@@ -103,6 +119,7 @@ export function LocationStats({ city = 'Multan', purpose }: LocationStatsProps) 
         {Object.entries(stats.summary).map(([type, count]) => (
           <button
             key={type}
+            data-tab={type}
             onClick={() => setActiveTab(type as any)}
             className={`px-4 py-2 rounded-full whitespace-nowrap capitalize ${activeTab === type
               ? 'bg-primary text-white'
