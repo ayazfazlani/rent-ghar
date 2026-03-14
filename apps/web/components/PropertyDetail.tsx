@@ -973,9 +973,9 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
           </div>
           {/* Related Properties Matching Area - Horizontal Scroll */}
           {relatedByArea.length > 0 && (
-            <section className="pt-8 border-t max-w-full overflow-x-auto">
-              <div className="flex items-center justify-between mb-6 max-w-min">
-                <h2 className="text-xl md:text-2xl font-bold">
+            <section className="pt-8 border-t max-w-full overflow-x-hidden px-2">
+              <div className="flex items-center justify-between mb-6 max-w-full">
+                <h2 className="text-lg text-wrap md:text-2xl font-bold">
                   Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
                 </h2>
                 <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties/${property.purpose === 'buy' ? 'sale' : 'rent'}/${property.city.toLowerCase()}/${property.areaSlug === undefined ? ' ' : property.areaSlug}`)}>
@@ -984,7 +984,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               </div>
               <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
                 {relatedByArea.map((item) => (
-                  <div key={item.id} className="min-w-[200px] md:min-w-[300px] snap-start">
+                  <div key={item.id} className="min-w-[200px] max-w-1/4 md:min-w-[300px] snap-start">
                     <PropertyCard property={item} />
                   </div>
                 ))}
@@ -997,13 +997,13 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
             {relatedByOwner.length > 0 && (
               <section className="pt-8 border-t">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl md:text-2xl font-bold">
+                  <h2 className="text-lg md:text-2xl font-bold">
                     More properties by {backendProperty?.owner?.name || 'this Agency'}
                   </h2>
                 </div>
                 <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
                   {relatedByOwner.map((item) => (
-                    <div key={item.id} className="min-w-[200px] md:min-w-[300px] snap-start">
+                    <div key={item.id} className="min-w-[200px] max-w-1/4 md:min-w-[300px] snap-start">
                       <PropertyCard property={item} />
                     </div>
                   ))}
@@ -1012,11 +1012,11 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
             )}
           </div>
           {/* Related Properties Matching City - Horizontal Scroll */}
-          <div className="max-w-full overflow-x-auto px-2">
+          <div className="max-w-full overflow-x-hidden px-2">
             {relatedByCity.length > 0 && (
               <section className="pt-8 border-t max-w-full">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl md:text-2xl font-bold">
+                  <h2 className="text-lg md:text-2xl font-bold">
                     Similar {toTitleCase(property.type)}s in {toTitleCase(property.city)}
                   </h2>
                   <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties/${backendProperty?.listingType}/${property.citySlug || property.city.toLowerCase()}`)}>
@@ -1025,7 +1025,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 </div>
                 <div className="flex -mx-4 px-4 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
                   {relatedByCity.map((item) => (
-                    <div key={item.id} className="min-w-[200px] md:min-w-[300px] snap-start">
+                    <div key={item.id} className="min-w-[200px] max-w-1/4 md:min-w-[300px] snap-start">
                       <PropertyCard property={item} />
                     </div>
                   ))}
@@ -1102,7 +1102,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full h-12 w-12"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full border h-12 w-12"
                 onClick={(e) => {
                   e.stopPropagation();
                   prevImage();
@@ -1113,7 +1113,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full h-12 w-12"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full border h-12 w-12"
                 onClick={(e) => {
                   e.stopPropagation();
                   nextImage();
@@ -1121,6 +1121,8 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               >
                 <ChevronRight className="w-10 h-10" />
               </Button>
+
+
             </>
           )}
 
@@ -1138,7 +1140,9 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               {selectedImage + 1} / {images.length}
             </div>
           )}
+
         </DialogContent>
+
       </Dialog>
     </div>
   );
