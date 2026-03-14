@@ -399,7 +399,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
   } : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden max-w-full">
       {isMounted && jsonLd && (
         <script
           type="application/ld+json"
