@@ -206,7 +206,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
   if (error || !property) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-20 text-center">
+        <div className="container mx-auto md:px-4 py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Property Not Found</h1>
           <p className="text-muted-foreground mb-4">{error || 'The property you are looking for does not exist.'}</p>
           <Button onClick={() => router.push('/properties')}>Back to Properties</Button>
@@ -406,14 +406,14 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <div className="pt-20 md:pt-24">
-        <div className="container mx-auto px-4 py-6">
+      <div className="pt-4 md:pt-24">
+        <div className="container mx-auto md:px-4 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content - Left Side */}
             <div className="lg:col-span-2 space-y-6">
               {/* Title and Excerpt Section */}
               <div>
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex hidden md:flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="px-3 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-full">
@@ -474,8 +474,10 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   </div>
                 </div>
 
+
+
                 {/* Price and Stats */}
-                <div className="flex items-center justify-between p-6 bg-secondary rounded-lg mb-6">
+                <div className="flex hidden md:flex items-center justify-between p-6 bg-secondary rounded-lg mb-6">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
                       {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
@@ -511,14 +513,14 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 <div className="relative w-full group">
                   {/* Main Image */}
                   <div
-                    className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden bg-secondary cursor-zoom-in"
-                    onClick={() => setIsLightboxOpen(true)}
+                    className="relative w-full h-[250px] md:h-[600px]  overflow-hidden bg-secondary cursor-zoom-in"
                   >
                     {images.length > 0 && images[selectedImage] ? (
                       <img
                         src={images[selectedImage]}
                         alt={`${property.name} - Image ${selectedImage + 1}`}
                         className="w-full h-full object-cover transition-opacity duration-300"
+                        onClick={() => setIsLightboxOpen(true)}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           const placeholder = getPlaceholderImages(property.type)[selectedImage] || getPlaceholderImages(property.type)[0];
@@ -539,18 +541,18 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                         <Button
                           variant="outline"
                           size="icon"
-                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-100"
                           onClick={prevImage}
                         >
-                          <ChevronLeft className="w-6 h-6" />
+                          <ChevronLeft className="md:w-6 md:h-6 w-2 h-2" />
                         </Button>
                         <Button
                           variant="outline"
                           size="icon"
-                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-100"
                           onClick={nextImage}
                         >
-                          <ChevronRight className="w-6 h-6" />
+                          <ChevronRight className="md:w-6 md:h-6 w-2 h-2" />
                         </Button>
                       </>
                     )}
@@ -582,7 +584,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
                   {/* Thumbnail Strip - Visible on all devices now */}
                   {images.length > 1 && (
-                    <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
+                    <div className="flex hidden md:flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
                       {images.map((img, idx) => (
                         <div
                           key={idx}
@@ -610,9 +612,91 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   )}
                 </div>
               </section>
+              {/* give call and message button etc for mobile  */}
+
+              <div className="md:hidden flex flex-col -mt-2 space-y-3">
+                <div className='flex justify-between items-center'>
+                  {property.price > 100000 && property.price < 1000000 && (
+                    <p className="text-xl px-4 font-bold text-primary">
+                      PKR: {formatPrice(property.price / 1000)} Thousand
+                    </p>
+                  )}
+                  {property.price >= 1000000 && (
+                    <p className="text-xl px-4 font-bold text-primary">
+                      <span className='text-sm text-foreground/80 font-medium mr-1'>PKR:</span>{formatPrice(property.price / 100000)} Crore
+                    </p>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={handleShare} className="mr-2">
+                    <Share2 className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                <div className="px-4 flex items-start font-medium text-sm text-muted-foreground">
+                  <MapPin className="w-4 h-4 mr-1 mt-0.5 shrink-0 text-primary" />
+                  <div>
+                    {toTitleCase(property.location)}{property.city ? `, ${toTitleCase(property.city)}` : ''}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-secondary rounded-none border-y">
+                  {property.bedrooms > 0 && (
+                    <div className="flex gap-4 md:gap-6 justify-around w-full">
+                      <div className="text-center flex flex-col items-center">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Bed className="w-4 h-4 text-muted-foreground" />
+                          <p className="text-sm font-semibold">{property.bedrooms}</p>
+                        </div>
+                        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Beds</p>
+                      </div>
+                      <div className="text-center flex flex-col items-center">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Bath className="w-4 h-4 text-muted-foreground" />
+                          <p className="text-sm font-semibold">{property.bathrooms}</p>
+                        </div>
+                        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Baths</p>
+                      </div>
+                      <div className="text-center flex flex-col items-center">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Maximize className="w-4 h-4 text-muted-foreground" />
+                          <p className="text-sm font-semibold">{property.marla && property.marla > 0 ? property.marla : property.area}</p>
+                        </div>
+                        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                          {property.marla && property.marla > 0 ? 'Marla' : 'Sq Ft'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex px-4 py-1">
+                  <div className="flex space-x-3 w-full">
+                    <Button
+                      className="flex-1 bg-[#25D366] rounded-sm hover:bg-[#128C7E] text-white border-none shadow-sm"
+                      size="lg"
+                      onClick={() => {
+                        const message = encodeURIComponent(`I want to know more about this property: ${property.name}\nLink: ${window.location.href}`);
+                        const waNumber = property.whatsappNumber || property.contactNumber || '923123456789';
+                        const cleanNumber = waNumber.replace(/\D/g, '');
+                        window.open(`https://wa.me/${cleanNumber.startsWith('92') ? cleanNumber : '92' + cleanNumber.replace(/^0/, '')}?text=${message}`, '_blank');
+                      }}
+                    >
+                      <svg className="w-4 h-4 mr-2 fill-current" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                      WhatsApp
+                    </Button>
+                    <Button variant="outline" className="flex-1 rounded-sm border-primary text-primary hover:bg-primary/5 shadow-sm" size="lg" asChild>
+                      <a href={`tel:${property.contactNumber}`}>
+                        <Phone className="w-4 h-4 mr-2" />
+                        Call
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </div>
 
               {/* Sticky Navigation Bar */}
-              <div className="sticky top-[64px] md:top-[88px] z-30 bg-black/80 backdrop-blur-sm border-b pb-0 mb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 transition-all">
+              <div className="sticky top-[30px] md:top-[88px] z-30 bg-black/80 backdrop-blur-sm border-b pb-0 mb-2 md:mb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 transition-all">
                 <div className="flex gap-6 overflow-x-auto scrollbar-none">
                   {[
                     { id: 'overview-section', label: 'Overview' },
@@ -624,7 +708,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     <button
                       key={tab.id}
                       onClick={() => scrollToSection(tab.id)}
-                      className={`pb-3  text-white whitespace-nowrap font-semibold transition-all border-b-2 m-2 ${activeSection === tab.id
+                      className={`md:pb-3 pb-2 text-white whitespace-nowrap font-semibold transition-all border-b-2 m-2 ${activeSection === tab.id
                         ? 'border-white text-white'
                         : 'border-transparent text-muted-foreground hover:text-gray-200 hover:border-primary/50'
                         }`}
@@ -636,8 +720,8 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               </div>
 
               {/* Overview will be table like  with size location and more features like of the zameen.com*/}
-              <Card id="overview-section" className="scroll-mt-28">
-                <CardContent className="p-6">
+              <Card id="overview-section" className="scroll-mt-20">
+                <CardContent className="md:p-6">
                   <h2 className="text-xl font-bold mb-4">Overview</h2>
                   <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1 border p-4 rounded-lg">
@@ -809,7 +893,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               <div className="sticky top-24 space-y-6">
                 {/* Contact Card */}
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 hidden md:block">
                     <h3 className="text-lg font-bold mb-4">Contact Agent</h3>
 
                     <div className="space-y-3 mb-6">
@@ -998,7 +1082,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
       {/* Image Lightbox */}
       <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
-        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 bg-black/95 border-none flex items-center justify-center rounded-xl overflow-hidden">
+        <DialogContent showCloseButton={false} className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-black/95 border-none flex items-center justify-center rounded-none overflow-hidden sm:max-w-[100vw]">
           <Button
             variant="ghost"
             size="icon"
@@ -1039,7 +1123,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
             <img
               src={images[selectedImage]}
               alt={`${property.name} - Full Image ${selectedImage + 1}`}
-              className="max-w-full max-h-full object-contain select-none"
+              className="w-full max-h-full object-contain select-none"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
