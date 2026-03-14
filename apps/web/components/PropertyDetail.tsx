@@ -615,18 +615,20 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               {/* give call and message button etc for mobile  */}
 
               <div className="md:hidden flex flex-col -mt-2 space-y-3">
-                <div className='flex justify-between items-center'>
-                  {property.price > 100000 && property.price < 1000000 && (
-                    <p className="text-xl px-4 font-bold text-primary">
-                      PKR: {formatPrice(property.price / 1000)} Thousand
-                    </p>
-                  )}
-                  {property.price >= 1000000 && (
-                    <p className="text-xl px-4 font-bold text-primary">
-                      <span className='text-sm text-foreground/80 font-medium mr-1'>PKR:</span>{formatPrice(property.price / 100000)} Crore
-                    </p>
-                  )}
-                  <Button variant="ghost" size="icon" onClick={handleShare} className="mr-2">
+                <div className='flex justify-between items-center px-4'>
+                  <p className="text-xl font-bold text-primary">
+                    {/* also add the onditions for the thousands  */}
+                    <span className='text-sm text-foreground/80 font-medium mr-1'>PKR:</span>
+                    {property.price >= 10000000
+                      ? `${(property.price / 10000000).toLocaleString('en-PK', { maximumFractionDigits: 2 })} Crore`
+                      : property.price >= 100000
+                        ? `${(property.price / 100000).toLocaleString('en-PK', { maximumFractionDigits: 2 })} Lac`
+                        : property.price >= 1000
+                          ? `${(property.price / 1000).toLocaleString('en-PK', { maximumFractionDigits: 2 })} Thousand`
+                          : formatPrice(property.price)
+                    }
+                  </p>
+                  <Button variant="ghost" size="icon" onClick={handleShare} className="-mr-2">
                     <Share2 className="w-5 h-5" />
                   </Button>
                 </div>
@@ -641,26 +643,26 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 <div className="flex items-center justify-between p-4 bg-secondary rounded-none border-y">
                   {property.bedrooms > 0 && (
                     <div className="flex gap-4 md:gap-6 justify-around w-full">
-                      <div className="text-center flex flex-col items-center">
+                      <div className="text-center flex  items-center">
                         <div className="flex items-center gap-1.5 mb-1">
                           <Bed className="w-4 h-4 text-muted-foreground" />
                           <p className="text-sm font-semibold">{property.bedrooms}</p>
                         </div>
-                        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Beds</p>
+                        <p className="text-[11px]  tracking-wider text-muted-foreground">Beds</p>
                       </div>
-                      <div className="text-center flex flex-col items-center">
+                      <div className="text-center flex gap-2 items-center">
                         <div className="flex items-center gap-1.5 mb-1">
                           <Bath className="w-4 h-4 text-muted-foreground" />
                           <p className="text-sm font-semibold">{property.bathrooms}</p>
                         </div>
-                        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Baths</p>
+                        <p className="text-[11px] gap-2 tracking-wider text-muted-foreground">Baths</p>
                       </div>
-                      <div className="text-center flex flex-col items-center">
+                      <div className="text-center flex gap-2 items-center">
                         <div className="flex items-center gap-1.5 mb-1">
                           <Maximize className="w-4 h-4 text-muted-foreground" />
                           <p className="text-sm font-semibold">{property.marla && property.marla > 0 ? property.marla : property.area}</p>
                         </div>
-                        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                        <p className="text-[11px] tracking-wider text-muted-foreground">
                           {property.marla && property.marla > 0 ? 'Marla' : 'Sq Ft'}
                         </p>
                       </div>
