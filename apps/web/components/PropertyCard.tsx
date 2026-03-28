@@ -1,4 +1,4 @@
-'use client'
+ 'use client'
 import { useRouter } from 'next/navigation';
 import { MapPin, Bed, Bath, Maximize, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,6 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
     return price.toLocaleString('en-PK');
   };
 
-  // Temporary placeholder images
   const getPlaceholderImage = (type: string) => {
     const images: { [key: string]: string } = {
       'House': 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80',
@@ -30,127 +29,102 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
   const imageUrl = property.image || getPlaceholderImage(property.type);
 
-  // Navigate to detail page
   const handleCardClick = () => {
-
     router.push(`/properties/${property.slug}`);
-
   };
 
-  // Prevent navigation when clicking the Contact button
   const handleContactClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Add your contact logic here
     alert(`Contact for ${property.name}`);
   };
 
   return (
     <div
-      className="property-card group cursor-pointer bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 active:scale-[0.98]"
+      className="property-card group cursor-pointer bg-card rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 active:scale-[0.98]"
       onClick={handleCardClick}
     >
-      {/* Image Container with Enhanced Animations */}
+      {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3] bg-gradient-to-br from-secondary to-secondary/50">
         <img
           src={imageUrl}
           alt={property.name}
           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
           onError={(e) => {
-            // Fallback if image fails to load
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
             target.parentElement?.classList.add('flex', 'items-center', 'justify-center');
           }}
         />
 
-        {/* Gradient Overlay on Hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        {/* Purpose Badge with Animation */}
-        <div className="absolute top-3 left-3 flex gap-2">
-          <span className="px-2 md:px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 animate-in fade-in slide-in-from-left duration-500">
+        {/* Purpose Badge */}
+        <div className="absolute top-1.5 left-1.5 flex gap-1">
+          <span className="px-1.5 py-0.5 bg-primary text-primary-foreground text-[9px] font-semibold rounded-full shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-110">
             {property.purpose === 'buy' ? 'For Sale' : 'For Rent'}
           </span>
           {property.videoUrl && (
-            <span className="flex items-center gap-1 px-2 md:px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full shadow-lg shadow-red-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-red-900/40 animate-in fade-in slide-in-from-left duration-700">
-              <Play className="w-3 h-3 fill-current" />
+            <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-red-600 text-white text-[9px] font-bold rounded-full shadow-lg shadow-red-900/30 transition-all duration-300 group-hover:scale-110">
+              <Play className="w-2 h-2 fill-current" />
               Video
             </span>
           )}
         </div>
 
-        {/* Type Badge with Animation */}
-        <div className="absolute top-3 right-3">
-          <span className="px-2 md:px-3 py-1 bg-background/90 backdrop-blur-md text-foreground text-xs font-medium rounded-full shadow-md transition-all duration-300 group-hover:bg-background group-hover:scale-110 group-hover:shadow-lg animate-in fade-in slide-in-from-right duration-500">
+        {/* Type Badge */}
+        <div className="absolute top-1.5 right-1.5">
+          <span className="px-1.5 py-0.5 bg-background/90 backdrop-blur-md text-foreground text-[9px] font-medium rounded-full shadow-md transition-all duration-300 group-hover:scale-110">
             {property.type}
           </span>
         </div>
 
-        {/* Animated Corner Accent */}
-        <div className="absolute bottom-0 right-0 w-20 h-20 bg-primary/20 rounded-tl-full transform translate-x-10 translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
+        <div className="absolute bottom-0 right-0 w-12 h-12 bg-primary/20 rounded-tl-full transform translate-x-6 translate-y-6 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
       </div>
 
-      {/* Content Section with Staggered Animations */}
-      <div className="p-5 bg-card relative">
-        {/* Subtle Top Border Animation */}
+      {/* Content */}
+      <div className="p-2.5 bg-card relative">
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
 
-        {/* Property Name */}
-        <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-all duration-300 transform group-hover:translate-x-1">
+        {/* Name */}
+        <h3 className="text-xs font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-all duration-300">
           {property.name}
         </h3>
 
-        {/* Location with Icon Animation */}
-        <div className="flex items-center gap-1.5 text-muted-foreground text-xs md:text-sm mb-4 transition-all duration-300 group-hover:text-foreground">
-          <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary transition-all duration-300 group-hover:scale-125 group-hover:animate-bounce shrink-0" />
-          <span className="transition-all duration-300 group-hover:translate-x-1 line-clamp-1">
-            {property.location}, {toTitleCase(property.city)}
-          </span>
+        {/* Location */}
+        <div className="flex items-center gap-1 text-muted-foreground text-[10px] mb-2 transition-all duration-300 group-hover:text-foreground">
+          <MapPin className="w-3 h-3 text-primary shrink-0 transition-all duration-300 group-hover:scale-125" />
+          <span className="line-clamp-1">{property.location}, {toTitleCase(property.city)}</span>
         </div>
 
-        {/* Property Features with Hover Effects */}
+        {/* Features */}
         {property.bedrooms > 0 && (
-          <div className="flex flex-wrap items-center gap-3 md:gap-4 text-[10px] md:text-sm text-muted-foreground mb-4">
-            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default shrink-0">
-              <Bed className="w-4 h-4 transition-transform duration-300" />
-              <span>{property.bedrooms} Beds</span>
+          <div className="flex items-center gap-2 text-[9px] text-muted-foreground mb-2">
+            <div className="flex items-center gap-0.5 shrink-0">
+              <Bed className="w-3 h-3" />
+              <span>{property.bedrooms}</span>
             </div>
-            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default">
-              <Bath className="w-4 h-4 transition-transform duration-300" />
-              <span>{property.bathrooms} Baths</span>
+            <div className="flex items-center gap-0.5">
+              <Bath className="w-3 h-3" />
+              <span>{property.bathrooms}</span>
             </div>
-            <div className="flex items-center gap-1 transition-all duration-300 hover:text-primary hover:scale-110 cursor-default shrink-0">
-              <Maximize className="w-4 h-4 transition-transform duration-300" />
-              <span className="whitespace-nowrap">{property.marla && property.marla > 0 ? `${property.marla} marla` : `${property.area} sq ft`}</span>
+            <div className="flex items-center gap-0.5 shrink-0">
+              <Maximize className="w-3 h-3" />
+              <span>{property.marla && property.marla > 0 ? `${property.marla}M` : `${property.area}sqft`}</span>
             </div>
           </div>
         )}
 
-        {/* Price and Contact Section with Enhanced Styling */}
-        <div className="flex items-center justify-between gap-2 pt-4 border-t border-border group-hover:border-primary/30 transition-colors duration-500">
-          <div className="transition-all duration-300 group-hover:translate-x-1 min-w-0">
-            <p className="text-[10px] md:text-xs text-muted-foreground transition-colors duration-300 group-hover:text-foreground truncate uppercase tracking-wider font-semibold">
-              {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
-            </p>
-            <p className="text-sm md:text-lg font-bold text-primary transition-all duration-300 group-hover:scale-105 origin-left bg-primary/5 px-2 py-0.5 rounded-md inline-block group-hover:bg-primary/10 whitespace-nowrap">
-              Rs. {formatPrice(property.price)}
-            </p>
-          </div>
-
-          {/* Enhanced Contact Button */}
-          <Button
-            size="sm"
-            onClick={handleContactClick}
-            className="hidden md:block h-8 md:h-10 px-3 md:px-6 text-xs md:text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 active:scale-95 relative overflow-hidden group/btn shrink-0"
-          >
-            <span className="relative z-10">Contact</span>
-            {/* Button Shimmer Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
-          </Button>
+        {/* Price */}
+        <div className="pt-2 border-t border-border group-hover:border-primary/30 transition-colors duration-500">
+          <p className="text-[8px] text-muted-foreground uppercase tracking-wider font-semibold">
+            {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
+          </p>
+          <p className="text-xs font-bold text-primary bg-primary/5 px-1.5 py-0.5 rounded-md inline-block group-hover:bg-primary/10 whitespace-nowrap">
+            Rs. {formatPrice(property.price)}
+          </p>
         </div>
 
-        {/* Decorative Bottom Corner */}
-        <div className="absolute bottom-0 left-0 w-16 h-16 bg-primary/5 rounded-tr-full transform -translate-x-8 translate-y-8 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
+        <div className="absolute bottom-0 left-0 w-10 h-10 bg-primary/5 rounded-tr-full transform -translate-x-5 translate-y-5 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
       </div>
     </div>
   );

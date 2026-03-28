@@ -1,4 +1,4 @@
-'use client'
+ 'use client'
 /**
  * Shared Properties Listing Component
  * 
@@ -576,7 +576,7 @@ export default function PropertiesListing({
 
                 {filteredProperties.length > 0 ? (
                   <div className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-3">
                       {filteredProperties.map((property, index) => (
                         <div
                           key={`${property.id}-${index}`}
@@ -645,10 +645,6 @@ export default function PropertiesListing({
           {/* Hero Banner - Responsive sizing */}
           <section className="pt-24 pb-6 md:pt-28 md:pb-8 bg-secondary/50 animate-in fade-in duration-500">
             <div className="container mx-auto px-4">
-              {/* <p className="text-[10px] md:text-sm font-bold text-primary mb-1 uppercase tracking-widest opacity-70">
-                Property Search
-              </p> */}
-
               {effectiveRichDescription && (
                 <div
                   className="mt-6 prose prose-sm max-w-4xl text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
@@ -663,4 +659,3 @@ export default function PropertiesListing({
     </div>
   );
 }
-
