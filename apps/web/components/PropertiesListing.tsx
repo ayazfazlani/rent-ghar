@@ -1,42 +1,40 @@
  'use client'
-/**
- * Shared Properties Listing Component
- * 
- * This component can be used with either:
- * - Query params: /properties?purpose=rent&city=karachi&type=house
- * - Direct props: purpose, city, type passed as props
- */
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SlidersHorizontal, Search, Loader2 } from 'lucide-react';
+import { SlidersHorizontal, Loader2, X, MapPin, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import PropertyCard from '@/components/PropertyCard';
 import { propertyApi, cityApi } from '@/lib/api';
+import { areaApi } from '@/lib/api/area/area.api';
 import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/property-utils';
 import { Property } from '@/lib/data';
 import { toast } from 'sonner';
 import SearchSidebar from '@/components/SearchSidebar';
 import LocationExplorer from '@/components/LocationExplorer';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger
-} from '@/components/ui/sheet';
-import { Filter } from 'lucide-react';
-
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { cn, toTitleCase } from '@/lib/utils';
 
 interface PropertiesListingProps {
   purpose: 'rent' | 'buy' | 'all';
   city?: string;
   type?: string;
-  useCleanUrls?: boolean; // If true, navigate using /properties/rent/city/type format
+  useCleanUrls?: boolean;
   richDescription?: string;
   areaId?: string;
-  areaSlug?: string; // The area slug used in clean URLs (e.g. 'model-town')
+  areaSlug?: string;
 }
+
+interface AreaOption {
+  id: string;
+  name: string;
+  slug?: string;
+  count: number;
+}
+
+const MARLA_OPTIONS = [2, 3, 5, 7, 10];
 
 export default function PropertiesListing({
   purpose,
@@ -50,483 +48,652 @@ export default function PropertiesListing({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // STATE: Properties and filters
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [allCities, setAllCities] = useState<any[]>([]);
+  const [properties, setProperties]             = useState<Property[]>([]);
+  const [allCities, setAllCities]               = useState<any[]>([]);
   const [allPropertyTypes, setAllPropertyTypes] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading]                   = useState(true);
+  const [error, setError]                       = useState<string | null>(null);
+  const [city, setCity]                         = useState(initialCity);
+  const [type, setType]                         = useState(initialType);
+  const [tempCity, setTempCity]                 = useState(initialCity);
+  const [tempType, setTempType]                 = useState(initialType);
+  const [currentPage, setCurrentPage]           = useState(1);
+  const [totalPages, setTotalPages]             = useState(1);
+  const [isFetchingMore, setIsFetchingMore]     = useState(false);
+  const [selectedMarla, setSelectedMarla]       = useState<number | null>(null);
 
-  const [city, setCity] = useState(initialCity);
-  const [type, setType] = useState(initialType);
-  // Local state for filters before applying
-  const [tempCity, setTempCity] = useState(initialCity);
-  const [tempType, setTempType] = useState(initialType);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [isFilterSheetOpen,   setIsFilterSheetOpen]   = useState(false);
+  const [isLocationPanelOpen, setIsLocationPanelOpen] = useState(false);
 
+  const [mainAreas,        setMainAreas]        = useState<AreaOption[]>([]);
+  const [loadingMainAreas, setLoadingMainAreas] = useState(false);
+  const [allAreas,         setAllAreas]         = useState<AreaOption[]>([]);
+  const [loadingAllAreas,  setLoadingAllAreas]  = useState(false);
 
-  // State for advanced filters
+  const [sheetCity,     setSheetCity]     = useState('');
+  const [sheetType,     setSheetType]     = useState('all');
+  const [sheetAreaId,   setSheetAreaId]   = useState('');
+  const [sheetAreaSlug, setSheetAreaSlug] = useState('');
+  const [sheetAreas,    setSheetAreas]    = useState<AreaOption[]>([]);
+  const [loadingAreas,  setLoadingAreas]  = useState(false);
+  const [showAllAreas,  setShowAllAreas]  = useState(false);
+
+  const [sheetPriceMin, setSheetPriceMin] = useState('');
+  const [sheetPriceMax, setSheetPriceMax] = useState('');
+  const [sheetMarlaMin, setSheetMarlaMin] = useState('');
+  const [sheetMarlaMax, setSheetMarlaMax] = useState('');
+  const [sheetBeds,     setSheetBeds]     = useState<number | undefined>();
+  const [sheetBaths,    setSheetBaths]    = useState<number | undefined>();
+
   const [advancedFilters, setAdvancedFilters] = useState<{
-    priceMin?: number;
-    priceMax?: number;
-    areaMin?: number;
-    areaMax?: number;
-    marlaMin?: number;
-    marlaMax?: number;
-    beds?: number;
-    baths?: number;
+    priceMin?: number; priceMax?: number;
+    marlaMin?: number; marlaMax?: number;
+    beds?: number;     baths?: number;
   }>({});
 
   const handleFilterChange = (newFilters: any) => {
     setAdvancedFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
-
-  // Helper function to create slug from city name
-  const cityToSlug = (cityName: string): string => {
-    return cityName
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
-
-  // Helper function to find city name from slug (handles both full slugs and abbreviations)
-  const slugToCity = (slug: string, cityList: string[]): string | null => {
-    const normalizedSlug = slug.toLowerCase().trim();
-
-    // First try exact slug match
-    const exactMatch = cityList.find(c => cityToSlug(c) === normalizedSlug);
-    if (exactMatch) return exactMatch;
-
-    // Try to match by first letters (e.g., "dgk" matches "Dera Ghazi Khan")
-    const words = normalizedSlug.split('-');
-    if (words.length > 0) {
-      const firstLetters = words.map((w: string) => w[0] || '').join('');
-      const abbreviationMatch = cityList.find(c => {
-        const cityWords = c.toLowerCase().split(/\s+/);
-        const cityAbbr = cityWords.map((w: string) => w[0] || '').join('');
-        return cityAbbr === firstLetters;
-      });
-      if (abbreviationMatch) return abbreviationMatch;
+  const handleMarlaClick = (marla: number) => {
+    if (selectedMarla === marla) {
+      setSelectedMarla(null);
+      handleFilterChange({ ...advancedFilters, marlaMin: undefined, marlaMax: undefined });
+    } else {
+      setSelectedMarla(marla);
+      handleFilterChange({ ...advancedFilters, marlaMin: marla, marlaMax: marla });
     }
-
-    // Try partial match (e.g., "dgk" might match cities starting with "dera")
-    const partialMatch = cityList.find(c =>
-      cityToSlug(c).startsWith(normalizedSlug) ||
-      normalizedSlug.startsWith(cityToSlug(c).substring(0, 3))
-    );
-    if (partialMatch) return partialMatch;
-
-    return null;
   };
 
-  // Extract unique cities
+  useEffect(() => {
+    if (type.toLowerCase() !== 'house' && type.toLowerCase() !== 'plot') {
+      setSelectedMarla(null);
+    }
+  }, [type]);
+
+  const cityToSlug = (name: string) =>
+    name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+  const slugToCity = (slug: string, list: string[]): string | null => {
+    const ns = slug.toLowerCase().trim();
+    const exact = list.find(c => cityToSlug(c) === ns);
+    if (exact) return exact;
+    const fl = ns.split('-').map((w: string) => w[0] || '').join('');
+    const abbr = list.find(c => c.toLowerCase().split(/\s+/).map((w: string) => w[0] || '').join('') === fl);
+    if (abbr) return abbr;
+    return list.find(c => cityToSlug(c).startsWith(ns) || ns.startsWith(cityToSlug(c).substring(0, 3))) || null;
+  };
+
   const cities = useMemo(() => {
-    if (allCities && allCities.length > 0) {
-      return allCities.map(c => c.name).sort();
-    }
-    const uniqueCities = Array.from(new Set(
-      properties
-        .map((p: Property) => p.city)
-        .filter((c): c is string => typeof c === 'string' && c.length > 0)
-    ));
-    return uniqueCities.sort();
+    if (allCities?.length) return allCities.map(c => c.name).sort();
+    return Array.from(new Set(
+      properties.map((p: Property) => p.city).filter((c): c is string => !!c)
+    )).sort();
   }, [properties, allCities]);
 
-  // Match city slug to actual city name (for display/filtering)
   const matchedCity = useMemo(() => {
     if (!city) return '';
-    // If cities array is not loaded yet, return the city as-is (will be matched later)
-    if (cities.length === 0) return city;
-    // If city is already a valid city name, use it
+    if (!cities.length) return city;
     if (cities.includes(city)) return city;
-    // Otherwise, try to match it as a slug
-    const matched = slugToCity(city, cities);
-    // Case-insensitive match against cities list
-    const found = cities.find(c => c.toLowerCase() === city.toLowerCase());
-    if (found) return found;
-    // Otherwise, try to match it as a slug
-    return slugToCity(city, cities) || city;
+    return cities.find(c => c.toLowerCase() === city.toLowerCase()) || slugToCity(city, cities) || city;
   }, [city, cities]);
 
   const propertyTypes = useMemo(() => {
-    if (allPropertyTypes && allPropertyTypes.length > 0) {
+    if (allPropertyTypes?.length)
       return allPropertyTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1)).sort();
-    }
-    const validTypes: Property['type'][] = ['House', 'Apartment', 'Flat', 'Commercial', 'Office', 'Plot', 'Land', 'Shop', 'Factory', 'Hotel', 'Restaurant', 'Other'];
-    const uniqueTypes = Array.from(new Set(
-      properties
-        .map((p: Property) => p.type)
-        .filter((t): t is Property['type'] => validTypes.includes(t))
-    ));
-    return uniqueTypes.sort();
+    const valid: Property['type'][] = ['House','Apartment','Flat','Commercial','Office','Plot','Land','Shop','Factory','Hotel','Restaurant','Other'];
+    return Array.from(new Set(
+      properties.map((p: Property) => p.type).filter((t): t is Property['type'] => valid.includes(t))
+    )).sort();
   }, [properties, allPropertyTypes]);
 
-
-  // FETCH PROPERTIES FROM API
+  const typeLabel = (t: string) => {
+    const map: Record<string, string> = {
+      House: 'Houses', Apartment: 'Apartments', Flat: 'Flats',
+      Plot: 'Plots', Shop: 'Shops', Office: 'Offices',
+      Land: 'Land', Commercial: 'Commercial', Factory: 'Factories',
+      Hotel: 'Hotels', Restaurant: 'Restaurants', Other: 'Other',
+    };
+    return map[t] || `${t}s`;
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
+      setLoadingAllAreas(true);
       try {
-        if (currentPage === 1) {
-          setLoading(true);
-        } else {
-          setIsFetchingMore(true);
+        const data = await areaApi.getAll();
+        if (Array.isArray(data)) {
+          setAllAreas(data.map((a: any) => ({
+            id: a._id, name: a.name, slug: a.slug || '', count: a.count || 0,
+          })));
         }
-        setError(null);
+      } catch { setAllAreas([]); }
+      finally { setLoadingAllAreas(false); }
+    })();
+  }, []);
 
-        const [citiesResponse, typesResponse] = await Promise.all([
-          cityApi.getAll(),
-          propertyApi.getTypes()
-        ]);
-        setAllCities(citiesResponse);
-        setAllPropertyTypes(typesResponse);
-
-        // Fetch properties with filters and pagination
-        const cityToMatch = matchedCity || city;
-        const currentCity = citiesResponse.find((c: any) => c.name.toLowerCase() === cityToMatch.toLowerCase());
-
-        const response = await propertyApi.getAll({
-          cityId: currentCity?._id,
-          cityName: cityToMatch,
-          areaId: searchParams.get('areaId') || initialAreaId || undefined,
-          search: searchParams.get('search') || undefined,
-
-          priceMin: advancedFilters.priceMin,
-          priceMax: advancedFilters.priceMax,
-          areaMin: advancedFilters.areaMin,
-          areaMax: advancedFilters.areaMax,
-          marlaMin: advancedFilters.marlaMin,
-          marlaMax: advancedFilters.marlaMax,
-          beds: advancedFilters.beds,
-          baths: advancedFilters.baths,
-          type: type !== 'all' ? type : undefined,
-          purpose: purpose !== 'all' ? purpose : undefined,
-          page: currentPage,
-          limit: 12
-        });
-
-
-
-        // Handle both pagination object and direct array response
-        let backendProperties: BackendProperty[] = [];
-        let total = 0;
-        let pages = 1;
-
-        if (Array.isArray(response)) {
-          backendProperties = response;
-          total = response.length;
-          pages = 1;
-        } else if (response && response.properties) {
-          backendProperties = response.properties;
-          total = response.total || 0;
-          pages = response.totalPages || 1;
-        } else {
-          console.error('Unexpected API response format:', response);
-          backendProperties = [];
-        }
-
-        const transformedProperties = backendProperties.map(mapBackendToFrontendProperty);
-
-
-        if (currentPage === 1) {
-          setProperties(transformedProperties);
-        } else {
-          setProperties(prev => [...prev, ...transformedProperties]);
-        }
-
-        setTotalPages(pages);
-
-      } catch (err: any) {
-        console.error('Error fetching data:', err);
-        const errorMessage = err.response?.data?.message || err.message || 'Failed to load data';
-        setError(errorMessage);
-        toast.error('Error', {
-          description: errorMessage,
-        });
-      } finally {
-        setLoading(false);
-        setIsFetchingMore(false);
-      }
-    };
-
-    fetchData();
-  }, [matchedCity, purpose, type, advancedFilters, searchParams, currentPage, initialAreaId]);
-
-  // Derive richDescription from allCities based on purpose if not explicitly provided.
-  // IMPORTANT: Only fall back to city-level content when:
-  //   - No type filter is active (type === 'all' or empty) AND
-  //   - No area filter is active
-  // Otherwise content shown would be misleading (e.g. city rent content on offices page).
-  const effectiveRichDescription = useMemo(() => {
-    // If an explicit richDescription was passed from the server page, always use it
-    if (richDescription) return richDescription;
-
-    // Suppress fallback when a specific type or area filter is active
-    const hasTypeFilter = type && type !== 'all';
-    const hasAreaFilter = !!(initialAreaId || initialAreaSlug);
-    if (hasTypeFilter || hasAreaFilter) return undefined;
-
-    // City-only page: derive from city data
-    if (!matchedCity || allCities.length === 0) return undefined;
-
-    const cityData = allCities.find(c => c.name.toLowerCase() === matchedCity.toLowerCase());
-    if (!cityData) return undefined;
-
-    if (purpose === 'rent') return cityData.rentContent;
-    if (purpose === 'buy') return cityData.saleContent;
-
-    return cityData.description;
-  }, [richDescription, matchedCity, allCities, purpose, type, initialAreaId, initialAreaSlug]);
-
-
-  // Update state when props change
   useEffect(() => {
-    setProperties([]); // Clear old results to prevent stale display during loading
-    setCity(initialCity);
-    setType(initialType);
-    setTempCity(initialCity);
-    setTempType(initialType);
-    setCurrentPage(1); // Reset to first page on URL/filter change
-  }, [initialCity, initialType, purpose, searchParams, initialAreaId, initialAreaSlug]);
+    if (!sheetCity) { setSheetAreas([]); return; }
+    (async () => {
+      setLoadingAreas(true);
+      try {
+        const pt = purpose === 'buy' ? 'sale' : purpose === 'rent' ? 'rent' : undefined;
+        const data = await propertyApi.getLocationStats(sheetCity, pt);
+        if (data?.locations) {
+          setSheetAreas(data.locations.map((l: any) => ({
+            id: l.id, name: l.name, slug: l.slug, count: l.count,
+          })));
+        }
+      } catch { setSheetAreas([]); }
+      finally { setLoadingAreas(false); }
+    })();
+  }, [sheetCity, purpose]);
 
+  useEffect(() => {
+    if (!matchedCity) { setMainAreas([]); return; }
+    setLoadingMainAreas(true);
+    (async () => {
+      try {
+        const pt = purpose === 'buy' ? 'sale' : purpose === 'rent' ? 'rent' : undefined;
+        const data = await propertyApi.getLocationStats(matchedCity, pt);
+        if (data?.locations) {
+          setMainAreas(data.locations.map((l: any) => ({
+            id: l.id, name: l.name, slug: l.slug, count: l.count,
+          })));
+        } else { setMainAreas([]); }
+      } catch { setMainAreas([]); }
+      finally { setLoadingMainAreas(false); }
+    })();
+  }, [matchedCity, purpose]);
 
-  // Match temp city for the filter dropdown
-  const matchedTempCity = useMemo(() => {
-    if (!tempCity) return '';
-    // If tempCity is already a valid city name, use it
-    if (cities.includes(tempCity)) return tempCity;
-    // Otherwise, try to match it as a slug
-    return slugToCity(tempCity, cities) || tempCity;
-  }, [tempCity, cities]);
+  useEffect(() => {
+    if (!isFilterSheetOpen) return;
+    setSheetCity(matchedCity);
+    setSheetType(type);
+    setSheetAreaId(initialAreaId || searchParams.get('areaId') || '');
+    setSheetAreaSlug(initialAreaSlug || '');
+    setSheetPriceMin(advancedFilters.priceMin?.toString() || '');
+    setSheetPriceMax(advancedFilters.priceMax?.toString() || '');
+    setSheetMarlaMin(advancedFilters.marlaMin?.toString() || '');
+    setSheetMarlaMax(advancedFilters.marlaMax?.toString() || '');
+    setSheetBeds(advancedFilters.beds);
+    setSheetBaths(advancedFilters.baths);
+    setShowAllAreas(false);
+  }, [isFilterSheetOpen]);
 
-
-  // Normalize type for matching (handle case differences)
-  const normalizedType = useMemo(() => {
-    if (!type || type === 'all') return null;
-    // Convert to title case for matching (e.g., "house" -> "House", "flat" -> "Flat")
-    const normalized = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
-    // Also handle common variations
-    const typeMap: Record<string, string> = {
-      'house': 'House',
-      'apartment': 'Apartment',
-      'flat': 'Flat',
-      'commercial': 'Commercial',
-    };
-    return typeMap[type.toLowerCase()] || normalized;
-  }, [type]);
-
-  // Filter properties based on selected filters
-  const filteredProperties = properties;
-
-
-  const currentAreaId = useMemo(() => {
-    // If we're filtering by areaId, pass it to explorer
-    return searchParams.get('areaId') || initialAreaId || '';
-  }, [searchParams, initialAreaId]);
-
-  // LOADING STATE
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 pt-32 pb-16">
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-              <p className="text-muted-foreground">Loading properties...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ERROR STATE
-  if (error && properties.length === 0) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 pt-32 pb-16 text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Error Loading Properties</h1>
-          <p className="text-muted-foreground mb-8">{error}</p>
-          <Button onClick={() => setCurrentPage(1)}>Retry</Button>
-        </div>
-
-      </div>
-    );
-  }
-
-  const updateFilters = (newCity: string, newType: string, newPurpose?: 'rent' | 'buy' | 'all', forceCleanUrl = false) => {
-    const currentPurpose = newPurpose || purpose;
-
-    // Always use clean URLs when forceCleanUrl is true (from Apply button) or when useCleanUrls is true
-    const shouldUseCleanUrl = (forceCleanUrl || useCleanUrls);
-
-    // Get existing parameters to preserve
+  const applySheetFilters = () => {
+    handleFilterChange({
+      priceMin: sheetPriceMin ? Number(sheetPriceMin) : undefined,
+      priceMax: sheetPriceMax ? Number(sheetPriceMax) : undefined,
+      marlaMin: sheetMarlaMin ? Number(sheetMarlaMin) : undefined,
+      marlaMax: sheetMarlaMax ? Number(sheetMarlaMax) : undefined,
+      beds: sheetBeds,
+      baths: sheetBaths,
+    });
     const params = new URLSearchParams(searchParams.toString());
-
-    // City and Type are now handled by path in clean URLs, so remove them from query if present
-    if (shouldUseCleanUrl) {
-      params.delete('city');
-      params.delete('type');
-      params.delete('purpose');
-
-      // Use 'sale' for path if purpose is 'buy'
-      const purposePath = currentPurpose === 'buy' ? 'sale' : currentPurpose;
-      const citySlug = newCity ? cityToSlug(newCity) : '';
-      const typeSlug = newType && newType !== 'all'
-        ? `/${newType.toLowerCase()}`
-        : '';
-
-      const queryString = params.toString();
-      const suffix = queryString ? `?${queryString}` : '';
-
-      if (citySlug) {
+    if (sheetAreaId) params.set('areaId', sheetAreaId); else params.delete('areaId');
+    if (useCleanUrls) {
+      params.delete('city'); params.delete('type'); params.delete('purpose');
+      const purposePath = purpose === 'buy' ? 'sale' : purpose;
+      const citySlug    = sheetCity ? cityToSlug(sheetCity) : '';
+      const typeSlug    = sheetType && sheetType !== 'all' ? `/${sheetType.toLowerCase()}` : '';
+      const qs          = params.toString();
+      const suffix      = qs ? `?${qs}` : '';
+      if (sheetAreaSlug && citySlug) {
+        router.push(`/properties/${purposePath}/${citySlug}/${sheetAreaSlug}${typeSlug}${suffix}`);
+      } else if (citySlug) {
         router.push(`/properties/${purposePath}/${citySlug}${typeSlug}${suffix}`);
       } else {
         router.push(`/properties/${purposePath}${suffix}`);
       }
     } else {
-      // Use query params format
-      if (currentPurpose !== 'all') params.set('purpose', currentPurpose);
-      else params.delete('purpose');
+      if (sheetCity) params.set('city', sheetCity); else params.delete('city');
+      if (sheetType && sheetType !== 'all') params.set('type', sheetType); else params.delete('type');
+      const qs = params.toString();
+      router.push(qs ? `/properties?${qs}` : '/properties');
+    }
+    setIsFilterSheetOpen(false);
+  };
 
-      if (newCity) params.set('city', newCity);
-      else params.delete('city');
+  const resetSheetFilters = () => {
+    setSheetCity(matchedCity);
+    setSheetType('all');
+    setSheetAreaId(''); setSheetAreaSlug('');
+    setSheetPriceMin(''); setSheetPriceMax('');
+    setSheetMarlaMin(''); setSheetMarlaMax('');
+    setSheetBeds(undefined); setSheetBaths(undefined);
+  };
 
-      if (newType && newType !== 'all') params.set('type', newType);
-      else params.delete('type');
+  useEffect(() => {
+    (async () => {
+      try {
+        if (currentPage === 1) setLoading(true); else setIsFetchingMore(true);
+        setError(null);
+        const [citiesRes, typesRes] = await Promise.all([cityApi.getAll(), propertyApi.getTypes()]);
+        setAllCities(citiesRes);
+        setAllPropertyTypes(typesRes);
+        const cityToMatch  = matchedCity || city;
+        const currentCity  = citiesRes.find((c: any) => c.name.toLowerCase() === cityToMatch.toLowerCase());
+        const response = await propertyApi.getAll({
+          cityId:   currentCity?._id,
+          cityName: cityToMatch,
+          areaId:   searchParams.get('areaId') || initialAreaId || undefined,
+          search:   searchParams.get('search') || undefined,
+          priceMin: advancedFilters.priceMin,
+          priceMax: advancedFilters.priceMax,
+          marlaMin: advancedFilters.marlaMin,
+          marlaMax: advancedFilters.marlaMax,
+          beds:     advancedFilters.beds,
+          baths:    advancedFilters.baths,
+          type:     type !== 'all' ? type : undefined,
+          purpose:  purpose !== 'all' ? purpose : undefined,
+          page:     currentPage,
+          limit:    12,
+        });
+        let props: BackendProperty[] = [];
+        let pages = 1;
+        if (Array.isArray(response))   { props = response; }
+        else if (response?.properties) { props = response.properties; pages = response.totalPages || 1; }
+        const transformed = props.map(mapBackendToFrontendProperty);
+        if (currentPage === 1) setProperties(transformed);
+        else setProperties(prev => [...prev, ...transformed]);
+        setTotalPages(pages);
+      } catch (err: any) {
+        const msg = err.response?.data?.message || err.message || 'Failed to load data';
+        setError(msg);
+        toast.error('Error', { description: msg });
+      } finally {
+        setLoading(false);
+        setIsFetchingMore(false);
+      }
+    })();
+  }, [matchedCity, purpose, type, advancedFilters, searchParams, currentPage, initialAreaId]);
 
-      const queryString = params.toString();
-      router.push(queryString ? `/properties?${queryString}` : '/properties');
+  const effectiveRichDescription = useMemo(() => {
+    if (richDescription) return richDescription;
+    if ((type && type !== 'all') || !!(initialAreaId || initialAreaSlug)) return undefined;
+    if (!matchedCity || !allCities.length) return undefined;
+    const d = allCities.find(c => c.name.toLowerCase() === matchedCity.toLowerCase());
+    if (!d) return undefined;
+    return purpose === 'rent' ? d.rentContent : purpose === 'buy' ? d.saleContent : d.description;
+  }, [richDescription, matchedCity, allCities, purpose, type, initialAreaId, initialAreaSlug]);
+
+  useEffect(() => {
+    setProperties([]);
+    setCity(initialCity); setType(initialType);
+    setTempCity(initialCity); setTempType(initialType);
+    setCurrentPage(1);
+    setIsLocationPanelOpen(false);
+  }, [initialCity, initialType, purpose, searchParams, initialAreaId, initialAreaSlug]);
+
+  const currentAreaId = useMemo(
+    () => searchParams.get('areaId') || initialAreaId || '',
+    [searchParams, initialAreaId]
+  );
+
+  const updateFilters = (
+    newCity: string, newType: string,
+    newPurpose?: 'rent' | 'buy' | 'all', forceCleanUrl = false
+  ) => {
+    const cp  = newPurpose || purpose;
+    const use = forceCleanUrl || useCleanUrls;
+    const params = new URLSearchParams(searchParams.toString());
+    if (use) {
+      params.delete('city'); params.delete('type'); params.delete('purpose');
+      const pp     = cp === 'buy' ? 'sale' : cp;
+      const cSlug  = newCity ? cityToSlug(newCity) : '';
+      const tSlug  = newType && newType !== 'all' ? `/${newType.toLowerCase()}` : '';
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      router.push(cSlug
+        ? `/properties/${pp}/${cSlug}${tSlug}${suffix}`
+        : `/properties/${pp}${suffix}`);
+    } else {
+      if (cp !== 'all') params.set('purpose', cp); else params.delete('purpose');
+      if (newCity) params.set('city', newCity);    else params.delete('city');
+      if (newType && newType !== 'all') params.set('type', newType); else params.delete('type');
+      const qs = params.toString();
+      router.push(qs ? `/properties?${qs}` : '/properties');
     }
   };
 
+  const navigateType = (t: string) => {
+    setIsLocationPanelOpen(false);
+    const params = new URLSearchParams(searchParams.toString());
+    if (useCleanUrls && matchedCity) {
+      const pp    = purpose === 'buy' ? 'sale' : purpose;
+      const cs    = cityToSlug(matchedCity);
+      const tSlug = t === 'all' ? '' : `/${t.toLowerCase()}`;
+      router.push(initialAreaSlug
+        ? `/properties/${pp}/${cs}/${initialAreaSlug}${tSlug}`
+        : `/properties/${pp}/${cs}${tSlug}`);
+    } else {
+      if (t === 'all') params.delete('type'); else params.set('type', t.toLowerCase());
+      const qs = params.toString();
+      router.push(qs ? `/properties?${qs}` : '/properties');
+    }
+  };
 
+  const navigateArea = (area: AreaOption) => {
+    setIsLocationPanelOpen(false);
+    const params = new URLSearchParams(searchParams.toString());
+    const isUnselecting = params.get('areaId') === area.id || initialAreaId === area.id;
+    if (useCleanUrls && matchedCity) {
+      const pp    = purpose === 'buy' ? 'sale' : purpose;
+      const cSlug = cityToSlug(matchedCity);
+      const tSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
+      if (isUnselecting) { router.push(`/properties/${pp}/${cSlug}${tSlug}`); return; }
+      if (area.slug)     { router.push(`/properties/${pp}/${cSlug}/${area.slug}${tSlug}`); return; }
+    }
+    if (isUnselecting) params.delete('areaId'); else params.set('areaId', area.id);
+    const qs = params.toString();
+    router.push(`${window.location.pathname}${qs ? `?${qs}` : ''}`);
+  };
+
+  if (loading) return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 pt-32 pb-16 flex items-center justify-center py-20">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading properties...</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (error && !properties.length) return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 pt-32 pb-16 text-center">
+        <h1 className="text-4xl font-bold mb-4">Error Loading Properties</h1>
+        <p className="text-muted-foreground mb-8">{error}</p>
+        <Button onClick={() => setCurrentPage(1)}>Retry</Button>
+      </div>
+    </div>
+  );
+
+  const typeTabs = [
+    { key: 'all', label: 'All Properties', count: properties.length },
+    ...propertyTypes.map(t => ({
+      key: t.toLowerCase(),
+      label: typeLabel(t),
+      count: properties.filter(p => p.type?.toLowerCase() === t.toLowerCase()).length,
+    })),
+  ];
+
+  const locationPanelAreas   = matchedCity ? mainAreas : allAreas;
+  const locationPanelLoading = matchedCity ? loadingMainAreas : loadingAllAreas;
+
+  const activeTabLabel = typeTabs.find(t =>
+    t.key === 'all' ? (type === 'all' || !type) : type.toLowerCase() === t.key
+  )?.label || 'Properties';
+  const purposeLabel = purpose === 'buy' ? 'For Sale' : purpose === 'rent' ? 'For Rent' : '';
+  const locationPanelTitle = [
+    'Locations of',
+    activeTabLabel,
+    purposeLabel,
+    matchedCity ? `in ${matchedCity}` : '',
+  ].filter(Boolean).join(' ');
+
+  const filterSheetAreaList    = sheetCity ? sheetAreas : allAreas;
+  const filterSheetAreaLoading = sheetCity ? loadingAreas : loadingAllAreas;
+  const visibleFilterAreas     = showAllAreas ? filterSheetAreaList : filterSheetAreaList.slice(0, 8);
+
+  const showMarlaChips = type.toLowerCase() === 'house' || type.toLowerCase() === 'plot';
 
   return (
     <div className="min-h-screen bg-background">
 
-      {/* Main Content Area - Sidebar + Grid */}
+      {/* ══════════════════════════════════════════════════════
+          BOTTOM FILTER SHEET
+      ══════════════════════════════════════════════════════ */}
+      <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+        <SheetContent side="bottom" className="h-screen w-full p-0 rounded-none border-0 lg:hidden flex flex-col">
+
+          <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200 bg-white shrink-0">
+            <SheetTitle className="text-base font-bold text-black">Filters</SheetTitle>
+            <button
+              onClick={() => setIsFilterSheetOpen(false)}
+              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100"
+            >
+              <X className="w-4 h-4 text-black" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto bg-white">
+            <div className="p-4 space-y-6">
+
+              {/* City */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-black">City</Label>
+                <div className="relative">
+                  <select
+                    value={sheetCity}
+                    onChange={e => { setSheetCity(e.target.value); setSheetAreaId(''); setSheetAreaSlug(''); setShowAllAreas(false); }}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium appearance-none focus:border-black focus:outline-none"
+                  >
+                    <option value="">All Cities</option>
+                    {cities.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Property Type */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-black">Property Type</Label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSheetType('all')}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold border transition-colors ${
+                      sheetType === 'all' ? 'bg-black text-white border-black' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'
+                    }`}
+                  >
+                    All Types
+                  </button>
+                  {propertyTypes.map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setSheetType(sheetType.toLowerCase() === t.toLowerCase() ? 'all' : t.toLowerCase())}
+                      className={`px-4 py-2 rounded-full text-xs font-semibold border transition-colors ${
+                        sheetType.toLowerCase() === t.toLowerCase() ? 'bg-black text-white border-black' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Areas */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-black">
+                  Area
+                  {sheetAreaId && (
+                    <button
+                      onClick={() => { setSheetAreaId(''); setSheetAreaSlug(''); }}
+                      className="ml-2 text-xs text-gray-400 font-normal underline"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </Label>
+                {filterSheetAreaLoading ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-400 py-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Loading areas…
+                  </div>
+                ) : filterSheetAreaList.length === 0 ? (
+                  <p className="text-sm text-gray-400 py-2">No areas found</p>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-2">
+                      {visibleFilterAreas.map(area => (
+                        <button
+                          key={area.id}
+                          onClick={() => {
+                            if (sheetAreaId === area.id) { setSheetAreaId(''); setSheetAreaSlug(''); }
+                            else { setSheetAreaId(area.id); setSheetAreaSlug(area.slug || ''); }
+                          }}
+                          className={`flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors text-left ${
+                            sheetAreaId === area.id
+                              ? 'bg-black text-white border-black'
+                              : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <MapPin className="w-3 h-3 shrink-0 opacity-60" />
+                            <span className="truncate">{toTitleCase(area.name)}</span>
+                          </div>
+                          {area.count > 0 && (
+                            <span className={`ml-1 shrink-0 text-[10px] ${sheetAreaId === area.id ? 'opacity-70' : 'text-gray-400'}`}>
+                              {area.count}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    {filterSheetAreaList.length > 8 && (
+                      <button
+                        onClick={() => setShowAllAreas(v => !v)}
+                        className="flex items-center gap-1 text-xs text-gray-500 mt-1 hover:text-black transition-colors"
+                      >
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllAreas ? 'rotate-180' : ''}`} />
+                        {showAllAreas ? 'Show less' : `Show all ${filterSheetAreaList.length} areas`}
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="border-t border-gray-100" />
+
+              {/* Price Range */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-black">Price Range (PKR)</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input type="number" placeholder="Min" value={sheetPriceMin} onChange={e => setSheetPriceMin(e.target.value)} className="h-11 text-sm rounded-xl border-gray-200 focus:border-black" />
+                  <Input type="number" placeholder="Max" value={sheetPriceMax} onChange={e => setSheetPriceMax(e.target.value)} className="h-11 text-sm rounded-xl border-gray-200 focus:border-black" />
+                </div>
+              </div>
+
+              {/* Area Size */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-black">Area Size (Marla)</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input type="number" placeholder="Min" value={sheetMarlaMin} onChange={e => setSheetMarlaMin(e.target.value)} className="h-11 text-sm rounded-xl border-gray-200 focus:border-black" />
+                  <Input type="number" placeholder="Max" value={sheetMarlaMax} onChange={e => setSheetMarlaMax(e.target.value)} className="h-11 text-sm rounded-xl border-gray-200 focus:border-black" />
+                </div>
+              </div>
+
+              {/* Bedrooms */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-black">Bedrooms</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {[1,2,3,4,5].map(n => (
+                    <button key={n} onClick={() => setSheetBeds(sheetBeds === n ? undefined : n)}
+                      className={`w-11 h-11 rounded-full text-sm font-semibold border transition-colors ${sheetBeds === n ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-300 hover:border-gray-500'}`}>
+                      {n}{n === 5 ? '+' : ''}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bathrooms */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-black">Bathrooms</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {[1,2,3,4].map(n => (
+                    <button key={n} onClick={() => setSheetBaths(sheetBaths === n ? undefined : n)}
+                      className={`w-11 h-11 rounded-full text-sm font-semibold border transition-colors ${sheetBaths === n ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-300 hover:border-gray-500'}`}>
+                      {n}{n === 4 ? '+' : ''}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-4" />
+            </div>
+          </div>
+
+          <div className="shrink-0 border-t border-gray-200 bg-white px-4 py-3 flex gap-3">
+            <button onClick={resetSheetFilters} className="flex-1 py-3 rounded-xl border-2 border-gray-300 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
+              RESET
+            </button>
+            <button onClick={applySheetFilters} className="flex-[2] py-3 rounded-xl bg-black text-white text-sm font-bold hover:bg-gray-900 transition-colors">
+              APPLY FILTERS
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* ══════════════════════════════════════════════════════
+          MAIN CONTENT
+      ══════════════════════════════════════════════════════ */}
       <section className="py-8 md:py-10">
         <div className="container mx-auto px-4">
-
           <div className="flex flex-col lg:flex-row gap-8">
 
-            {/* Sidebar - Desktop Only */}
+            {/* Desktop Sidebar */}
             <aside className="w-80 shrink-0 hidden lg:block">
               <div className="sticky top-24">
                 <SearchSidebar
-                  city={matchedCity}
-                  purpose={purpose}
-                  type={type}
-                  useCleanUrls={useCleanUrls}
-                  filters={advancedFilters}
+                  city={matchedCity} purpose={purpose} type={type}
+                  useCleanUrls={useCleanUrls} filters={advancedFilters}
                   onFilterChange={handleFilterChange}
                 />
-
               </div>
             </aside>
 
-            {/* Main Listing Side */}
-            <div className="w-full lg:w-3/4 space-y-10">
+            {/* Listing column */}
+            <div className="w-full lg:w-3/4 space-y-5">
 
-              {/* Location Explorer Board */}
               <LocationExplorer
-                city={matchedCity}
-                purpose={purpose}
-                currentAreaId={currentAreaId}
-                currentAreaSlug={initialAreaSlug}
+                city={matchedCity} purpose={purpose}
+                currentAreaId={currentAreaId} currentAreaSlug={initialAreaSlug}
                 currentType={type}
-
                 onAreaSelect={(areaId, areaSlug) => {
-                  // Standardize navigation to preserve current filters
                   const params = new URLSearchParams(searchParams.toString());
                   const isUnselecting = params.get('areaId') === areaId || initialAreaId === areaId;
-
                   if (useCleanUrls && matchedCity) {
-                    const currentPurpose = purpose;
-                    const purposePath = currentPurpose === 'buy' ? 'sale' : currentPurpose;
-                    const citySlug = cityToSlug(matchedCity);
-
-                    // If unselecting, go back to city (or city/type if type is active)
-                    if (isUnselecting) {
-                      const typeSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
-                      router.push(`/properties/${purposePath}/${citySlug}${typeSlug}`);
-                      return;
-                    }
-
-                    // If selecting and we have a slug, go to area page (preserve active type)
-                    if (areaSlug) {
-                      const typeSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
-                      router.push(`/properties/${purposePath}/${citySlug}/${areaSlug}${typeSlug}`);
-                      return;
-                    }
+                    const pp    = purpose === 'buy' ? 'sale' : purpose;
+                    const cSlug = cityToSlug(matchedCity);
+                    const tSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
+                    if (isUnselecting) { router.push(`/properties/${pp}/${cSlug}${tSlug}`); return; }
+                    if (areaSlug)      { router.push(`/properties/${pp}/${cSlug}/${areaSlug}${tSlug}`); return; }
                   }
-
-                  // Fallback to query params
-                  if (isUnselecting) {
-                    params.delete('areaId');
-                  } else {
-                    params.set('areaId', areaId);
-                  }
-
-                  const queryString = params.toString();
-                  const currentPath = window.location.pathname;
-                  router.push(`${currentPath}${queryString ? `?${queryString}` : ''}`);
+                  if (isUnselecting) params.delete('areaId'); else params.set('areaId', areaId);
+                  const qs = params.toString();
+                  router.push(`${window.location.pathname}${qs ? `?${qs}` : ''}`);
                 }}
-                onTypeSelect={(newType) => {
+                onTypeSelect={newType => {
                   const params = new URLSearchParams(searchParams.toString());
                   params.delete('areaId');
-
-                  const currentPurpose = purpose;
-
                   if (useCleanUrls) {
-                    const purposePath = currentPurpose === 'buy' ? 'sale' : currentPurpose;
-                    const citySlug = cityToSlug(matchedCity);
-                    const typeSlug = newType && newType !== 'all' ? `/${newType.toLowerCase()}` : '';
-
-                    params.delete('city');
-                    params.delete('type');
-                    params.delete('purpose');
-
-                    const queryString = params.toString();
-                    const suffix = queryString ? `?${queryString}` : '';
-
-                    // If we are currently viewing a specific area, stay in area context
+                    const pp    = purpose === 'buy' ? 'sale' : purpose;
+                    const cSlug = cityToSlug(matchedCity);
+                    const tSlug = newType && newType !== 'all' ? `/${newType.toLowerCase()}` : '';
+                    params.delete('city'); params.delete('type'); params.delete('purpose');
+                    const suffix = params.toString() ? `?${params.toString()}` : '';
                     if (initialAreaSlug) {
-                      if (newType && newType !== 'all') {
-                        // Navigate to area/type
-                        router.push(`/properties/${purposePath}/${citySlug}/${initialAreaSlug}${typeSlug}${suffix}`);
-                      } else {
-                        // Selecting 'Total' clears the type but keeps area
-                        router.push(`/properties/${purposePath}/${citySlug}/${initialAreaSlug}${suffix}`);
-                      }
+                      router.push(newType && newType !== 'all'
+                        ? `/properties/${pp}/${cSlug}/${initialAreaSlug}${tSlug}${suffix}`
+                        : `/properties/${pp}/${cSlug}/${initialAreaSlug}${suffix}`);
                     } else {
-                      // City-wide type selection
-                      router.push(`/properties/${purposePath}/${citySlug}${typeSlug}${suffix}`);
+                      router.push(`/properties/${pp}/${cSlug}${tSlug}${suffix}`);
                     }
                   } else {
-                    if (currentPurpose !== 'all') params.set('purpose', currentPurpose);
+                    if (purpose !== 'all') params.set('purpose', purpose);
                     if (matchedCity) params.set('city', matchedCity);
-                    if (newType && newType !== 'all') params.set('type', newType);
-                    else params.delete('type');
-
-                    const queryString = params.toString();
-                    router.push(queryString ? `/properties?${queryString}` : '/properties');
+                    if (newType && newType !== 'all') params.set('type', newType); else params.delete('type');
+                    const qs = params.toString();
+                    router.push(qs ? `/properties?${qs}` : '/properties');
                   }
                 }}
-                onPurposeChange={(newPurpose) => {
-                  // Switch between rent and buy while keeping city and type
-                  updateFilters(matchedCity, type, newPurpose);
-                }}
+                onPurposeChange={newPurpose => updateFilters(matchedCity, type, newPurpose)}
               />
 
-
-
+              {/* Page heading */}
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
                 {type !== 'all'
                   ? (type.toLowerCase() === 'house' ? 'Property' : `${type.charAt(0).toUpperCase() + type.slice(1)}s`)
@@ -535,56 +702,166 @@ export default function PropertiesListing({
                 in {matchedCity || 'Pakistan'}
               </h1>
 
+              {/* Mobile: Buy | Rent | FILTERS bar */}
+              <div className="lg:hidden flex rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                <button
+                  onClick={() => updateFilters(matchedCity, type, 'buy')}
+                  className={`flex-1 py-3 text-sm font-bold transition-colors ${
+                    purpose === 'buy' ? 'bg-black text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  Buy
+                </button>
+                <button
+                  onClick={() => updateFilters(matchedCity, type, 'rent')}
+                  className={`flex-1 py-3 text-sm font-bold transition-colors border-x border-gray-200 ${
+                    purpose === 'rent' ? 'bg-black text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  Rent
+                </button>
+                <button
+                  onClick={() => setIsFilterSheetOpen(true)}
+                  className="px-5 py-3 bg-black hover:bg-gray-900 text-white text-xs font-bold tracking-widest flex items-center gap-1.5 transition-colors"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  FILTERS
+                </button>
+              </div>
 
-              {/* Properties Grid */}
-              <div className="pt-4">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold">
-                    Property Listings
-                  </h3>
-
-                  {/* Mobile Filters Trigger - Hide if FilterBar is enough, or keep as advanced */}
-                  <div className="lg:hidden">
-                    <Sheet>
-                      <SheetTrigger asChild>
-                        <Button variant="outline" size="sm" className="gap-2 h-9 rounded-full border-gray-300">
-                          <Filter className="w-4 h-4" />
-                          Advanced Filters
-                        </Button>
-                      </SheetTrigger>
-                      <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
-                        <SheetHeader className="p-4 border-b text-left">
-                          <SheetTitle>Search Filters</SheetTitle>
-                        </SheetHeader>
-                        <div className="p-4 overflow-y-auto h-[calc(100vh-100px)]">
-                          <SearchSidebar
-                            city={matchedCity}
-                            purpose={purpose}
-                            type={type}
-                            useCleanUrls={useCleanUrls}
-                            filters={advancedFilters}
-                            onFilterChange={(newFilters) => {
-                              handleFilterChange(newFilters);
-                            }}
-                          />
-
-                        </div>
-                      </SheetContent>
-                    </Sheet>
+              {/* ══ Mobile: Type Tabs + LOCATION LIST button ══ */}
+              {/* position:relative zaruri hai floating panel ke liye */}
+              <div className="lg:hidden relative">
+                <div className="relative">
+                  <div className="flex flex-wrap gap-x-5 gap-y-0 pr-28">
+                    {typeTabs.map(tab => {
+                      const isActive = tab.key === 'all'
+                        ? (type === 'all' || !type)
+                        : type.toLowerCase() === tab.key;
+                      return (
+                        <button
+                          key={tab.key}
+                          onClick={() => navigateType(tab.key)}
+                          className={`flex flex-col items-start pb-2 pt-0.5 text-left transition-colors border-b-2 ${
+                            isActive ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-800'
+                          }`}
+                        >
+                          <span className="text-xs font-bold leading-tight whitespace-nowrap">{tab.label}</span>
+                          <span className="text-[10px] text-gray-400 leading-tight">({tab.count})</span>
+                        </button>
+                      );
+                    })}
                   </div>
+
+                  {/* Toggle button */}
+                  <button
+                    onClick={() => setIsLocationPanelOpen(v => !v)}
+                    className={`absolute right-0 top-0.5 text-[10px] font-bold border px-2 py-1 rounded transition-colors whitespace-nowrap ${
+                      isLocationPanelOpen
+                        ? 'border-black bg-black text-white'
+                        : 'border-gray-300 bg-white text-gray-600 hover:border-gray-600'
+                    }`}
+                  >
+                    {isLocationPanelOpen ? 'CLOSE LIST' : 'LOCATION LIST'}
+                  </button>
                 </div>
 
-                {filteredProperties.length > 0 ? (
+                {/* ══════════════════════════════════════════
+                    ZAMEEN STYLE — RIGHT SIDE FLOATING BOX
+                    Cards ke upar overlay, bilkul zameen jaisa
+                ══════════════════════════════════════════ */}
+                {isLocationPanelOpen && (
+                  <>
+                    {/* Transparent backdrop — bahar click karo to band ho */}
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsLocationPanelOpen(false)}
+                    />
+
+                    {/* Floating panel — right side pe, cards ke upar */}
+                    <div className="absolute right-0 top-8 z-50 w-[260px] bg-white border border-gray-200 shadow-2xl overflow-hidden">
+
+                      {/* Big bold title — zameen style */}
+                      <div className="px-4 pt-4 pb-3">
+                        <p className="text-[17px] font-bold text-gray-900 leading-snug">
+                          {locationPanelTitle}
+                        </p>
+                      </div>
+
+                      {/* Scrollable list */}
+                      <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
+                        {locationPanelLoading ? (
+                          <div className="flex items-center gap-2 px-4 py-6 text-sm text-gray-400">
+                            <Loader2 className="w-4 h-4 animate-spin" /> Loading locations…
+                          </div>
+                        ) : locationPanelAreas.length === 0 ? (
+                          <p className="px-4 py-6 text-sm text-gray-400 text-center">No areas found</p>
+                        ) : (
+                          locationPanelAreas.map((area, idx) => {
+                            const isSelected = currentAreaId === area.id;
+                            return (
+                              <button
+                                key={area.id}
+                                onClick={() => navigateArea(area)}
+                                className={cn(
+                                  'w-full flex items-center justify-between px-4 py-[10px] text-left transition-colors hover:bg-gray-50',
+                                  idx !== 0 && 'border-t border-gray-100'
+                                )}
+                              >
+                                {/* Area name — Title Case, zameen style */}
+                                <span className={`text-[13px] leading-tight ${
+                                  isSelected ? 'font-semibold text-gray-900' : 'font-normal text-gray-800'
+                                }`}>
+                                  {toTitleCase(area.name)}
+                                </span>
+
+                                {/* Count — "(145)" grey, right side */}
+                                {area.count > 0 && (
+                                  <span className="text-[11px] text-gray-400 ml-2 shrink-0 tabular-nums">
+                                    ({area.count})
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Mobile: Marla chips */}
+              {showMarlaChips && (
+                <div className="lg:hidden flex gap-2 flex-wrap">
+                  {MARLA_OPTIONS.map(m => (
+                    <button
+                      key={m}
+                      onClick={() => handleMarlaClick(m)}
+                      className={`px-3 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
+                        selectedMarla === m
+                          ? 'bg-black text-white border-black'
+                          : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'
+                      }`}
+                    >
+                      {m} Marla
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Properties grid */}
+              <div className="pt-2">
+                <h3 className="text-lg font-semibold mb-6">Property Listings</h3>
+
+                {properties.length > 0 ? (
                   <div className="space-y-8">
-                    <div className="grid grid-cols-2 gap-3">
-                      {filteredProperties.map((property, index) => (
+                    <div className="grid grid-cols-1 gap-4 md:gap-6">
+                      {properties.map((property, index) => (
                         <div
                           key={`${property.id}-${index}`}
                           className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-                          style={{
-                            animationDelay: `${index * 50}ms`,
-                            animationFillMode: 'backwards'
-                          }}
+                          style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
                         >
                           <PropertyCard property={property} />
                         </div>
@@ -594,68 +871,51 @@ export default function PropertiesListing({
                     {currentPage < totalPages && (
                       <div className="flex justify-center pt-4">
                         <Button
-                          variant="outline"
-                          size="lg"
-                          onClick={() => setCurrentPage(prev => prev + 1)}
+                          variant="outline" size="lg"
+                          onClick={() => setCurrentPage(p => p + 1)}
                           disabled={isFetchingMore}
                           className="min-w-[200px] rounded-full border-primary text-primary hover:bg-primary/5"
                         >
-                          {isFetchingMore ? (
-                            <>
-                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Loading...
-                            </>
-                          ) : (
-                            'Load More Properties'
-                          )}
+                          {isFetchingMore
+                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</>
+                            : 'Load More Properties'}
                         </Button>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-16 animate-in fade-in zoom-in-95 duration-500 bg-secondary/30 rounded-xl">
-                    <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 animate-in spin-in-180 duration-700">
+                  <div className="text-center py-16 bg-secondary/30 rounded-xl">
+                    <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
                       <SlidersHorizontal className="w-8 h-8 text-muted-foreground" />
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2 animate-in slide-in-from-bottom-2 duration-500 delay-200">
-                      No properties found
-                    </h3>
-                    <p className="text-muted-foreground mb-6 animate-in slide-in-from-bottom-2 duration-500 delay-300">
-                      Try adjusting your filters to find more properties
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setType('all');
-                          updateFilters('', 'all');
-                          setAdvancedFilters({});
-                        }}
-                        className="animate-in slide-in-from-bottom-2 duration-500 delay-400 transition-all hover:scale-105"
-                      >
-                        Clear All Filters
-                      </Button>
-                    </div>
+                    <h3 className="text-xl font-semibold mb-2">No properties found</h3>
+                    <p className="text-muted-foreground mb-6">Try adjusting your filters</p>
+                    <Button variant="outline" onClick={() => {
+                      setType('all');
+                      setSelectedMarla(null);
+                      updateFilters('', 'all');
+                      setAdvancedFilters({});
+                    }}>
+                      Clear All Filters
+                    </Button>
                   </div>
                 )}
-
               </div>
             </div>
           </div>
-          {/* Hero Banner - Responsive sizing */}
-          <section className="pt-24 pb-6 md:pt-28 md:pb-8 bg-secondary/50 animate-in fade-in duration-500">
-            <div className="container mx-auto px-4">
-              {effectiveRichDescription && (
+
+          {effectiveRichDescription && (
+            <section className="pt-24 pb-6 md:pt-28 md:pb-8 bg-secondary/50">
+              <div className="container mx-auto px-4">
                 <div
                   className="mt-6 prose prose-sm max-w-4xl text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
                   dangerouslySetInnerHTML={{ __html: effectiveRichDescription }}
                 />
-              )}
-            </div>
-          </section>
+              </div>
+            </section>
+          )}
         </div>
       </section>
-
     </div>
   );
 }

@@ -1,4 +1,4 @@
-'use client';
+ 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
@@ -20,10 +20,11 @@ interface LocationExplorerProps {
   city: string;
   purpose: 'rent' | 'buy' | 'all';
   currentAreaId?: string;
-  currentAreaSlug?: string; // slug of the currently selected area (for area+type URLs)
+  currentAreaSlug?: string;
   onAreaSelect: (areaId: string, slug?: string) => void;
   onTypeSelect: (type: string) => void;
   onPurposeChange?: (purpose: 'rent' | 'buy') => void;
+  onFilterChange?: (filters: { marlaMin?: number; marlaMax?: number }) => void;
   currentType?: string;
 }
 
@@ -40,6 +41,17 @@ interface StatsData {
   total: number;
 }
 
+// Marla options for Houses and Plots only
+const MARLA_OPTIONS = [
+  { label: '2 Marla',  min: 0,  max: 2  },
+  { label: '3 Marla',  min: 2,  max: 3  },
+  { label: '5 Marla',  min: 4,  max: 5  },
+  { label: '7 Marla',  min: 6,  max: 7  },
+  { label: '10 Marla', min: 8,  max: 10 },
+];
+
+const MARLA_TYPES = ['house', 'plot'];
+
 export default function LocationExplorer({
   city,
   purpose,
@@ -48,25 +60,30 @@ export default function LocationExplorer({
   onAreaSelect,
   onTypeSelect,
   onPurposeChange,
+  onFilterChange,
   currentType = 'all'
 }: LocationExplorerProps) {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState<'count' | 'name'>('count');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedMarla, setSelectedMarla] = useState<string | null>(null);
+
+  // Reset marla when type changes away from house/plot
+  useEffect(() => {
+    if (!MARLA_TYPES.includes(currentType?.toLowerCase())) {
+      setSelectedMarla(null);
+    }
+  }, [currentType]);
 
   useEffect(() => {
-    if (city) {
-      fetchStats();
-    }
+    if (city) fetchStats();
   }, [city, purpose, currentType, currentAreaSlug]);
 
   const fetchStats = async () => {
     try {
       setLoading(true);
       const listingType = purpose === 'buy' ? 'sale' : (purpose === 'rent' ? 'rent' : undefined);
-      // When a specific type is selected at city level, pass it so we get
-      // the areas that actually have properties of that type
       const typeFilter = currentType && currentType !== 'all' ? currentType : undefined;
       const data = await propertyApi.getLocationStats(city, listingType, typeFilter);
       setStats(data);
@@ -87,6 +104,19 @@ export default function LocationExplorer({
 
   const displayedLocations = isExpanded ? sortedLocations : sortedLocations.slice(0, 16);
 
+  const showMarlaOptions = MARLA_TYPES.includes(currentType?.toLowerCase());
+
+  const handleMarlaClick = (option: typeof MARLA_OPTIONS[0]) => {
+    if (selectedMarla === option.label) {
+      // Deselect
+      setSelectedMarla(null);
+      onFilterChange?.({ marlaMin: undefined, marlaMax: undefined });
+    } else {
+      setSelectedMarla(option.label);
+      onFilterChange?.({ marlaMin: option.min, marlaMax: option.max });
+    }
+  };
+
   if (!city) return null;
 
   return (
@@ -102,9 +132,10 @@ export default function LocationExplorer({
             for {purpose === 'all' ? 'Rent & Sale' : (purpose === 'buy' ? 'Sale' : 'Rent')} in {city}
           </h2>
 
+          {/* Type filter pills */}
           <div className="flex flex-wrap gap-2 items-center">
             <button
-              onClick={() => onTypeSelect('all')}
+              onClick={() => { onTypeSelect('all'); setSelectedMarla(null); }}
               className={cn(
                 "px-4 py-1.5 rounded-full text-xs font-semibold transition-all border flex items-center gap-2",
                 currentType === 'all'
@@ -122,7 +153,7 @@ export default function LocationExplorer({
             {Object.entries(stats?.summary || {}).map(([type, count]) => (
               <button
                 key={type}
-                onClick={() => onTypeSelect(type)}
+                onClick={() => { onTypeSelect(type); setSelectedMarla(null); }}
                 className={cn(
                   "px-4 py-1.5 rounded-full text-xs font-semibold transition-all border flex items-center gap-2 capitalize",
                   currentType.toLowerCase() === type.toLowerCase()
@@ -138,6 +169,26 @@ export default function LocationExplorer({
               </button>
             ))}
           </div>
+
+          {/* ── Marla options (only for House & Plot) ── */}
+          {showMarlaOptions && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {MARLA_OPTIONS.map((option) => (
+                <button
+                  key={option.label}
+                  onClick={() => handleMarlaClick(option)}
+                  className={cn(
+                    "px-3 py-1 rounded-full text-[11px] font-semibold border transition-all",
+                    selectedMarla === option.label
+                      ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                      : "bg-background border-input text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mt-2 md:mt-2 flex items-center gap-3">
@@ -251,15 +302,9 @@ export default function LocationExplorer({
               onClick={() => setIsExpanded(!isExpanded)}
             >
               {isExpanded ? (
-                <>
-                  <ChevronUp className="w-3.5 h-3.5" />
-                  Show Fewer
-                </>
+                <><ChevronUp className="w-3.5 h-3.5" />Show Fewer</>
               ) : (
-                <>
-                  <ChevronDown className="w-3.5 h-3.5" />
-                  Show all {sortedLocations.length} locations
-                </>
+                <><ChevronDown className="w-3.5 h-3.5" />Show all {sortedLocations.length} locations</>
               )}
             </Button>
           </div>

@@ -1,4 +1,4 @@
-'use client'
+ 'use client'
 /**
  * Properties Filter Bar Component
  * 
@@ -51,20 +51,18 @@ export default function PropertiesFilterBar() {
 
   const currentCity = useMemo(() => {
     if (!pathname) return '';
-    // Extract from pathname if on clean URL
     const pathParts = pathname.split('/').filter(Boolean);
     if (pathParts.length >= 3 && (pathParts[1] === 'rent' || pathParts[1] === 'sale' || pathParts[1] === 'all')) {
-      return pathParts[2]; // City slug
+      return pathParts[2];
     }
     return searchParams.get('city') || '';
   }, [pathname, searchParams]);
 
   const currentType = useMemo(() => {
     if (!pathname) return 'all';
-    // Extract from pathname if on clean URL
     const pathParts = pathname.split('/').filter(Boolean);
     if (pathParts.length >= 4 && (pathParts[1] === 'rent' || pathParts[1] === 'sale' || pathParts[1] === 'all')) {
-      return pathParts[3]; // Type
+      return pathParts[3];
     }
     return searchParams.get('type') || 'all';
   }, [pathname, searchParams]);
@@ -103,7 +101,6 @@ export default function PropertiesFilterBar() {
   // Update temp state when URL changes
   useEffect(() => {
     setTempPurpose(currentPurpose);
-    // Match city slug to actual city name for dropdown
     const matchedCity = currentCity ? slugToCity(currentCity) : null;
     setTempCity(matchedCity || currentCity || '');
     setTempType(currentType || 'all');
@@ -111,7 +108,6 @@ export default function PropertiesFilterBar() {
 
   // Extract unique cities and property types
   const cities = useMemo(() => {
-    // If we have cities from API, use them, otherwise extract from properties
     if (allCities && allCities.length > 0) {
       return allCities.map(c => c.name).sort();
     }
@@ -121,7 +117,6 @@ export default function PropertiesFilterBar() {
 
   const propertyTypes = useMemo(() => {
     if (allPropertyTypes && allPropertyTypes.length > 0) {
-      // Capitalize first letter of each type for display and apply custom sort
       const mapped = allPropertyTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1));
       return sortPropertyTypes(mapped, t => t);
     }
@@ -142,11 +137,9 @@ export default function PropertiesFilterBar() {
     if (!slug) return null;
     const normalizedSlug = slug.toLowerCase().trim();
 
-    // Try exact slug match
     const exactMatch = cities.find(c => cityToSlug(c) === normalizedSlug);
     if (exactMatch) return exactMatch;
 
-    // Try abbreviation match
     const words = normalizedSlug.split('-');
     if (words.length > 0) {
       const firstLetters = words.map(w => w[0] || '').join('');
@@ -158,7 +151,6 @@ export default function PropertiesFilterBar() {
       if (abbreviationMatch) return abbreviationMatch;
     }
 
-    // Try partial match
     const partialMatch = cities.find(c =>
       cityToSlug(c).startsWith(normalizedSlug) ||
       normalizedSlug.startsWith(cityToSlug(c).substring(0, 3))
@@ -175,7 +167,6 @@ export default function PropertiesFilterBar() {
     const typeSlug = tempType && tempType !== 'all' ? `/${tempType.toLowerCase()}` : '';
 
     const params = new URLSearchParams(searchParams.toString());
-    // These are handled by path
     params.delete('city');
     params.delete('type');
     params.delete('purpose');
@@ -212,32 +203,19 @@ export default function PropertiesFilterBar() {
   };
 
   // Determine if we are on a property detail page
-  // Detail pages have a slug that isn't 'rent' or 'sale' and isn't part of the standard filter path
   const isDetailPage = useMemo(() => {
     if (!pathname) return false;
-
-    // If we are at root properties page, show it
     if (pathname === '/properties') return false;
-
-    // Split path to analyze segments
     const parts = pathname.split('/').filter(Boolean);
-    // parts[0] is 'properties'
-
-    // Properties root
     if (parts.length === 1) return false;
-
-    // /properties/rent or /properties/sale or /properties/all
     if (parts.length >= 2 && (parts[1] === 'rent' || parts[1] === 'sale' || parts[1] === 'all')) {
       return false;
     }
-
-    // Any other second segment is likely a slug -> Detail page
     return true;
   }, [pathname]);
 
   const [open, setOpen] = useState(false);
 
-  // Close drawer when filters are applied
   const handleApplyFilters = () => {
     applyFilters();
     setOpen(false);
@@ -348,9 +326,12 @@ export default function PropertiesFilterBar() {
   );
 
   return (
-    <section className="py-3 border-b border-border bg-white/95 backdrop-blur-md sticky top-16 md:top-20 z-40 shadow-sm transition-all duration-300">
+    // ✅ KEY CHANGE: Added "hidden md:block" — entire bar is hidden on mobile.
+    // Mobile now uses the Zameen-style sticky header inside PropertiesListing instead.
+    <section className="hidden md:block py-3 border-b border-border bg-white/95 backdrop-blur-md sticky top-16 md:top-20 z-40 shadow-sm transition-all duration-300">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center gap-4 max-w-6xl mx-auto">
+
           {/* Purpose Tabs - Desktop Only */}
           <div className="hidden md:flex gap-2 bg-gray-100 p-1 rounded-lg">
             <button
@@ -391,40 +372,11 @@ export default function PropertiesFilterBar() {
             </button>
           </div>
 
-          {/* Mobile Filter Button */}
-          <div className="md:hidden w-full">
-            <Drawer open={open} onOpenChange={setOpen}>
-              <DrawerTrigger asChild>
-                <button className="w-full flex items-center justify-center gap-2 border-2 border-gray-300 px-4 py-2.5 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-                  <Search className="w-4 h-4" />
-                  Filters
-                </button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <div className="mx-auto w-full max-w-sm">
-                  <DrawerHeader>
-                    <DrawerTitle>Filter Properties</DrawerTitle>
-                    <DrawerDescription>Select options to refine your search.</DrawerDescription>
-                  </DrawerHeader>
-                  <div className="p-4 flex flex-col gap-4">
-                    <FilterControls mobile={true} />
-                  </div>
-                  <DrawerFooter>
-                    <DrawerClose asChild>
-                      <button className="w-full py-3 text-sm font-medium text-gray-500 hover:text-gray-900">
-                        Cancel
-                      </button>
-                    </DrawerClose>
-                  </DrawerFooter>
-                </div>
-              </DrawerContent>
-            </Drawer>
-          </div>
-
-          {/* Desktop Filter Controls (Hidden on Mobile) */}
+          {/* Desktop Filter Controls */}
           <div className="hidden md:flex flex-1 flex-wrap gap-3 justify-end w-full md:w-auto">
             <FilterControls />
           </div>
+
         </div>
       </div>
     </section>
