@@ -13,7 +13,6 @@ import { mapBackendToFrontendProperty, BackendProperty } from '@/lib/types/prope
 import { Property } from '@/lib/data';
 import { toast } from 'sonner';
 import SearchSidebar from '@/components/SearchSidebar';
-import LocationExplorer from '@/components/LocationExplorer';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { cn, toTitleCase } from '@/lib/utils';
 
@@ -648,51 +647,6 @@ export default function PropertiesListing({
             {/* Listing column */}
             <div className="w-full lg:w-3/4 space-y-5">
 
-              <LocationExplorer
-                city={matchedCity} purpose={purpose}
-                currentAreaId={currentAreaId} currentAreaSlug={initialAreaSlug}
-                currentType={type}
-                onAreaSelect={(areaId, areaSlug) => {
-                  const params = new URLSearchParams(searchParams.toString());
-                  const isUnselecting = params.get('areaId') === areaId || initialAreaId === areaId;
-                  if (useCleanUrls && matchedCity) {
-                    const pp    = purpose === 'buy' ? 'sale' : purpose;
-                    const cSlug = cityToSlug(matchedCity);
-                    const tSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
-                    if (isUnselecting) { router.push(`/properties/${pp}/${cSlug}${tSlug}`); return; }
-                    if (areaSlug)      { router.push(`/properties/${pp}/${cSlug}/${areaSlug}${tSlug}`); return; }
-                  }
-                  if (isUnselecting) params.delete('areaId'); else params.set('areaId', areaId);
-                  const qs = params.toString();
-                  router.push(`${window.location.pathname}${qs ? `?${qs}` : ''}`);
-                }}
-                onTypeSelect={newType => {
-                  const params = new URLSearchParams(searchParams.toString());
-                  params.delete('areaId');
-                  if (useCleanUrls) {
-                    const pp    = purpose === 'buy' ? 'sale' : purpose;
-                    const cSlug = cityToSlug(matchedCity);
-                    const tSlug = newType && newType !== 'all' ? `/${newType.toLowerCase()}` : '';
-                    params.delete('city'); params.delete('type'); params.delete('purpose');
-                    const suffix = params.toString() ? `?${params.toString()}` : '';
-                    if (initialAreaSlug) {
-                      router.push(newType && newType !== 'all'
-                        ? `/properties/${pp}/${cSlug}/${initialAreaSlug}${tSlug}${suffix}`
-                        : `/properties/${pp}/${cSlug}/${initialAreaSlug}${suffix}`);
-                    } else {
-                      router.push(`/properties/${pp}/${cSlug}${tSlug}${suffix}`);
-                    }
-                  } else {
-                    if (purpose !== 'all') params.set('purpose', purpose);
-                    if (matchedCity) params.set('city', matchedCity);
-                    if (newType && newType !== 'all') params.set('type', newType); else params.delete('type');
-                    const qs = params.toString();
-                    router.push(qs ? `/properties?${qs}` : '/properties');
-                  }
-                }}
-                onPurposeChange={newPurpose => updateFilters(matchedCity, type, newPurpose)}
-              />
-
               {/* Page heading */}
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
                 {type !== 'all'
@@ -730,7 +684,6 @@ export default function PropertiesListing({
               </div>
 
               {/* ══ Mobile: Type Tabs + LOCATION LIST button ══ */}
-              {/* position:relative zaruri hai floating panel ke liye */}
               <div className="lg:hidden relative">
                 <div className="relative">
                   <div className="flex flex-wrap gap-x-5 gap-y-0 pr-28">
@@ -766,29 +719,22 @@ export default function PropertiesListing({
                   </button>
                 </div>
 
-                {/* ══════════════════════════════════════════
-                    ZAMEEN STYLE — RIGHT SIDE FLOATING BOX
-                    Cards ke upar overlay, bilkul zameen jaisa
-                ══════════════════════════════════════════ */}
+                {/* Floating location panel */}
                 {isLocationPanelOpen && (
                   <>
-                    {/* Transparent backdrop — bahar click karo to band ho */}
                     <div
                       className="fixed inset-0 z-40"
                       onClick={() => setIsLocationPanelOpen(false)}
                     />
 
-                    {/* Floating panel — right side pe, cards ke upar */}
                     <div className="absolute right-0 top-8 z-50 w-[260px] bg-white border border-gray-200 shadow-2xl overflow-hidden">
 
-                      {/* Big bold title — zameen style */}
                       <div className="px-4 pt-4 pb-3">
                         <p className="text-[17px] font-bold text-gray-900 leading-snug">
                           {locationPanelTitle}
                         </p>
                       </div>
 
-                      {/* Scrollable list */}
                       <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
                         {locationPanelLoading ? (
                           <div className="flex items-center gap-2 px-4 py-6 text-sm text-gray-400">
@@ -808,14 +754,12 @@ export default function PropertiesListing({
                                   idx !== 0 && 'border-t border-gray-100'
                                 )}
                               >
-                                {/* Area name — Title Case, zameen style */}
                                 <span className={`text-[13px] leading-tight ${
                                   isSelected ? 'font-semibold text-gray-900' : 'font-normal text-gray-800'
                                 }`}>
                                   {toTitleCase(area.name)}
                                 </span>
 
-                                {/* Count — "(145)" grey, right side */}
                                 {area.count > 0 && (
                                   <span className="text-[11px] text-gray-400 ml-2 shrink-0 tabular-nums">
                                     ({area.count})

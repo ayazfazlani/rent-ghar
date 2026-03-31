@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -36,7 +36,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
   const [loading, setLoading] = useState(!initialProperty);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
-  // const [isLiked, setIsLiked] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -119,12 +118,10 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
       });
     }, 100);
 
-    // Observer for sticky contact buttons on mobile
     const contactObserver = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (!entry) return;
-        // Show sticky bar when original buttons are NOT fully visible and we have scrolled down
         setShowStickyContact(!entry.isIntersecting && entry.boundingClientRect.top < 0);
       },
       { threshold: 0 }
@@ -169,7 +166,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
       try {
         setLoadingRelated(true);
 
-        // 1. Similar Houses around [Area] - Same Type, Same Purpose, Same Area
         const areaData = await propertyApi.getAll({
           cityName: property.city,
           search: property.location,
@@ -184,7 +180,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
             .filter(p => p.slug !== resolvedSlug)
         );
 
-        // 2. Similar Houses in [City] - Same Type, Same Purpose, Different Area
         const cityData = await propertyApi.getAll({
           cityName: property.city,
           type: backendProperty?.propertyType,
@@ -201,7 +196,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
             )
         );
 
-        // 3. Similar Houses by Same Agency (Owner)
         if (backendProperty?.owner?._id) {
           const ownerData = await propertyApi.getAll({
             ownerId: backendProperty.owner._id,
@@ -292,20 +286,15 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
     );
   }
 
-  // Get images from property or use placeholders
   const getImages = (): string[] => {
     if (!property) return getPlaceholderImages('House');
 
-    // Convert image URL to full URL if needed
     const getImageUrl = (url?: string): string | null => {
       if (!url) return null;
-      // If it's already a full URL, return as is
       if (url.startsWith('http://') || url.startsWith('https://')) {
         return url;
       }
-      // If it's a relative path like /uploads/..., use Next.js proxy
       if (url.startsWith('/uploads/')) {
-        // Next.js rewrite will handle /uploads/... -> http://localhost:3001/uploads/...
         return url;
       }
       return null;
@@ -313,7 +302,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
     const validImages: string[] = [];
 
-    // Add main photo if valid
     if (backendProperty) {
       const mainPhotoUrl = getImageUrl(backendProperty.mainPhotoUrl);
       if (mainPhotoUrl) {
@@ -321,7 +309,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
       }
     }
 
-    // Add additional photos if valid
     if (backendProperty?.additionalPhotosUrls) {
       backendProperty.additionalPhotosUrls.forEach(url => {
         const imageUrl = getImageUrl(url);
@@ -331,7 +318,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
       });
     }
 
-    // Return valid images or fallback to placeholders
     return validImages.length > 0 ? validImages : getPlaceholderImages(property.type);
   };
 
@@ -519,39 +505,13 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                         </button>
                       )}
                     </div>
-                    {/* Short Excerpt make it like render html also */}
-                    {/* <p
-                      className="text-muted-foreground text-lg leading-relaxed"
-                      // Prefer excerpt → truncated description → fallback plain text
-                      dangerouslySetInnerHTML={{
-                        __html:
-                          (backendProperty as any)?.excerpt?.trim() ||
-                          (property.description
-                            ? property.description.length > 320
-                              ? // Rough char limit — adjust based on average HTML → visible length
-                              property.description.substring(0, 320).replace(/<[^>]*>?/gm, '').trim() + '…'
-                              : property.description
-                            : `This beautiful ${(property.type ?? 'property').toLowerCase()} is located in the prime area of ${toTitleCase(property.location ?? '')}, ${toTitleCase(property.city ?? '')}. 
-                        Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort.`.replace(/\s+/g, ' ').trim()),
-                      }}
-                    /> */}
                   </div>
                   <div className="flex gap-2 ml-4">
-                    {/* <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setIsLiked(!isLiked)}
-                      className={isLiked ? 'text-red-500' : ''}
-                    >
-                      <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-                    </Button> */}
                     <Button variant="outline" size="icon" onClick={handleShare}>
                       <Share2 className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
-
-
 
                 {/* Price and Stats */}
                 <div className="flex hidden md:flex items-center justify-between p-6 bg-secondary rounded-lg mb-6">
@@ -588,9 +548,8 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               {/* Image Slider Section */}
               <section>
                 <div className="relative w-full group">
-                  {/* Main Image */}
                   <div
-                    className="relative w-full h-[250px] md:h-[600px]  overflow-hidden bg-secondary cursor-zoom-in"
+                    className="relative w-full h-[250px] md:h-[600px] overflow-hidden bg-secondary cursor-zoom-in"
                   >
                     {images.length > 0 && images[selectedImage] ? (
                       <div className="relative w-full h-full">
@@ -672,7 +631,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                     )}
                   </div>
 
-                  {/* Thumbnail Strip - Visible on all devices now */}
+                  {/* Thumbnail Strip */}
                   {images.length > 1 && (
                     <div className="flex hidden md:flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
                       {images.map((img, idx) => (
@@ -702,8 +661,8 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   )}
                 </div>
               </section>
-              {/* give call and message button etc for mobile  */}
 
+              {/* Mobile call/whatsapp buttons */}
               <div className="md:hidden flex flex-col -mt-2 space-y-3">
                 <div className="px-4 flex items-center justify-between font-medium text-sm text-muted-foreground">
                   <div className="flex items-start">
@@ -720,12 +679,12 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 <div className="flex items-center justify-between p-4 bg-secondary rounded-none border-y">
                   {property.bedrooms > 0 && (
                     <div className="flex gap-4 md:gap-6 justify-around w-full">
-                      <div className="text-center flex  items-center">
+                      <div className="text-center flex items-center">
                         <div className="flex items-center gap-1.5 mb-1">
                           <Bed className="w-4 h-4 text-muted-foreground" />
                           <p className="text-sm font-semibold">{property.bedrooms}</p>
                         </div>
-                        <p className="text-[11px]  tracking-wider text-muted-foreground">Beds</p>
+                        <p className="text-[11px] tracking-wider text-muted-foreground">Beds</p>
                       </div>
                       <div className="text-center flex gap-2 items-center">
                         <div className="flex items-center gap-1.5 mb-1">
@@ -791,8 +750,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                       className={`md:pb-3 pb-2 text-white whitespace-nowrap font-semibold transition-all border-b-2 m-2 ${activeSection === tab.id
                         ? 'border-white text-white'
                         : 'border-transparent text-muted-foreground hover:text-gray-200 hover:border-primary/50'
-                        }`
-                      }
+                        }`}
                     >
                       {tab.label}
                     </button>
@@ -800,20 +758,11 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 </div>
               </div>
 
-              {/* Overview Section - Zameen.com style */}
+              {/* Overview Section */}
               <Card id="overview-section" className="scroll-mt-32">
                 <CardContent className="p-4 md:p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold">Details & Overview</h2>
-                    {/* <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsDescriptionModalOpen(true)}
-                      className="md:hidden flex items-center gap-2 border-primary text-primary hover:bg-primary/5"
-                    >
-                      Read Description
-                      <ChevronRight className="w-4 h-4" />
-                    </Button> */}
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -902,23 +851,15 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                 </CardContent>
               </Card>
 
-
-
               {/* Description */}
               <Card id="description-section" className="scroll-mt-32">
                 <CardContent className="p-6">
-
                   <h2 className="text-xl font-bold mb-4">Description</h2>
                   <div className={`overflow-hidden transition-all duration-300 ${!isDescriptionExpanded ? 'max-h-[150px] relative' : 'max-h-full'}`}>
                     <div
                       className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
                       dangerouslySetInnerHTML={{
-                        __html: property.description || `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${toTitleCase(property.location)}, ${toTitleCase(property.city)}. 
-                        It offers ${property.bedrooms} spacious bedrooms and ${property.bathrooms} modern bathrooms spread across ${property.marla && property.marla > 0 ? `${property.marla} marla` : `${property.area} square feet`}. 
-                        Perfect for ${property.purpose === 'buy' ? 'purchasing' : 'renting'}, this property provides excellent value and comfort for your lifestyle needs.
-                        
-                        The property is situated in a well-developed neighborhood with easy access to schools, hospitals, shopping centers, and public transport. 
-                        It features modern amenities and finishes throughout, making it an ideal choice for families and professionals alike.`
+                        __html: property.description || `This beautiful ${property.type.toLowerCase()} is located in the prime area of ${toTitleCase(property.location)}, ${toTitleCase(property.city)}.`
                       }}
                     />
                     {!isDescriptionExpanded && (
@@ -970,7 +911,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                         } else {
                           videoId = url.split('/').pop() || '';
                         }
-
                         return (
                           <iframe
                             width="100%"
@@ -1017,18 +957,14 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   )}
                 </CardContent>
               </Card>
-
-
             </div>
 
             {/* Sidebar - Right Side */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
-                {/* Contact Card */}
                 <Card>
                   <CardContent className="p-6 hidden md:block">
                     <h3 className="text-lg font-bold mb-4">Contact Agent</h3>
-
                     <div className="space-y-3 mb-6">
                       <Button
                         className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white border-none"
@@ -1036,7 +972,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                         onClick={() => {
                           const message = encodeURIComponent(`I want to know more about this property: ${property.name}\nLink: ${window.location.href}`);
                           const waNumber = property.whatsappNumber || property.contactNumber || '923123456789';
-                          // Remove any non-digit characters from the phone number
                           const cleanNumber = waNumber.replace(/\D/g, '');
                           window.open(`https://wa.me/${cleanNumber.startsWith('92') ? cleanNumber : '92' + cleanNumber.replace(/^0/, '')}?text=${message}`, '_blank');
                         }}
@@ -1053,14 +988,12 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                         </a>
                       </Button>
                     </div>
-
                     <div className="pt-6 border-t border-border">
                       <p className="text-sm text-muted-foreground mb-3">Schedule a visit</p>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Property Details */}
                 <Card>
                   <CardContent className="p-6">
                     <h3 className="text-lg font-bold mb-3">Property Details</h3>
@@ -1093,77 +1026,88 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                         <span className="text-muted-foreground">Location:</span>
                         <span className="font-semibold">{toTitleCase(property.location)}</span>
                       </div>
-
                     </div>
                   </CardContent>
                 </Card>
-
-
               </div>
             </div>
           </div>
-          {/* Related Properties Matching Area - Horizontal Scroll */}
+
+          {/* ═══════════════════════════════════════════════════
+              SIMILAR PROPERTIES — OPTIMIZED FOR MOBILE
+              Only min-w and container padding changed here
+          ═══════════════════════════════════════════════════ */}
+
+          {/* Similar by Area */}
           {relatedByArea.length > 0 && (
-            <section className="pt-8 border-t max-w-full overflow-x-hidden mx-2">
-              <div className="flex items-center justify-between mb-6 max-w-full">
-                <h2 className="text-lg text-wrap md:text-2xl font-bold">
+            <section className="pt-8 border-t max-w-full overflow-x-hidden">
+              <div className="flex items-center justify-between mb-4 px-4 md:px-0">
+                <h2 className="text-lg md:text-2xl font-bold text-wrap">
                   Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
                 </h2>
-                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties/${property.purpose === 'buy' ? 'sale' : 'rent'}/${property.city.toLowerCase()}/${property.areaSlug === undefined ? ' ' : property.areaSlug}`)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary hover:text-primary/80 shrink-0 ml-2"
+                  onClick={() => router.push(`/properties/${property.purpose === 'buy' ? 'sale' : 'rent'}/${property.city.toLowerCase()}/${property.areaSlug === undefined ? ' ' : property.areaSlug}`)}
+                >
                   View All
                 </Button>
               </div>
-              <div className="flex mx-2 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
+              <div className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x px-4 md:px-0">
                 {relatedByArea.map((item) => (
-                  <div key={item.id} className="min-w-[200px] max-w-1/4 md:min-w-[300px] snap-start">
-                    <PropertyCard property={item} />
+                  <div key={item.id} className="min-w-[47vw] max-w-[47vw] md:min-w-[320px] md:max-w-[320px] shrink-0 snap-start">
+                    <PropertyCard property={item} hideActions />
                   </div>
                 ))}
               </div>
             </section>
           )}
 
-          {/* Related Properties by Same Agency - Horizontal Scroll */}
-          <div className="max-w-full overflow-x-auto mx-2">
-            {relatedByOwner.length > 0 && (
-              <section className="pt-8 border-t">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg md:text-2xl font-bold">
-                    More properties by {backendProperty?.owner?.name || 'this Agency'}
-                  </h2>
-                </div>
-                <div className="flex mx-2 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
-                  {relatedByOwner.map((item) => (
-                    <div key={item.id} className="min-w-[200px] max-w-1/4 md:min-w-[300px] snap-start">
-                      <PropertyCard property={item} />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-          {/* Related Properties Matching City - Horizontal Scroll */}
-          <div className="max-w-full overflow-x-hidden mx-2">
-            {relatedByCity.length > 0 && (
-              <section className="pt-8 border-t max-w-full">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg md:text-2xl font-bold">
-                    Similar {toTitleCase(property.type)}s in {toTitleCase(property.city)}
-                  </h2>
-                  <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={() => router.push(`/properties/${backendProperty?.listingType}/${property.citySlug || property.city.toLowerCase()}`)}>
-                    View All
-                  </Button>
-                </div>
-                <div className="flex mx-2 overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x">
-                  {relatedByCity.map((item) => (
-                    <div key={item.id} className="min-w-[200px] max-w-1/4 md:min-w-[300px] snap-start">
-                      <PropertyCard property={item} />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
+          {/* Similar by Owner */}
+          {relatedByOwner.length > 0 && (
+            <section className="pt-8 border-t max-w-full overflow-x-hidden">
+              <div className="flex items-center justify-between mb-4 px-4 md:px-0">
+                <h2 className="text-lg md:text-2xl font-bold">
+                  More properties by {backendProperty?.owner?.name || 'this Agency'}
+                </h2>
+              </div>
+              <div className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x px-4 md:px-0">
+                {relatedByOwner.map((item) => (
+                  <div key={item.id} className="min-w-[47vw] max-w-[47vw] md:min-w-[320px] md:max-w-[320px] shrink-0 snap-start">
+                    <PropertyCard property={item} hideActions />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Similar by City */}
+          {relatedByCity.length > 0 && (
+            <section className="pt-8 border-t max-w-full overflow-x-hidden">
+              <div className="flex items-center justify-between mb-4 px-4 md:px-0">
+                <h2 className="text-lg md:text-2xl font-bold">
+                  Similar {toTitleCase(property.type)}s in {toTitleCase(property.city)}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary hover:text-primary/80 shrink-0 ml-2"
+                  onClick={() => router.push(`/properties/${backendProperty?.listingType}/${property.citySlug || property.city.toLowerCase()}`)}
+                >
+                  View All
+                </Button>
+              </div>
+              <div className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x px-4 md:px-0">
+                {relatedByCity.map((item) => (
+                  <div key={item.id} className="min-w-[47vw] max-w-[47vw] md:min-w-[320px] md:max-w-[320px] shrink-0 snap-start">
+                    <PropertyCard property={item} hideActions />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
         </div>
       </div>
 
@@ -1218,8 +1162,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
       {/* Sticky Mobile Contact Bar */}
       <div
-        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-in-out ${showStickyContact ? 'translate-y-0' : 'translate-y-full'
-          }`}
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-in-out ${showStickyContact ? 'translate-y-0' : 'translate-y-full'}`}
       >
         <div className="grid grid-cols-2 gap-3 p-4">
           <Button
@@ -1249,13 +1192,10 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
         </div>
       </div>
 
-
-
       {/* Image Lightbox */}
       <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
         <DialogContent showCloseButton={false} className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-black/98 border-none flex flex-col items-center justify-center rounded-none overflow-hidden sm:max-w-[100vw] z-[9999]">
           
-          {/* Top Bar with Counter and Close Button */}
           <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-4 bg-gradient-to-b from-black/80 to-transparent z-50">
             <div className="text-white font-medium">
               {selectedImage + 1} / {images.length}
@@ -1270,7 +1210,6 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
             </Button>
           </div>
 
-          {/* Slider Container */}
           <div className="flex-1 w-full relative overflow-hidden flex items-center justify-center" ref={emblaRef}>
             <div className="flex h-full w-full">
               {images.map((img, idx) => (
@@ -1292,17 +1231,13 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
               ))}
             </div>
 
-            {/* Navigation Arrows - Desktop Only Visibility managed by embla usually, but here manually */}
             {images.length > 1 && (
               <>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full border border-white/20 h-14 w-14"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    emblaApi?.scrollPrev();
-                  }}
+                  onClick={(e) => { e.stopPropagation(); emblaApi?.scrollPrev(); }}
                 >
                   <ChevronLeft className="w-8 h-8" />
                 </Button>
@@ -1310,10 +1245,7 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
                   variant="ghost"
                   size="icon"
                   className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 z-50 rounded-full border border-white/20 h-14 w-14"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    emblaApi?.scrollNext();
-                  }}
+                  onClick={(e) => { e.stopPropagation(); emblaApi?.scrollNext(); }}
                 >
                   <ChevronRight className="w-8 h-8" />
                 </Button>
@@ -1321,17 +1253,13 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
             )}
           </div>
 
-          {/* Bottom Thumbnail Strip - Mobile Optimized */}
           {images.length > 1 && (
             <div className="w-full bg-black/90 p-4 pb-8 overflow-hidden z-20">
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-start px-2">
                 {images.map((img, idx) => (
                   <div
                     key={idx}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      emblaApi?.scrollTo(idx);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); emblaApi?.scrollTo(idx); }}
                     className={`shrink-0 cursor-pointer rounded-sm overflow-hidden border-2 transition-all w-20 h-14 ${
                       selectedImage === idx
                         ? 'border-primary ring-1 ring-primary'
