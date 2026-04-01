@@ -24,6 +24,7 @@ interface PropertiesListingProps {
   richDescription?: string;
   areaId?: string;
   areaSlug?: string;
+  initialMarla?: number;
 }
 
 interface AreaOption {
@@ -33,7 +34,14 @@ interface AreaOption {
   count: number;
 }
 
-const MARLA_OPTIONS = [2, 3, 5, 7, 10];
+const MARLA_OPTIONS = [2, 3, 5, 10];
+const SIZE_OPTIONS: { label: string; marlaMin: number; marlaMax: number }[] = [
+  { label: '2 Marla',  marlaMin: 2,  marlaMax: 2  },
+  { label: '3 Marla',  marlaMin: 3,  marlaMax: 3  },
+  { label: '5 Marla',  marlaMin: 5,  marlaMax: 5  },
+  { label: '10 Marla', marlaMin: 10, marlaMax: 10 },
+  { label: '1 Kanal',  marlaMin: 20, marlaMax: 20 },
+];
 
 export default function PropertiesListing({
   purpose,
@@ -42,7 +50,8 @@ export default function PropertiesListing({
   useCleanUrls = false,
   richDescription,
   areaId: initialAreaId,
-  areaSlug: initialAreaSlug
+  areaSlug: initialAreaSlug,
+  initialMarla,
 }: PropertiesListingProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -59,7 +68,7 @@ export default function PropertiesListing({
   const [currentPage, setCurrentPage]           = useState(1);
   const [totalPages, setTotalPages]             = useState(1);
   const [isFetchingMore, setIsFetchingMore]     = useState(false);
-  const [selectedMarla, setSelectedMarla]       = useState<number | null>(null);
+  const [selectedMarla, setSelectedMarla]       = useState<number | null>(initialMarla ?? null);
 
   const [isFilterSheetOpen,   setIsFilterSheetOpen]   = useState(false);
   const [isLocationPanelOpen, setIsLocationPanelOpen] = useState(false);
@@ -88,28 +97,12 @@ export default function PropertiesListing({
     priceMin?: number; priceMax?: number;
     marlaMin?: number; marlaMax?: number;
     beds?: number;     baths?: number;
-  }>({});
+  }>(initialMarla ? { marlaMin: initialMarla, marlaMax: initialMarla } : {});
 
   const handleFilterChange = (newFilters: any) => {
     setAdvancedFilters(newFilters);
     setCurrentPage(1);
   };
-
-  const handleMarlaClick = (marla: number) => {
-    if (selectedMarla === marla) {
-      setSelectedMarla(null);
-      handleFilterChange({ ...advancedFilters, marlaMin: undefined, marlaMax: undefined });
-    } else {
-      setSelectedMarla(marla);
-      handleFilterChange({ ...advancedFilters, marlaMin: marla, marlaMax: marla });
-    }
-  };
-
-  useEffect(() => {
-    if (type.toLowerCase() !== 'house' && type.toLowerCase() !== 'plot') {
-      setSelectedMarla(null);
-    }
-  }, [type]);
 
   const cityToSlug = (name: string) =>
     name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -156,6 +149,73 @@ export default function PropertiesListing({
     };
     return map[t] || `${t}s`;
   };
+
+  // ── URL builder ─────────────────────────────────────────────────────────────
+  const buildCleanUrl = (opts: {
+    purposeOverride?: string;
+    cityOverride?: string;
+    typeOverride?: string;
+    areaSlugOverride?: string | null;
+    marlaOverride?: number | null;
+  }) => {
+    const pp    = opts.purposeOverride ?? (purpose === 'buy' ? 'sale' : purpose);
+    const cs    = opts.cityOverride !== undefined
+      ? (opts.cityOverride ? cityToSlug(opts.cityOverride) : '')
+      : (matchedCity ? cityToSlug(matchedCity) : '');
+    const aSlug = opts.areaSlugOverride !== undefined ? opts.areaSlugOverride : (initialAreaSlug || null);
+    const t     = opts.typeOverride !== undefined ? opts.typeOverride : type;
+    const marla = opts.marlaOverride !== undefined ? opts.marlaOverride : selectedMarla;
+
+    const tSlug     = t && t !== 'all' ? `/${t.toLowerCase()}` : '';
+    const marlaSlug = marla ? `/${marla}marla` : '';
+    const areaPath  = aSlug ? `/${aSlug}` : '';
+
+    // FIX 1: No-city case now includes tSlug + marlaSlug
+    if (!cs) {
+      return `/properties/${pp}${tSlug}${marlaSlug}`;
+    }
+    return `/properties/${pp}/${cs}${areaPath}${tSlug}${marlaSlug}`;
+  };
+  // ────────────────────────────────────────────────────────────────────────────
+
+  // FIX 2: handleMarlaClick — supports marla + 1 kanal (20 marla)
+  const handleMarlaClick = (marla: number) => {
+    const isDeselecting = selectedMarla === marla;
+    const newMarla = isDeselecting ? null : marla;
+
+    if (useCleanUrls) {
+      if (newMarla === 20) {
+        // 1 Kanal → custom URL slug
+        const pp    = purpose === 'buy' ? 'sale' : purpose;
+        const cs    = matchedCity ? `/${cityToSlug(matchedCity)}` : '';
+        const tSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
+        router.push(`/properties/${pp}${cs}${tSlug}/1kanal`);
+      } else {
+        router.push(buildCleanUrl({ marlaOverride: newMarla }));
+      }
+    } else {
+      setSelectedMarla(newMarla);
+      handleFilterChange({
+        ...advancedFilters,
+        marlaMin: newMarla ?? undefined,
+        marlaMax: newMarla ?? undefined,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (type.toLowerCase() !== 'house' && type.toLowerCase() !== 'plot') {
+      setSelectedMarla(null);
+    }
+  }, [type]);
+
+  useEffect(() => {
+    setSelectedMarla(initialMarla ?? null);
+    setAdvancedFilters(initialMarla
+      ? { marlaMin: initialMarla, marlaMax: initialMarla }
+      : {}
+    );
+  }, [initialMarla]);
 
   useEffect(() => {
     (async () => {
@@ -356,17 +416,16 @@ export default function PropertiesListing({
     }
   };
 
+  // FIX 3: navigateType — removed && matchedCity
   const navigateType = (t: string) => {
     setIsLocationPanelOpen(false);
-    const params = new URLSearchParams(searchParams.toString());
-    if (useCleanUrls && matchedCity) {
-      const pp    = purpose === 'buy' ? 'sale' : purpose;
-      const cs    = cityToSlug(matchedCity);
-      const tSlug = t === 'all' ? '' : `/${t.toLowerCase()}`;
-      router.push(initialAreaSlug
-        ? `/properties/${pp}/${cs}/${initialAreaSlug}${tSlug}`
-        : `/properties/${pp}/${cs}${tSlug}`);
+    const supportsMarla = t === 'house' || t === 'plot';
+    const marlaToKeep  = supportsMarla ? selectedMarla : null;
+
+    if (useCleanUrls) {
+      router.push(buildCleanUrl({ typeOverride: t, marlaOverride: marlaToKeep }));
     } else {
+      const params = new URLSearchParams(searchParams.toString());
       if (t === 'all') params.delete('type'); else params.set('type', t.toLowerCase());
       const qs = params.toString();
       router.push(qs ? `/properties?${qs}` : '/properties');
@@ -378,11 +437,12 @@ export default function PropertiesListing({
     const params = new URLSearchParams(searchParams.toString());
     const isUnselecting = params.get('areaId') === area.id || initialAreaId === area.id;
     if (useCleanUrls && matchedCity) {
-      const pp    = purpose === 'buy' ? 'sale' : purpose;
-      const cSlug = cityToSlug(matchedCity);
-      const tSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
-      if (isUnselecting) { router.push(`/properties/${pp}/${cSlug}${tSlug}`); return; }
-      if (area.slug)     { router.push(`/properties/${pp}/${cSlug}/${area.slug}${tSlug}`); return; }
+      const pp        = purpose === 'buy' ? 'sale' : purpose;
+      const cSlug     = cityToSlug(matchedCity);
+      const tSlug     = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
+      const marlaSlug = selectedMarla ? `/${selectedMarla}marla` : '';
+      if (isUnselecting) { router.push(`/properties/${pp}/${cSlug}${tSlug}${marlaSlug}`); return; }
+      if (area.slug)     { router.push(`/properties/${pp}/${cSlug}/${area.slug}${tSlug}${marlaSlug}`); return; }
     }
     if (isUnselecting) params.delete('areaId'); else params.set('areaId', area.id);
     const qs = params.toString();
@@ -427,9 +487,7 @@ export default function PropertiesListing({
   )?.label || 'Properties';
   const purposeLabel = purpose === 'buy' ? 'For Sale' : purpose === 'rent' ? 'For Rent' : '';
   const locationPanelTitle = [
-    'Locations of',
-    activeTabLabel,
-    purposeLabel,
+    'Locations of', activeTabLabel, purposeLabel,
     matchedCity ? `in ${matchedCity}` : '',
   ].filter(Boolean).join(' ');
 
@@ -442,18 +500,11 @@ export default function PropertiesListing({
   return (
     <div className="min-h-screen bg-background">
 
-      {/* ══════════════════════════════════════════════════════
-          BOTTOM FILTER SHEET
-      ══════════════════════════════════════════════════════ */}
       <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
         <SheetContent side="bottom" className="h-screen w-full p-0 rounded-none border-0 lg:hidden flex flex-col">
-
           <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200 bg-white shrink-0">
             <SheetTitle className="text-base font-bold text-black">Filters</SheetTitle>
-            <button
-              onClick={() => setIsFilterSheetOpen(false)}
-              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100"
-            >
+            <button onClick={() => setIsFilterSheetOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100">
               <X className="w-4 h-4 text-black" />
             </button>
           </div>
@@ -461,7 +512,6 @@ export default function PropertiesListing({
           <div className="flex-1 overflow-y-auto bg-white">
             <div className="p-4 space-y-6">
 
-              {/* City */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-black">City</Label>
                 <div className="relative">
@@ -471,92 +521,57 @@ export default function PropertiesListing({
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium appearance-none focus:border-black focus:outline-none"
                   >
                     <option value="">All Cities</option>
-                    {cities.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
+                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                 </div>
               </div>
 
-              {/* Property Type */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-black">Property Type</Label>
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setSheetType('all')}
-                    className={`px-4 py-2 rounded-full text-xs font-semibold border transition-colors ${
-                      sheetType === 'all' ? 'bg-black text-white border-black' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'
-                    }`}
-                  >
+                  <button onClick={() => setSheetType('all')}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold border transition-colors ${sheetType === 'all' ? 'bg-black text-white border-black' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'}`}>
                     All Types
                   </button>
                   {propertyTypes.map(t => (
-                    <button
-                      key={t}
+                    <button key={t}
                       onClick={() => setSheetType(sheetType.toLowerCase() === t.toLowerCase() ? 'all' : t.toLowerCase())}
-                      className={`px-4 py-2 rounded-full text-xs font-semibold border transition-colors ${
-                        sheetType.toLowerCase() === t.toLowerCase() ? 'bg-black text-white border-black' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'
-                      }`}
-                    >
+                      className={`px-4 py-2 rounded-full text-xs font-semibold border transition-colors ${sheetType.toLowerCase() === t.toLowerCase() ? 'bg-black text-white border-black' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'}`}>
                       {t}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Areas */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-black">
                   Area
                   {sheetAreaId && (
-                    <button
-                      onClick={() => { setSheetAreaId(''); setSheetAreaSlug(''); }}
-                      className="ml-2 text-xs text-gray-400 font-normal underline"
-                    >
-                      Clear
-                    </button>
+                    <button onClick={() => { setSheetAreaId(''); setSheetAreaSlug(''); }} className="ml-2 text-xs text-gray-400 font-normal underline">Clear</button>
                   )}
                 </Label>
                 {filterSheetAreaLoading ? (
-                  <div className="flex items-center gap-2 text-sm text-gray-400 py-2">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Loading areas…
-                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-400 py-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading areas…</div>
                 ) : filterSheetAreaList.length === 0 ? (
                   <p className="text-sm text-gray-400 py-2">No areas found</p>
                 ) : (
                   <>
                     <div className="grid grid-cols-2 gap-2">
                       {visibleFilterAreas.map(area => (
-                        <button
-                          key={area.id}
-                          onClick={() => {
-                            if (sheetAreaId === area.id) { setSheetAreaId(''); setSheetAreaSlug(''); }
-                            else { setSheetAreaId(area.id); setSheetAreaSlug(area.slug || ''); }
-                          }}
-                          className={`flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors text-left ${
-                            sheetAreaId === area.id
-                              ? 'bg-black text-white border-black'
-                              : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
-                          }`}
-                        >
+                        <button key={area.id}
+                          onClick={() => { if (sheetAreaId === area.id) { setSheetAreaId(''); setSheetAreaSlug(''); } else { setSheetAreaId(area.id); setSheetAreaSlug(area.slug || ''); } }}
+                          className={`flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors text-left ${sheetAreaId === area.id ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}>
                           <div className="flex items-center gap-1.5 min-w-0">
                             <MapPin className="w-3 h-3 shrink-0 opacity-60" />
                             <span className="truncate">{toTitleCase(area.name)}</span>
                           </div>
-                          {area.count > 0 && (
-                            <span className={`ml-1 shrink-0 text-[10px] ${sheetAreaId === area.id ? 'opacity-70' : 'text-gray-400'}`}>
-                              {area.count}
-                            </span>
-                          )}
+                          {area.count > 0 && <span className={`ml-1 shrink-0 text-[10px] ${sheetAreaId === area.id ? 'opacity-70' : 'text-gray-400'}`}>{area.count}</span>}
                         </button>
                       ))}
                     </div>
                     {filterSheetAreaList.length > 8 && (
-                      <button
-                        onClick={() => setShowAllAreas(v => !v)}
-                        className="flex items-center gap-1 text-xs text-gray-500 mt-1 hover:text-black transition-colors"
-                      >
+                      <button onClick={() => setShowAllAreas(v => !v)} className="flex items-center gap-1 text-xs text-gray-500 mt-1 hover:text-black transition-colors">
                         <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllAreas ? 'rotate-180' : ''}`} />
                         {showAllAreas ? 'Show less' : `Show all ${filterSheetAreaList.length} areas`}
                       </button>
@@ -567,7 +582,6 @@ export default function PropertiesListing({
 
               <div className="border-t border-gray-100" />
 
-              {/* Price Range */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-black">Price Range (PKR)</Label>
                 <div className="grid grid-cols-2 gap-3">
@@ -576,7 +590,6 @@ export default function PropertiesListing({
                 </div>
               </div>
 
-              {/* Area Size */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-black">Area Size (Marla)</Label>
                 <div className="grid grid-cols-2 gap-3">
@@ -585,7 +598,6 @@ export default function PropertiesListing({
                 </div>
               </div>
 
-              {/* Bedrooms */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-black">Bedrooms</Label>
                 <div className="flex gap-2 flex-wrap">
@@ -598,7 +610,6 @@ export default function PropertiesListing({
                 </div>
               </div>
 
-              {/* Bathrooms */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-black">Bathrooms</Label>
                 <div className="flex gap-2 flex-wrap">
@@ -616,38 +627,24 @@ export default function PropertiesListing({
           </div>
 
           <div className="shrink-0 border-t border-gray-200 bg-white px-4 py-3 flex gap-3">
-            <button onClick={resetSheetFilters} className="flex-1 py-3 rounded-xl border-2 border-gray-300 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-              RESET
-            </button>
-            <button onClick={applySheetFilters} className="flex-[2] py-3 rounded-xl bg-black text-white text-sm font-bold hover:bg-gray-900 transition-colors">
-              APPLY FILTERS
-            </button>
+            <button onClick={resetSheetFilters} className="flex-1 py-3 rounded-xl border-2 border-gray-300 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">RESET</button>
+            <button onClick={applySheetFilters} className="flex-[2] py-3 rounded-xl bg-black text-white text-sm font-bold hover:bg-gray-900 transition-colors">APPLY FILTERS</button>
           </div>
         </SheetContent>
       </Sheet>
 
-      {/* ══════════════════════════════════════════════════════
-          MAIN CONTENT
-      ══════════════════════════════════════════════════════ */}
       <section className="py-8 md:py-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-8">
 
-            {/* Desktop Sidebar */}
             <aside className="w-80 shrink-0 hidden lg:block">
               <div className="sticky top-24">
-                <SearchSidebar
-                  city={matchedCity} purpose={purpose} type={type}
-                  useCleanUrls={useCleanUrls} filters={advancedFilters}
-                  onFilterChange={handleFilterChange}
-                />
+                <SearchSidebar city={matchedCity} purpose={purpose} type={type} useCleanUrls={useCleanUrls} filters={advancedFilters} onFilterChange={handleFilterChange} />
               </div>
             </aside>
 
-            {/* Listing column */}
             <div className="w-full lg:w-3/4 space-y-5">
 
-              {/* Page heading */}
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
                 {type !== 'all'
                   ? (type.toLowerCase() === 'house' ? 'Property' : `${type.charAt(0).toUpperCase() + type.slice(1)}s`)
@@ -656,34 +653,22 @@ export default function PropertiesListing({
                 in {matchedCity || 'Pakistan'}
               </h1>
 
-              {/* Mobile: Buy | Rent | FILTERS bar */}
               <div className="lg:hidden flex rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                <button
-                  onClick={() => updateFilters(matchedCity, type, 'buy')}
-                  className={`flex-1 py-3 text-sm font-bold transition-colors ${
-                    purpose === 'buy' ? 'bg-black text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
+                <button onClick={() => updateFilters(matchedCity, type, 'buy')}
+                  className={`flex-1 py-3 text-sm font-bold transition-colors ${purpose === 'buy' ? 'bg-black text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}>
                   Buy
                 </button>
-                <button
-                  onClick={() => updateFilters(matchedCity, type, 'rent')}
-                  className={`flex-1 py-3 text-sm font-bold transition-colors border-x border-gray-200 ${
-                    purpose === 'rent' ? 'bg-black text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
+                <button onClick={() => updateFilters(matchedCity, type, 'rent')}
+                  className={`flex-1 py-3 text-sm font-bold transition-colors border-x border-gray-200 ${purpose === 'rent' ? 'bg-black text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}>
                   Rent
                 </button>
-                <button
-                  onClick={() => setIsFilterSheetOpen(true)}
-                  className="px-5 py-3 bg-black hover:bg-gray-900 text-white text-xs font-bold tracking-widest flex items-center gap-1.5 transition-colors"
-                >
+                <button onClick={() => setIsFilterSheetOpen(true)}
+                  className="px-5 py-3 bg-black hover:bg-gray-900 text-white text-xs font-bold tracking-widest flex items-center gap-1.5 transition-colors">
                   <SlidersHorizontal className="w-3.5 h-3.5" />
                   FILTERS
                 </button>
               </div>
 
-              {/* ══ Mobile: Type Tabs + LOCATION LIST button ══ */}
               <div className="lg:hidden relative">
                 <div className="relative">
                   <div className="flex flex-wrap gap-x-5 gap-y-0 pr-28">
@@ -692,79 +677,42 @@ export default function PropertiesListing({
                         ? (type === 'all' || !type)
                         : type.toLowerCase() === tab.key;
                       return (
-                        <button
-                          key={tab.key}
-                          onClick={() => navigateType(tab.key)}
-                          className={`flex flex-col items-start pb-2 pt-0.5 text-left transition-colors border-b-2 ${
-                            isActive ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-800'
-                          }`}
-                        >
+                        <button key={tab.key} onClick={() => navigateType(tab.key)}
+                          className={`flex flex-col items-start pb-2 pt-0.5 text-left transition-colors border-b-2 ${isActive ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>
                           <span className="text-xs font-bold leading-tight whitespace-nowrap">{tab.label}</span>
                           <span className="text-[10px] text-gray-400 leading-tight">({tab.count})</span>
                         </button>
                       );
                     })}
                   </div>
-
-                  {/* Toggle button */}
-                  <button
-                    onClick={() => setIsLocationPanelOpen(v => !v)}
-                    className={`absolute right-0 top-0.5 text-[10px] font-bold border px-2 py-1 rounded transition-colors whitespace-nowrap ${
-                      isLocationPanelOpen
-                        ? 'border-black bg-black text-white'
-                        : 'border-gray-300 bg-white text-gray-600 hover:border-gray-600'
-                    }`}
-                  >
+                  <button onClick={() => setIsLocationPanelOpen(v => !v)}
+                    className={`absolute right-0 top-0.5 text-[10px] font-bold border px-2 py-1 rounded transition-colors whitespace-nowrap ${isLocationPanelOpen ? 'border-black bg-black text-white' : 'border-gray-300 bg-white text-gray-600 hover:border-gray-600'}`}>
                     {isLocationPanelOpen ? 'CLOSE LIST' : 'LOCATION LIST'}
                   </button>
                 </div>
 
-                {/* Floating location panel */}
                 {isLocationPanelOpen && (
                   <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setIsLocationPanelOpen(false)}
-                    />
-
+                    <div className="fixed inset-0 z-40" onClick={() => setIsLocationPanelOpen(false)} />
                     <div className="absolute right-0 top-8 z-50 w-[260px] bg-white border border-gray-200 shadow-2xl overflow-hidden">
-
                       <div className="px-4 pt-4 pb-3">
-                        <p className="text-[17px] font-bold text-gray-900 leading-snug">
-                          {locationPanelTitle}
-                        </p>
+                        <p className="text-[17px] font-bold text-gray-900 leading-snug">{locationPanelTitle}</p>
                       </div>
-
                       <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
                         {locationPanelLoading ? (
-                          <div className="flex items-center gap-2 px-4 py-6 text-sm text-gray-400">
-                            <Loader2 className="w-4 h-4 animate-spin" /> Loading locations…
-                          </div>
+                          <div className="flex items-center gap-2 px-4 py-6 text-sm text-gray-400"><Loader2 className="w-4 h-4 animate-spin" /> Loading locations…</div>
                         ) : locationPanelAreas.length === 0 ? (
                           <p className="px-4 py-6 text-sm text-gray-400 text-center">No areas found</p>
                         ) : (
                           locationPanelAreas.map((area, idx) => {
                             const isSelected = currentAreaId === area.id;
                             return (
-                              <button
-                                key={area.id}
-                                onClick={() => navigateArea(area)}
-                                className={cn(
-                                  'w-full flex items-center justify-between px-4 py-[10px] text-left transition-colors hover:bg-gray-50',
-                                  idx !== 0 && 'border-t border-gray-100'
-                                )}
-                              >
-                                <span className={`text-[13px] leading-tight ${
-                                  isSelected ? 'font-semibold text-gray-900' : 'font-normal text-gray-800'
-                                }`}>
+                              <button key={area.id} onClick={() => navigateArea(area)}
+                                className={cn('w-full flex items-center justify-between px-4 py-[10px] text-left transition-colors hover:bg-gray-50', idx !== 0 && 'border-t border-gray-100')}>
+                                <span className={`text-[13px] leading-tight ${isSelected ? 'font-semibold text-gray-900' : 'font-normal text-gray-800'}`}>
                                   {toTitleCase(area.name)}
                                 </span>
-
-                                {area.count > 0 && (
-                                  <span className="text-[11px] text-gray-400 ml-2 shrink-0 tabular-nums">
-                                    ({area.count})
-                                  </span>
-                                )}
+                                {area.count > 0 && <span className="text-[11px] text-gray-400 ml-2 shrink-0 tabular-nums">({area.count})</span>}
                               </button>
                             );
                           })
@@ -775,38 +723,27 @@ export default function PropertiesListing({
                 )}
               </div>
 
-              {/* Mobile: Marla chips */}
               {showMarlaChips && (
                 <div className="lg:hidden flex gap-2 flex-wrap">
-                  {MARLA_OPTIONS.map(m => (
-                    <button
-                      key={m}
-                      onClick={() => handleMarlaClick(m)}
-                      className={`px-3 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
-                        selectedMarla === m
-                          ? 'bg-black text-white border-black'
-                          : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'
-                      }`}
-                    >
-                      {m} Marla
+                  {SIZE_OPTIONS.map(opt => (
+                    <button key={opt.marlaMin} onClick={() => handleMarlaClick(opt.marlaMin)}
+                      className={`px-3 py-1 rounded-full text-[11px] font-semibold border transition-colors ${selectedMarla === opt.marlaMin ? 'bg-black text-white border-black' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'}`}>
+                      {opt.label}
                     </button>
                   ))}
                 </div>
               )}
 
-              {/* Properties grid */}
               <div className="pt-2">
                 <h3 className="text-lg font-semibold mb-6">Property Listings</h3>
 
                 {properties.length > 0 ? (
                   <div className="space-y-8">
-                    <div className="grid grid-cols-1 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 gap-2 md:gap-4">
                       {properties.map((property, index) => (
-                        <div
-                          key={`${property.id}-${index}`}
+                        <div key={`${property.id}-${index}`}
                           className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-                          style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
-                        >
+                          style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}>
                           <PropertyCard property={property} />
                         </div>
                       ))}
@@ -814,15 +751,9 @@ export default function PropertiesListing({
 
                     {currentPage < totalPages && (
                       <div className="flex justify-center pt-4">
-                        <Button
-                          variant="outline" size="lg"
-                          onClick={() => setCurrentPage(p => p + 1)}
-                          disabled={isFetchingMore}
-                          className="min-w-[200px] rounded-full border-primary text-primary hover:bg-primary/5"
-                        >
-                          {isFetchingMore
-                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</>
-                            : 'Load More Properties'}
+                        <Button variant="outline" size="lg" onClick={() => setCurrentPage(p => p + 1)} disabled={isFetchingMore}
+                          className="min-w-[200px] rounded-full border-primary text-primary hover:bg-primary/5">
+                          {isFetchingMore ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Load More Properties'}
                         </Button>
                       </div>
                     )}
@@ -835,10 +766,8 @@ export default function PropertiesListing({
                     <h3 className="text-xl font-semibold mb-2">No properties found</h3>
                     <p className="text-muted-foreground mb-6">Try adjusting your filters</p>
                     <Button variant="outline" onClick={() => {
-                      setType('all');
-                      setSelectedMarla(null);
-                      updateFilters('', 'all');
-                      setAdvancedFilters({});
+                      setType('all'); setSelectedMarla(null);
+                      updateFilters('', 'all'); setAdvancedFilters({});
                     }}>
                       Clear All Filters
                     </Button>
@@ -851,10 +780,8 @@ export default function PropertiesListing({
           {effectiveRichDescription && (
             <section className="pt-24 pb-6 md:pt-28 md:pb-8 bg-secondary/50">
               <div className="container mx-auto px-4">
-                <div
-                  className="mt-6 prose prose-sm max-w-4xl text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
-                  dangerouslySetInnerHTML={{ __html: effectiveRichDescription }}
-                />
+                <div className="mt-6 prose prose-sm max-w-4xl text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
+                  dangerouslySetInnerHTML={{ __html: effectiveRichDescription }} />
               </div>
             </section>
           )}

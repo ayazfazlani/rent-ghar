@@ -1033,31 +1033,31 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
             </div>
           </div>
 
-          {/* ═══════════════════════════════════════════════════
-              SIMILAR PROPERTIES — OPTIMIZED FOR MOBILE
-              Only min-w and container padding changed here
-          ═══════════════════════════════════════════════════ */}
+          {/* ═══════════════════════ SIMILAR PROPERTIES ═══════════════════════ */}
 
           {/* Similar by Area */}
           {relatedByArea.length > 0 && (
-            <section className="pt-8 border-t max-w-full overflow-x-hidden">
-              <div className="flex items-center justify-between mb-4 px-4 md:px-0">
-                <h2 className="text-lg md:text-2xl font-bold text-wrap">
+            <section className="pt-10 border-t max-w-full overflow-x-hidden">
+              <div className="flex items-center justify-between mb-5 px-4 md:px-0">
+                <h2 className="text-lg md:text-2xl font-bold">
                   Similar {toTitleCase(property.type)}s around {toTitleCase(property.location)}
                 </h2>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-primary hover:text-primary/80 shrink-0 ml-2"
-                  onClick={() => router.push(`/properties/${property.purpose === 'buy' ? 'sale' : 'rent'}/${property.city.toLowerCase()}/${property.areaSlug === undefined ? ' ' : property.areaSlug}`)}
+                  className="text-primary hover:text-primary/80 shrink-0 ml-2 text-xs font-semibold"
+                  onClick={() => router.push(`/properties/${property.purpose === 'buy' ? 'sale' : 'rent'}/${property.city.toLowerCase()}/${property.areaSlug === undefined ? '' : property.areaSlug}`)}
                 >
                   View All
                 </Button>
               </div>
-              <div className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x px-4 md:px-0">
+              <div className="flex overflow-x-auto gap-3 pb-6 scrollbar-hide snap-x px-4 md:px-0">
                 {relatedByArea.map((item) => (
-                  <div key={item.id} className="min-w-[47vw] max-w-[47vw] md:min-w-[320px] md:max-w-[320px] shrink-0 snap-start">
-                    <PropertyCard property={item} hideActions />
+                  <div
+                    key={item.id}
+                    className="min-w-[47vw] max-w-[47vw] md:min-w-[300px] md:max-w-[300px] shrink-0 snap-start rounded-2xl overflow-hidden shadow-[0_2px_16px_rgba(0,0,0,0.10)] border border-gray-100 bg-white hover:shadow-[0_4px_24px_rgba(0,0,0,0.16)] transition-shadow duration-200"
+                  >
+                    <PropertyCard property={item} />
                   </div>
                 ))}
               </div>
@@ -1066,16 +1066,19 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
           {/* Similar by Owner */}
           {relatedByOwner.length > 0 && (
-            <section className="pt-8 border-t max-w-full overflow-x-hidden">
-              <div className="flex items-center justify-between mb-4 px-4 md:px-0">
+            <section className="pt-10 border-t max-w-full overflow-x-hidden">
+              <div className="flex items-center justify-between mb-5 px-4 md:px-0">
                 <h2 className="text-lg md:text-2xl font-bold">
                   More properties by {backendProperty?.owner?.name || 'this Agency'}
                 </h2>
               </div>
-              <div className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x px-4 md:px-0">
+              <div className="flex overflow-x-auto gap-3 pb-6 scrollbar-hide snap-x px-4 md:px-0">
                 {relatedByOwner.map((item) => (
-                  <div key={item.id} className="min-w-[47vw] max-w-[47vw] md:min-w-[320px] md:max-w-[320px] shrink-0 snap-start">
-                    <PropertyCard property={item} hideActions />
+                  <div
+                    key={item.id}
+                    className="min-w-[47vw] max-w-[47vw] md:min-w-[300px] md:max-w-[300px] shrink-0 snap-start rounded-2xl overflow-hidden shadow-[0_2px_16px_rgba(0,0,0,0.10)] border border-gray-100 bg-white hover:shadow-[0_4px_24px_rgba(0,0,0,0.16)] transition-shadow duration-200"
+                  >
+                    <PropertyCard property={item} />
                   </div>
                 ))}
               </div>
@@ -1084,24 +1087,27 @@ const PropertyDetail = ({ slug, initialProperty }: { slug?: string, initialPrope
 
           {/* Similar by City */}
           {relatedByCity.length > 0 && (
-            <section className="pt-8 border-t max-w-full overflow-x-hidden">
-              <div className="flex items-center justify-between mb-4 px-4 md:px-0">
+            <section className="pt-10 border-t max-w-full overflow-x-hidden">
+              <div className="flex items-center justify-between mb-5 px-4 md:px-0">
                 <h2 className="text-lg md:text-2xl font-bold">
                   Similar {toTitleCase(property.type)}s in {toTitleCase(property.city)}
                 </h2>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-primary hover:text-primary/80 shrink-0 ml-2"
+                  className="text-primary hover:text-primary/80 shrink-0 ml-2 text-xs font-semibold"
                   onClick={() => router.push(`/properties/${backendProperty?.listingType}/${property.citySlug || property.city.toLowerCase()}`)}
                 >
                   View All
                 </Button>
               </div>
-              <div className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x px-4 md:px-0">
+              <div className="flex overflow-x-auto gap-3 pb-6 scrollbar-hide snap-x px-4 md:px-0">
                 {relatedByCity.map((item) => (
-                  <div key={item.id} className="min-w-[47vw] max-w-[47vw] md:min-w-[320px] md:max-w-[320px] shrink-0 snap-start">
-                    <PropertyCard property={item} hideActions />
+                  <div
+                    key={item.id}
+                    className="min-w-[47vw] max-w-[47vw] md:min-w-[300px] md:max-w-[300px] shrink-0 snap-start rounded-2xl overflow-hidden shadow-[0_2px_16px_rgba(0,0,0,0.10)] border border-gray-100 bg-white hover:shadow-[0_4px_24px_rgba(0,0,0,0.16)] transition-shadow duration-200"
+                  >
+                    <PropertyCard property={item} />
                   </div>
                 ))}
               </div>
