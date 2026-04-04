@@ -1,4 +1,4 @@
- import PropertiesListing from '@/components/PropertiesListing';
+import PropertiesListing from '@/components/PropertiesListing';
 import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { serverApi } from '@/lib/server-api';
@@ -10,7 +10,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://propertydealer.pk'
 interface PageProps {
   params: Promise<{
     city: string;
-    segments: string[];
+    segments: string[]; // catch-all: ['type'] | ['area'] | ['area', 'type']
   }>;
 }
 
@@ -19,12 +19,7 @@ async function resolveSegments(citySlug: string, segments: string[]) {
     const cityData = await serverApi.getCityByName(citySlug);
     if (!cityData) return { cityData: null, areaData: null, propertyType: null, areaSlug: null };
 
-    let propertyTypes: string[] = [];
-    try {
-      propertyTypes = await serverApi.getTypes();
-    } catch {
-      propertyTypes = [];
-    }
+    const propertyTypes = await serverApi.getTypes();
 
     if (segments.length === 1) {
       const seg = segments[0] as string;
@@ -69,47 +64,53 @@ export async function generateMetadata(
   const { city: citySlug, segments } = await props.params;
   const { cityData, areaData, propertyType } = await resolveSegments(citySlug, segments);
 
-  const purpose = 'Rent & Sale';
+  const purpose = 'Sale';
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(citySlug);
 
+  // Find typeContent matching this type for sale (accepts 'sale' or 'all' purpose)
   const findTypeContent = (type: string) =>
     cityData?.typeContents?.find(
-      (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && tc.purpose === 'all'
+      (tc: any) =>
+        tc.propertyType.toLowerCase() === type.toLowerCase() &&
+        (tc.purpose === 'sale' || tc.purpose === 'all')
     ) || null;
 
   if (areaData && propertyType) {
     const areaName = toTitleCase(areaData.name);
     const typeName = propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType);
+    // area+type: prefer sale-specific meta, then general area meta
     return {
-      title: areaData.metaTitle || `${typeName} for ${purpose} in ${areaName}, ${cityName}`,
-      description: areaData.metaDescription || `Find ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. Browse verified listings on Property Dealer.`,
-      alternates: { canonical: `/properties/all/${citySlug}/${segments.join('/')}` },
+      title: areaData.saleMetaTitle?.trim() || areaData.metaTitle || `${typeName} for ${purpose} in ${areaName}, ${cityName}`,
+      description: areaData.saleMetaDescription?.trim() || areaData.metaDescription || `Find ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. Browse verified listings on Property Dealer.`,
+      alternates: { canonical: `/properties/sale/${citySlug}/${segments.join('/')}` },
     };
   }
 
   if (areaData) {
     const areaName = toTitleCase(areaData.name);
     return {
-      title: areaData.metaTitle || `Properties in ${areaName}, ${cityName}`,
-      description: areaData.metaDescription || `Discover properties in ${areaName}, ${cityName}. View photos, prices, and details on Property Dealer.`,
-      alternates: { canonical: areaData.canonicalUrl || `/properties/all/${citySlug}/${segments[0]}` },
+      title: areaData.saleMetaTitle?.trim() || areaData.metaTitle || `Properties for ${purpose} in ${areaName}, ${cityName}`,
+      description: areaData.saleMetaDescription?.trim() || areaData.metaDescription || `Discover properties for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. View photos, prices, and details on Property Dealer.`,
+      alternates: { canonical: areaData.canonicalUrl || `/properties/sale/${citySlug}/${segments[0]}` },
     };
   }
 
   if (propertyType) {
     const typeName = propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType);
     const tc = findTypeContent(propertyType);
+    const titleText = tc?.metaTitle?.trim() || `${typeName} for ${purpose} in ${cityName}`;
+    const descText = tc?.metaDescription?.trim() || `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse verified listings on Property Dealer.`;
     return {
-      title: tc?.metaTitle?.trim() || `${typeName} for ${purpose} in ${cityName}`,
-      description: tc?.metaDescription?.trim() || `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse verified listings on Property Dealer.`,
-      alternates: { canonical: `/properties/all/${citySlug}/${segments[0]}` },
+      title: titleText,
+      description: descText,
+      alternates: { canonical: `/properties/sale/${citySlug}/${segments[0]}` },
     };
   }
 
-  return { title: `Properties in ${cityName}` };
+  return { title: `Properties for ${purpose} in ${cityName}` };
 }
 
-export default async function AllCitySegmentsPage(props: PageProps) {
+export default async function SaleCitySegmentsPage(props: PageProps) {
   const { city, segments } = await props.params;
   const { cityData, areaData, propertyType, areaSlug } = await resolveSegments(city, segments);
 
@@ -118,50 +119,58 @@ export default async function AllCitySegmentsPage(props: PageProps) {
   const listingType = propertyType || 'all';
   const areaId = areaData?._id;
 
+  // Find typeContent: sale page matches 'sale' or 'all' purpose
   const specificContent = propertyType && !areaData
     ? cityData?.typeContents?.find(
-        (tc: any) =>
-          tc.propertyType.toLowerCase() === propertyType.toLowerCase() &&
-          tc.purpose === 'all'
-      ) || null
+      (tc: any) =>
+        tc.propertyType.toLowerCase() === propertyType.toLowerCase() &&
+        (tc.purpose === 'sale' || tc.purpose === 'all')
+    ) || null
     : null;
 
+  // richDescription rules:
+  // - area+type → nothing
+  // - area-only → areaData.saleContent (sale-specific) or areaData.description
+  // - type-only → specificContent.content ONLY if admin explicitly set it (no fallback)
   const richDescription = areaData && propertyType
     ? undefined
     : areaData
-      ? (areaData.description || undefined)
+      ? (areaData.saleContent?.trim() || areaData.description || undefined)
       : (specificContent?.content?.trim() ? specificContent.content : undefined);
 
+  // --- Schema.org ---
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(city);
   const areaName = areaData ? toTitleCase(areaData.name) : null;
   const typeName = propertyType ? (propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType)) : null;
-  const pageUrl = `${BASE_URL}/properties/all/${city}/${segments.join('/')}`;
+  const pageUrl = `${BASE_URL}/properties/sale/${city}/${segments.join('/')}`;
   const pageTitle = [
     typeName ? (typeName === 'Property' ? 'Property' : `${typeName}s`) : 'Properties',
-    'for Rent & Sale',
+    'for Sale',
     areaName ? `in ${areaName}, ${cityName}` : `in ${cityName}`,
   ].join(' ');
 
   let schemaProperties: any[] = [];
   try {
-    const params: Record<string, string> = { city, limit: '20', page: '1' };
+    const params: Record<string, string> = { city, limit: '20', page: '1', purpose: 'sale' };
     if (areaId) params.areaId = areaId;
     if (listingType !== 'all') params.type = listingType;
     const qs = new URLSearchParams(params).toString();
     const res = await serverApi.getProperties(qs);
     const rawProps: any[] = Array.isArray(res) ? res : (res as any).properties || [];
-    schemaProperties = rawProps.map((p: any) => ({ id: p._id, slug: p.slug, name: p.title }));
+    schemaProperties = rawProps.map((p: any) => ({
+      id: p._id, slug: p.slug, name: p.title
+    }));
   } catch { /* non-critical */ }
 
   const breadcrumbs = [
     { name: 'Home', url: `${BASE_URL}/` },
-    { name: 'Properties', url: `${BASE_URL}/properties/all` },
-    { name: cityName, url: `${BASE_URL}/properties/all/${city}` },
-    ...(areaName ? [{ name: areaName, url: `${BASE_URL}/properties/all/${city}/${areaSlug}` }] : []),
+    { name: 'Properties for Sale', url: `${BASE_URL}/properties/sale` },
+    { name: cityName, url: `${BASE_URL}/properties/sale/${city}` },
+    ...(areaName ? [{ name: areaName, url: `${BASE_URL}/properties/sale/${city}/${areaSlug}` }] : []),
     ...(typeName && areaName
-      ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/all/${city}/${areaSlug}/${segments[1]}` }]
+      ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/sale/${city}/${areaSlug}/${segments[1]}` }]
       : typeName
-        ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/all/${city}/${segments[0]}` }]
+        ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/sale/${city}/${segments[0]}` }]
         : []),
   ];
 
@@ -169,9 +178,12 @@ export default async function AllCitySegmentsPage(props: PageProps) {
     url: pageUrl,
     title: pageTitle,
     cityName,
-    properties: schemaProperties.map(p => ({ title: p.name, url: `${BASE_URL}/p/${p.slug || p.id}` })),
+    properties: schemaProperties.map(p => ({
+      title: p.name,
+      url: `${BASE_URL}/p/${p.slug || p.id}`
+    })),
     totalItems: schemaProperties.length,
-    crumbs: breadcrumbs,
+    crumbs: breadcrumbs
   });
 
   return (
@@ -183,7 +195,7 @@ export default async function AllCitySegmentsPage(props: PageProps) {
         </div>
       }>
         <PropertiesListing
-          purpose="all"
+          purpose="buy"
           city={city}
           type={listingType}
           areaId={areaId}

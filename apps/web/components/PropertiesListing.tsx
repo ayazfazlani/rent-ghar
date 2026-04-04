@@ -34,7 +34,6 @@ interface AreaOption {
   count: number;
 }
 
-const MARLA_OPTIONS = [2, 3, 5, 10];
 const SIZE_OPTIONS: { label: string; marlaMin: number; marlaMax: number }[] = [
   { label: '2 Marla',  marlaMin: 2,  marlaMax: 2  },
   { label: '3 Marla',  marlaMin: 3,  marlaMax: 3  },
@@ -150,7 +149,6 @@ export default function PropertiesListing({
     return map[t] || `${t}s`;
   };
 
-  // ── URL builder ─────────────────────────────────────────────────────────────
   const buildCleanUrl = (opts: {
     purposeOverride?: string;
     cityOverride?: string;
@@ -167,40 +165,43 @@ export default function PropertiesListing({
     const marla = opts.marlaOverride !== undefined ? opts.marlaOverride : selectedMarla;
 
     const tSlug     = t && t !== 'all' ? `/${t.toLowerCase()}` : '';
-    const marlaSlug = marla ? `/${marla}marla` : '';
+    const marlaSlug = marla ? `/${marla}-marla` : '';
     const areaPath  = aSlug ? `/${aSlug}` : '';
 
-    // FIX 1: No-city case now includes tSlug + marlaSlug
     if (!cs) {
       return `/properties/${pp}${tSlug}${marlaSlug}`;
     }
     return `/properties/${pp}/${cs}${areaPath}${tSlug}${marlaSlug}`;
   };
-  // ────────────────────────────────────────────────────────────────────────────
 
-  // FIX 2: handleMarlaClick — supports marla + 1 kanal (20 marla)
+  const navigateType = (t: string) => {
+    setIsLocationPanelOpen(false);
+    const supportsMarla = t === 'house' || t === 'plot';
+
+    if (!supportsMarla && selectedMarla !== null) {
+      setSelectedMarla(null);
+      handleFilterChange({
+        ...advancedFilters,
+        marlaMin: undefined,
+        marlaMax: undefined,
+      });
+    } else {
+      setCurrentPage(1);
+    }
+
+    setType(t);
+  };
+
   const handleMarlaClick = (marla: number) => {
     const isDeselecting = selectedMarla === marla;
     const newMarla = isDeselecting ? null : marla;
 
-    if (useCleanUrls) {
-      if (newMarla === 20) {
-        // 1 Kanal → custom URL slug
-        const pp    = purpose === 'buy' ? 'sale' : purpose;
-        const cs    = matchedCity ? `/${cityToSlug(matchedCity)}` : '';
-        const tSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
-        router.push(`/properties/${pp}${cs}${tSlug}/1kanal`);
-      } else {
-        router.push(buildCleanUrl({ marlaOverride: newMarla }));
-      }
-    } else {
-      setSelectedMarla(newMarla);
-      handleFilterChange({
-        ...advancedFilters,
-        marlaMin: newMarla ?? undefined,
-        marlaMax: newMarla ?? undefined,
-      });
-    }
+    setSelectedMarla(newMarla);
+    handleFilterChange({
+      ...advancedFilters,
+      marlaMin: newMarla ?? undefined,
+      marlaMax: newMarla ?? undefined,
+    });
   };
 
   useEffect(() => {
@@ -416,22 +417,6 @@ export default function PropertiesListing({
     }
   };
 
-  // FIX 3: navigateType — removed && matchedCity
-  const navigateType = (t: string) => {
-    setIsLocationPanelOpen(false);
-    const supportsMarla = t === 'house' || t === 'plot';
-    const marlaToKeep  = supportsMarla ? selectedMarla : null;
-
-    if (useCleanUrls) {
-      router.push(buildCleanUrl({ typeOverride: t, marlaOverride: marlaToKeep }));
-    } else {
-      const params = new URLSearchParams(searchParams.toString());
-      if (t === 'all') params.delete('type'); else params.set('type', t.toLowerCase());
-      const qs = params.toString();
-      router.push(qs ? `/properties?${qs}` : '/properties');
-    }
-  };
-
   const navigateArea = (area: AreaOption) => {
     setIsLocationPanelOpen(false);
     const params = new URLSearchParams(searchParams.toString());
@@ -440,7 +425,7 @@ export default function PropertiesListing({
       const pp        = purpose === 'buy' ? 'sale' : purpose;
       const cSlug     = cityToSlug(matchedCity);
       const tSlug     = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
-      const marlaSlug = selectedMarla ? `/${selectedMarla}marla` : '';
+      const marlaSlug = selectedMarla ? `/${selectedMarla}-marla` : '';
       if (isUnselecting) { router.push(`/properties/${pp}/${cSlug}${tSlug}${marlaSlug}`); return; }
       if (area.slug)     { router.push(`/properties/${pp}/${cSlug}/${area.slug}${tSlug}${marlaSlug}`); return; }
     }
@@ -653,6 +638,78 @@ export default function PropertiesListing({
                 in {matchedCity || 'Pakistan'}
               </h1>
 
+              {/* ══════════════════════════════════════════════
+                  DESKTOP ONLY — Area chips (zameen.com style)
+                  Sirf tab show hon jab city ya area filter laga ho
+                  Mobile pr: bilkul koi change nahi
+              ══════════════════════════════════════════════ */}
+              {locationPanelAreas.length > 0 && (matchedCity || currentAreaId) && (
+                <div className="hidden lg:block">
+                  <div className="border border-border rounded-xl p-4 bg-card">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-bold text-foreground">
+                        {matchedCity
+                          ? `Areas in ${toTitleCase(matchedCity)}`
+                          : 'Popular Areas'}
+                      </h3>
+                      {currentAreaId && (
+                        <button
+                          onClick={() => {
+                            const params = new URLSearchParams(searchParams.toString());
+                            params.delete('areaId');
+                            if (useCleanUrls && matchedCity) {
+                              const pp    = purpose === 'buy' ? 'sale' : purpose;
+                              const cSlug = cityToSlug(matchedCity);
+                              const tSlug = type && type !== 'all' ? `/${type.toLowerCase()}` : '';
+                              router.push(`/properties/${pp}/${cSlug}${tSlug}`);
+                            } else {
+                              const qs = params.toString();
+                              router.push(`${window.location.pathname}${qs ? `?${qs}` : ''}`);
+                            }
+                          }}
+                          className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
+                        >
+                          Clear area
+                        </button>
+                      )}
+                    </div>
+
+                    {locationPanelLoading ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground py-1">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading areas…
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {locationPanelAreas.map((area) => {
+                          const isSelected = currentAreaId === area.id;
+                          return (
+                            <button
+                              key={area.id}
+                              onClick={() => navigateArea(area)}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200
+                                ${isSelected
+                                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                                  : 'bg-background text-foreground border-border hover:border-primary/50 hover:bg-primary/5'
+                                }`}
+                            >
+                              <MapPin className="w-3 h-3 opacity-70" />
+                              {toTitleCase(area.name)}
+                              {area.count > 0 && (
+                                <span className={`text-[10px] ${isSelected ? 'opacity-80' : 'text-muted-foreground'}`}>
+                                  ({area.count})
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Mobile: Buy/Rent toggle + Filters button */}
               <div className="lg:hidden flex rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                 <button onClick={() => updateFilters(matchedCity, type, 'buy')}
                   className={`flex-1 py-3 text-sm font-bold transition-colors ${purpose === 'buy' ? 'bg-black text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}>
@@ -723,6 +780,7 @@ export default function PropertiesListing({
                 )}
               </div>
 
+              {/* Marla chips — mobile only */}
               {showMarlaChips && (
                 <div className="lg:hidden flex gap-2 flex-wrap">
                   {SIZE_OPTIONS.map(opt => (

@@ -83,10 +83,9 @@ const PropertyCard = ({ property, hideActions = false }: PropertyCardProps) => {
                 </span>
               </div>
             </div>
-            <div className="flex flex-col p-2 gap-1">
-              <p className="text-xs font-bold text-primary leading-tight">
-                PKR {formatPrice(property.price)}
-              </p>
+
+            {/* ── CHANGED: name/location/beds first, price + Explore at bottom ── */}
+            <div className="flex flex-col p-2 gap-1 flex-1">
               <h3 className="text-[11px] font-semibold text-foreground line-clamp-2 leading-tight">
                 {property.name}
               </h3>
@@ -104,6 +103,18 @@ const PropertyCard = ({ property, hideActions = false }: PropertyCardProps) => {
                   </span>
                 </div>
               )}
+              {/* Price + Explore row */}
+              <div className="flex items-center justify-between mt-auto pt-1">
+                <p className="text-xs font-bold text-primary leading-tight">
+                  PKR {formatPrice(property.price)}
+                </p>
+                <button
+                  onClick={handleCardClick}
+                  className="px-2 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded hover:bg-primary/90 transition-colors"
+                >
+                  EXPLORE
+                </button>
+              </div>
             </div>
           </>
         ) : (
@@ -216,37 +227,82 @@ const PropertyCard = ({ property, hideActions = false }: PropertyCardProps) => {
             </div>
           </div>
 
-          {/* Details */}
-          <div className="flex flex-col flex-1 p-4 min-w-0 justify-between">
-            <div>
-              <p className="text-xl font-bold text-primary leading-tight">
-                PKR {formatPrice(property.price)}
-              </p>
-              <h3 className="text-base font-semibold text-foreground mt-1 line-clamp-2 hover:text-primary transition-colors duration-200">
-                {property.name}
-              </h3>
-              <div className="flex items-center gap-1.5 mt-1.5 text-muted-foreground text-sm">
-                <MapPin className="w-4 h-4 text-primary shrink-0" />
-                <span className="line-clamp-1">{property.location}, {toTitleCase(property.city)}</span>
+          {/* ── CHANGED (hideActions): name/location/beds first, price + Explore at bottom ── */}
+          {hideActions ? (
+            <div className="flex flex-col flex-1 p-4 min-w-0 justify-between">
+              <div>
+                <h3 className="text-base font-semibold text-foreground line-clamp-2 hover:text-primary transition-colors duration-200">
+                  {property.name}
+                </h3>
+                <div className="flex items-center gap-1.5 mt-1.5 text-muted-foreground text-sm">
+                  <MapPin className="w-4 h-4 text-primary shrink-0" />
+                  <span className="line-clamp-1">{property.location}, {toTitleCase(property.city)}</span>
+                </div>
+              </div>
+
+              <div>
+                {property.bedrooms > 0 && (
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                    <span className="flex items-center gap-1.5"><Bed className="w-4 h-4 text-primary" />{property.bedrooms} Beds</span>
+                    <span className="flex items-center gap-1.5"><Bath className="w-4 h-4 text-primary" />{property.bathrooms} Baths</span>
+                    <span className="flex items-center gap-1.5">
+                      <Maximize className="w-4 h-4 text-primary" />
+                      {property.marla && property.marla > 0 ? `${property.marla} Marla` : `${property.area} sq ft`}
+                    </span>
+                  </div>
+                )}
+                {/* Price + Explore row */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
+                      {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
+                    </p>
+                    <p className="text-xl font-bold text-primary leading-tight">
+                      PKR {formatPrice(property.price)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleCardClick(); }}
+                    className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    EXPLORE
+                  </button>
+                </div>
               </div>
             </div>
-
-            <div>
-              {property.bedrooms > 0 && (
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-                  <span className="flex items-center gap-1.5"><Bed className="w-4 h-4 text-primary" />{property.bedrooms} Beds</span>
-                  <span className="flex items-center gap-1.5"><Bath className="w-4 h-4 text-primary" />{property.bathrooms} Baths</span>
-                  <span className="flex items-center gap-1.5">
-                    <Maximize className="w-4 h-4 text-primary" />
-                    {property.marla && property.marla > 0 ? `${property.marla} Marla` : `${property.area} sq ft`}
-                  </span>
+          ) : (
+            /* Original desktop details layout (unchanged) */
+            <div className="flex flex-col flex-1 p-4 min-w-0 justify-between">
+              <div>
+                <p className="text-xl font-bold text-primary leading-tight">
+                  PKR {formatPrice(property.price)}
+                </p>
+                <h3 className="text-base font-semibold text-foreground mt-1 line-clamp-2 hover:text-primary transition-colors duration-200">
+                  {property.name}
+                </h3>
+                <div className="flex items-center gap-1.5 mt-1.5 text-muted-foreground text-sm">
+                  <MapPin className="w-4 h-4 text-primary shrink-0" />
+                  <span className="line-clamp-1">{property.location}, {toTitleCase(property.city)}</span>
                 </div>
-              )}
-              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">
-                {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
-              </p>
+              </div>
+
+              <div>
+                {property.bedrooms > 0 && (
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                    <span className="flex items-center gap-1.5"><Bed className="w-4 h-4 text-primary" />{property.bedrooms} Beds</span>
+                    <span className="flex items-center gap-1.5"><Bath className="w-4 h-4 text-primary" />{property.bathrooms} Baths</span>
+                    <span className="flex items-center gap-1.5">
+                      <Maximize className="w-4 h-4 text-primary" />
+                      {property.marla && property.marla > 0 ? `${property.marla} Marla` : `${property.area} sq ft`}
+                    </span>
+                  </div>
+                )}
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">
+                  {property.purpose === 'buy' ? 'Total Price' : 'Monthly Rent'}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* WhatsApp + Call buttons — desktop (hidden if hideActions) */}

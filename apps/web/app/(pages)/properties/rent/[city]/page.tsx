@@ -1,15 +1,11 @@
- import PropertiesListing from '@/components/PropertiesListing';
+import PropertiesListing from '@/components/PropertiesListing';
 import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { serverApi } from '@/lib/server-api';
 import { toTitleCase } from '@/lib/utils';
 import { buildCollectionPageSchema } from '@/lib/schema/listing-schema';
-import { notFound, redirect } from 'next/navigation';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://propertydealer.pk';
-
-// Known property type slugs — these should never be treated as city slugs
-const PROPERTY_TYPES = ['house', 'flat', 'plot', 'shop', 'office', 'room', 'farmhouse', 'lower-portion', 'upper-portion', 'penthouse', 'building', 'factory', 'warehouse', 'hall'];
 
 interface PageProps {
   params: Promise<{ city: string }>;
@@ -21,59 +17,48 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { city: citySlug } = await props.params;
-
-  // If this segment is a property type, it'll be redirected — return minimal metadata
-  if (PROPERTY_TYPES.includes(citySlug.toLowerCase())) {
-    return { title: 'Properties' };
-  }
-
   const searchParams = await props.searchParams;
   const type = (searchParams.type as string) || '';
 
   try {
     const cityData = await serverApi.getCityByName(citySlug);
-    const purpose = 'Rent & Sale';
-    if (!cityData) return { title: `Properties in ${toTitleCase(citySlug)}` };
+    const purpose = 'Rent';
+    if (!cityData) return { title: `Properties for ${purpose} in ${toTitleCase(citySlug)}` };
     const cityName = toTitleCase(cityData.name);
     const typeName = type && type !== 'all'
       ? (type.toLowerCase() === 'house' ? 'Property' : toTitleCase(type))
       : 'Properties';
 
+    // If type is and no custom meta, auto-generate
     if (type && type !== 'all') {
       const specificContent = cityData.typeContents?.find(
-        (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && tc.purpose === 'all'
+        (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && (tc.purpose === 'rent' || tc.purpose === 'all')
       );
       if (specificContent?.metaTitle) return {
         title: specificContent.metaTitle,
         description: specificContent.metaDescription,
-        alternates: { canonical: `/properties/all/${citySlug.toLowerCase()}?type=${type.toLowerCase()}` }
+        alternates: { canonical: `/properties/rent/${citySlug.toLowerCase()}?type=${type.toLowerCase()}` }
       };
 
       return {
         title: `${typeName} for ${purpose} in ${cityName}`,
-        description: `Explore ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Find your dream home with Property Dealer.`,
-        alternates: { canonical: `/properties/all/${citySlug.toLowerCase()}?type=${type.toLowerCase()}` },
+        description: `Find the best ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse the latest listings and verified properties on Property Dealer.`,
+        alternates: { canonical: `/properties/rent/${citySlug.toLowerCase()}?type=${type.toLowerCase()}` },
       };
     }
 
     return {
-      title: cityData.metaTitle || `Properties for ${purpose} in ${cityName}`,
-      description: cityData.metaDescription || `Explore all properties for ${purpose.toLowerCase()} in ${cityName}. Find your dream home with Property Dealer.`,
-      alternates: { canonical: `/properties/all/${citySlug.toLowerCase()}` },
+      title: cityData.rentMetaTitle || `Properties for ${purpose} in ${cityName}`,
+      description: cityData.rentMetaDescription || `Find the best properties for ${purpose.toLowerCase()} in ${cityName}. Browse the latest houses, flats, and more on Property Dealer.`,
+      alternates: { canonical: `/properties/rent/${citySlug.toLowerCase()}` },
     };
   } catch {
-    return { title: `Properties in ${toTitleCase(citySlug)}` };
+    return { title: `Properties for Rent in ${toTitleCase(citySlug)}` };
   }
 }
 
-export default async function AllCityPage(props: PageProps) {
+export default async function RentCityPage(props: PageProps) {
   const { city } = await props.params;
-
-  // Guard: if "city" param is actually a property type slug, redirect to correct URL
-  if (PROPERTY_TYPES.includes(city.toLowerCase())) {
-    redirect(`/properties/all?type=${city.toLowerCase()}`);
-  }
-
   const searchParams = await props.searchParams;
   const type = (searchParams.type as string) || '';
   let cityDetails: any = null;
@@ -84,35 +69,28 @@ export default async function AllCityPage(props: PageProps) {
     console.error('Error fetching city details:', error);
   }
 
-  // If city genuinely not found in DB, show 404
-  if (!cityDetails) {
-    console.error(`City not found: ${city}`);
-    notFound();
-  }
-
-  const cityName = toTitleCase(cityDetails.name);
+  const cityName = cityDetails ? toTitleCase(cityDetails.name) : toTitleCase(city);
   const typeName = type && type !== 'all'
     ? (type.toLowerCase() === 'house' ? 'Property' : toTitleCase(type))
     : 'Properties';
-  const pageUrl = `${BASE_URL}/properties/all/${city}${type && type !== 'all' ? `?type=${type}` : ''}`;
+  const pageUrl = `${BASE_URL}/properties/rent/${city}${type && type !== 'all' ? `?type=${type}` : ''}`;
 
-  let pageTitle = cityDetails?.metaTitle || `Properties for Rent & Sale in ${cityName}`;
-  let richDescription = cityDetails?.description;
+  let pageTitle = cityDetails?.rentMetaTitle || `Properties for Rent in ${cityName}`;
+  let richDescription = cityDetails?.rentContent;
 
   if (type && type !== 'all') {
     const specificContent = cityDetails?.typeContents?.find(
-      (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && tc.purpose === 'all'
+      (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() && (tc.purpose === 'rent' || tc.purpose === 'all')
     );
     if (specificContent?.metaTitle) pageTitle = specificContent.metaTitle;
-    else pageTitle = `${typeName} for Rent & Sale in ${cityName}`;
+    else pageTitle = `${typeName} for Rent in ${cityName}`;
 
     if (specificContent?.content) richDescription = specificContent.content;
   }
 
-  // Fetch top properties for schema
   let schemaProperties: any[] = [];
   try {
-    const res = await serverApi.getProperties(`city=${city}&limit=20&page=1`);
+    const res = await serverApi.getProperties(`city=${city}&purpose=rent&limit=20&page=1`);
     const rawProps: any[] = Array.isArray(res) ? res : (res as any).properties || [];
     schemaProperties = rawProps.map((p: any) => ({
       id: p._id, slug: p.slug, name: p.title, type: p.propertyType,
@@ -134,7 +112,7 @@ export default async function AllCityPage(props: PageProps) {
     totalItems: schemaProperties.length,
     crumbs: [
       { name: 'Home', url: BASE_URL },
-      { name: 'Properties', url: `${BASE_URL}/properties/all` },
+      { name: 'Properties for Rent', url: `${BASE_URL}/properties/rent` },
       { name: cityName, url: pageUrl },
     ]
   });
@@ -148,7 +126,7 @@ export default async function AllCityPage(props: PageProps) {
         </div>
       }>
         <PropertiesListing
-          purpose="all"
+          purpose="rent"
           city={city}
           type={type || 'all'}
           useCleanUrls={true}
