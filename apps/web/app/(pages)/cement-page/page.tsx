@@ -1,41 +1,39 @@
+ // app/cement-page/page.tsx  (or pages/cement-page.tsx for Pages Router)
 "use client";
 
 import { useState, useMemo } from "react";
 import Head from "next/head";
 import CementCard, { CementBrand } from "@/components/Cementcard";
 
-// ── Sample data — replace with your NestJS API call ──────────────────────────
+// ── Sample data — replace with your NestJS API call ──────────────────────
 const ALL_BRANDS: CementBrand[] = [
-  { id: 1, brand: "Lucky Cement",       slug: "lucky-cement",       title: "Lucky Cement — 50 Kg Bag",       price: 1300, change: +20, city: "Lahore",      weightKg: 50, category: "OPC Cement" },
-  { id: 2, brand: "Bestway Cement",     slug: "bestway-cement",     title: "Bestway Cement — 50 Kg Bag",     price: 1280, change:   0, city: "Karachi",     weightKg: 50, category: "OPC Cement" },
-  { id: 3, brand: "Maple Leaf Cement",  slug: "maple-leaf-cement",  title: "Maple Leaf Cement — 50 Kg Bag",  price: 1260, change: -10, city: "Islamabad",   weightKg: 50, category: "OPC Cement" },
-  { id: 4, brand: "DG Khan Cement",     slug: "dg-khan-cement",     title: "DG Khan Cement — 50 Kg Bag",     price: 1290, change: +10, city: "Lahore",      weightKg: 50, category: "SRC Cement" },
-  { id: 5, brand: "Fauji Cement",       slug: "fauji-cement",       title: "Fauji Cement — 50 Kg Bag",       price: 1270, change:   0, city: "Rawalpindi",  weightKg: 50, category: "OPC Cement" },
-  { id: 6, brand: "Cherat Cement",      slug: "cherat-cement",      title: "Cherat Cement — 50 Kg Bag",      price: 1250, change: -20, city: "Peshawar",    weightKg: 50, category: "OPC Cement" },
-  { id: 7, brand: "Power Cement",       slug: "power-cement",       title: "Power Cement — 50 Kg Bag",       price: 1240, change: +15, city: "Karachi",     weightKg: 50, category: "SRC Cement" },
-  { id: 8, brand: "Askari Cement",      slug: "askari-cement",      title: "Askari Cement — 50 Kg Bag",      price: 1310, change: +30, city: "Lahore",      weightKg: 50, category: "OPC Cement" },
-  { id: 9, brand: "Pioneer Cement",     slug: "pioneer-cement",     title: "Pioneer Cement — 50 Kg Bag",     price: 1230, change:  -5, city: "Multan",      weightKg: 50, category: "SRC Cement" },
-  { id: 10, brand: "Gharibwal Cement",  slug: "gharibwal-cement",   title: "Gharibwal Cement — 50 Kg Bag",   price: 1220, change:   0, city: "Lahore",      weightKg: 50, category: "OPC Cement" },
+  { id: 1,  brand: "Lucky Cement",      slug: "lucky-cement",      title: "Lucky Cement — 50 Kg Bag",      price: 1300, change: +20, city: "Lahore",     weightKg: 50, category: "OPC Cement" },
+  { id: 2,  brand: "Bestway Cement",    slug: "bestway-cement",    title: "Bestway Cement — 50 Kg Bag",    price: 1280, change:   0, city: "Karachi",    weightKg: 50, category: "OPC Cement" },
+  { id: 3,  brand: "Maple Leaf Cement", slug: "maple-leaf-cement", title: "Maple Leaf Cement — 50 Kg Bag", price: 1260, change: -10, city: "Islamabad",  weightKg: 50, category: "OPC Cement" },
+  { id: 4,  brand: "DG Khan Cement",    slug: "dg-khan-cement",    title: "DG Khan Cement — 50 Kg Bag",    price: 1290, change: +10, city: "Lahore",     weightKg: 50, category: "SRC Cement" },
+  { id: 5,  brand: "Fauji Cement",      slug: "fauji-cement",      title: "Fauji Cement — 50 Kg Bag",      price: 1270, change:   0, city: "Rawalpindi", weightKg: 50, category: "OPC Cement" },
+  { id: 6,  brand: "Cherat Cement",     slug: "cherat-cement",     title: "Cherat Cement — 50 Kg Bag",     price: 1250, change: -20, city: "Peshawar",   weightKg: 50, category: "OPC Cement" },
+  { id: 7,  brand: "Power Cement",      slug: "power-cement",      title: "Power Cement — 50 Kg Bag",      price: 1240, change: +15, city: "Karachi",    weightKg: 50, category: "SRC Cement" },
+  { id: 8,  brand: "Askari Cement",     slug: "askari-cement",     title: "Askari Cement — 50 Kg Bag",     price: 1310, change: +30, city: "Lahore",     weightKg: 50, category: "OPC Cement" },
+  { id: 9,  brand: "Pioneer Cement",    slug: "pioneer-cement",    title: "Pioneer Cement — 50 Kg Bag",    price: 1230, change:  -5, city: "Multan",     weightKg: 50, category: "SRC Cement" },
+  { id: 10, brand: "Gharibwal Cement",  slug: "gharibwal-cement",  title: "Gharibwal Cement — 50 Kg Bag",  price: 1220, change:   0, city: "Lahore",     weightKg: 50, category: "OPC Cement" },
 ];
 
-const CITIES   = ["All Cities", "Lahore", "Karachi", "Islamabad", "Rawalpindi", "Peshawar", "Multan"];
-const BRANDS   = ["All Brands", ...Array.from(new Set(ALL_BRANDS.map((b) => b.brand)))];
-const CATEGORIES = ["All Types", ...Array.from(new Set(ALL_BRANDS.map((b) => b.category)))];
-const MIN_PRICE = Math.min(...ALL_BRANDS.map((b) => b.price));
-const MAX_PRICE = Math.max(...ALL_BRANDS.map((b) => b.price));
+const CITIES     = ["All Cities", "Lahore", "Karachi", "Islamabad", "Rawalpindi", "Peshawar", "Multan"];
+const BRANDS     = ["All Brands", ...Array.from(new Set(ALL_BRANDS.map((b) => b.brand)))];
+const CATEGORIES = ["All Types",  ...Array.from(new Set(ALL_BRANDS.map((b) => b.category)))];
+const MIN_PRICE  = Math.min(...ALL_BRANDS.map((b) => b.price));
+const MAX_PRICE  = Math.max(...ALL_BRANDS.map((b) => b.price));
 
 type ViewMode = "grid" | "list";
 type SortKey  = "latest" | "price-asc" | "price-desc" | "name";
 
 export default function TodayCementRatePage() {
-  // Filters
-  const [priceRange, setPriceRange] = useState<[number, number]>([MIN_PRICE, MAX_PRICE]);
-  const [selectedCity, setSelectedCity]     = useState("All Cities");
-  const [selectedBrand, setSelectedBrand]   = useState("All Brands");
-  const [selectedCat, setSelectedCat]       = useState("All Types");
-  const [sidebarOpen, setSidebarOpen]       = useState(false);
-
-  // Grid controls
+  const [priceRange, setPriceRange]   = useState<[number, number]>([MIN_PRICE, MAX_PRICE]);
+  const [selectedCity, setSelectedCity]   = useState("All Cities");
+  const [selectedBrand, setSelectedBrand] = useState("All Brands");
+  const [selectedCat, setSelectedCat]     = useState("All Types");
+  const [sidebarOpen, setSidebarOpen]     = useState(false);
   const [viewMode, setViewMode]   = useState<ViewMode>("grid");
   const [sortBy, setSortBy]       = useState<SortKey>("latest");
   const [perPage, setPerPage]     = useState(16);
@@ -70,342 +68,309 @@ export default function TodayCementRatePage() {
         <meta name="keywords" content="cement rate in Pakistan, today cement price, lucky cement rate, bestway cement price, maple leaf cement rate" />
       </Head>
 
-      <div className="outer">
-        {/* Mobile filter overlay */}
-        {sidebarOpen && <div className="overlay" onClick={() => setSidebarOpen(false)} />}
+      {/* 
+        pt-[72px] — adjust this value to match your actual header height.
+        Common header heights: 64px (pt-16), 72px (pt-[72px]), 80px (pt-20)
+      */}
+      <div className="pt-[72px] bg-gray-50 min-h-screen">
 
-        {/* ── Breadcrumb ────────────────────────────────────────────────── */}
-        <nav className="breadcrumb">
-          <a href="/">Home</a><span>›</span>
-          <a href="/pages">Pages</a><span>›</span>
-          <span className="bc-active">Today Cement Rate in Pakistan</span>
-        </nav>
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-[99] lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
 
-        <div className="layout">
-          {/* ── LEFT SIDEBAR ────────────────────────────────────────────── */}
-          <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
-            <div className="sidebar-header">
-              <h3>Filters</h3>
-              <button className="close-sb" onClick={() => setSidebarOpen(false)}>✕</button>
-            </div>
+        <div className="max-w-[1200px] mx-auto px-4 pb-12 pt-5">
 
-            {/* Price range */}
-            <div className="filter-section">
-              <h4>Filter by price</h4>
-              <div className="range-wrap">
-                <input
-                  type="range"
-                  min={MIN_PRICE}
-                  max={MAX_PRICE}
-                  value={priceRange[0]}
-                  step={10}
-                  onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
-                  className="range-slider"
-                />
-                <input
-                  type="range"
-                  min={MIN_PRICE}
-                  max={MAX_PRICE}
-                  value={priceRange[1]}
-                  step={10}
-                  onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
-                  className="range-slider"
-                />
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-5 flex-wrap">
+            <a href="/" className="hover:text-black transition-colors">Home</a>
+            <span>›</span>
+            <a href="/pages" className="hover:text-black transition-colors">Pages</a>
+            <span>›</span>
+            <span className="text-gray-600">Today Cement Rate in Pakistan</span>
+          </nav>
+
+          <div className="flex gap-6 items-start">
+
+            {/* ── LEFT SIDEBAR ───────────────────────────────────────── */}
+            <aside
+              className={`
+                w-[240px] flex-shrink-0 bg-white border border-gray-200 rounded-xl p-4
+                sticky top-[80px] self-start
+                max-lg:fixed max-lg:top-0 max-lg:left-0 max-lg:h-screen max-lg:overflow-y-auto
+                max-lg:z-[100] max-lg:rounded-none max-lg:w-[260px] max-lg:transition-transform max-lg:duration-300
+                ${sidebarOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"}
+              `}
+            >
+              {/* Sidebar header */}
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900">Filters</h3>
+                <button
+                  className="lg:hidden text-gray-400 hover:text-black text-lg leading-none"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  ✕
+                </button>
               </div>
-              <p className="price-label">
-                Price: Rs {priceRange[0].toLocaleString()} — Rs {priceRange[1].toLocaleString()}
-              </p>
-              <button className="filter-apply-btn" onClick={resetFilters}>Reset</button>
-            </div>
 
-            {/* City */}
-            <div className="filter-section">
-              <h4>City</h4>
-              {CITIES.map((c) => (
-                <label key={c} className="radio-label">
+              {/* Price range */}
+              <div className="border-t border-gray-100 pt-4">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3 underline underline-offset-2">
+                  Filter by price
+                </h4>
+                <div className="flex flex-col gap-2 mb-2">
                   <input
-                    type="radio"
+                    type="range"
+                    min={MIN_PRICE}
+                    max={MAX_PRICE}
+                    value={priceRange[0]}
+                    step={10}
+                    onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+                    className="w-full accent-black cursor-pointer"
+                  />
+                  <input
+                    type="range"
+                    min={MIN_PRICE}
+                    max={MAX_PRICE}
+                    value={priceRange[1]}
+                    step={10}
+                    onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
+                    className="w-full accent-black cursor-pointer"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mb-3">
+                  Price: Rs {priceRange[0].toLocaleString()} — Rs {priceRange[1].toLocaleString()}
+                </p>
+                <button
+                  onClick={resetFilters}
+                  className="text-xs px-4 py-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-black hover:text-white hover:border-black transition-colors"
+                >
+                  Reset
+                </button>
+              </div>
+
+              {/* City */}
+              <FilterSection title="City">
+                {CITIES.map((c) => (
+                  <RadioOption
+                    key={c}
                     name="city"
+                    label={c}
                     checked={selectedCity === c}
                     onChange={() => setSelectedCity(c)}
                   />
-                  {c}
-                </label>
-              ))}
-            </div>
+                ))}
+              </FilterSection>
 
-            {/* Brands */}
-            <div className="filter-section">
-              <h4>Brands</h4>
-              {BRANDS.map((b) => (
-                <label key={b} className="radio-label">
-                  <input
-                    type="radio"
+              {/* Brands */}
+              <FilterSection title="Brands">
+                {BRANDS.map((b) => (
+                  <RadioOption
+                    key={b}
                     name="brand"
+                    label={b}
                     checked={selectedBrand === b}
                     onChange={() => setSelectedBrand(b)}
+                    count={
+                      b !== "All Brands"
+                        ? ALL_BRANDS.filter((x) => x.brand === b).length
+                        : undefined
+                    }
                   />
-                  {b}
-                  {b !== "All Brands" && (
-                    <span className="count-badge">
-                      ({ALL_BRANDS.filter((x) => x.brand === b).length})
-                    </span>
-                  )}
-                </label>
-              ))}
-            </div>
+                ))}
+              </FilterSection>
 
-            {/* Category */}
-            <div className="filter-section">
-              <h4>Cement Type</h4>
-              {CATEGORIES.map((cat) => (
-                <label key={cat} className="radio-label">
-                  <input
-                    type="radio"
+              {/* Cement Type */}
+              <FilterSection title="Cement Type">
+                {CATEGORIES.map((cat) => (
+                  <RadioOption
+                    key={cat}
                     name="category"
+                    label={cat}
                     checked={selectedCat === cat}
                     onChange={() => setSelectedCat(cat)}
                   />
-                  {cat}
-                </label>
-              ))}
-            </div>
-          </aside>
+                ))}
+              </FilterSection>
+            </aside>
 
-          {/* ── MAIN CONTENT ─────────────────────────────────────────────── */}
-          <main className="main-content">
-            <h1 className="page-title">Today Cement Rate in Pakistan</h1>
+            {/* ── MAIN CONTENT ──────────────────────────────────────── */}
+            <main className="flex-1 min-w-0">
+              <h1 className="text-xl font-bold text-gray-900 mb-1">
+                Today Cement Rate in Pakistan
+              </h1>
 
-            {/* Toolbar */}
-            <div className="toolbar">
-              <div className="toolbar-left">
-                {/* Mobile filter toggle */}
-                <button className="mobile-filter-btn" onClick={() => setSidebarOpen(true)}>
-                  ☰ Filters
-                </button>
+              {/* Toolbar */}
+              <div className="flex items-center justify-between bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 my-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  {/* Mobile filter toggle */}
+                  <button
+                    className="lg:hidden text-xs px-3 py-1.5 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-black hover:text-white hover:border-black transition-colors"
+                    onClick={() => setSidebarOpen(true)}
+                  >
+                    ☰ Filters
+                  </button>
 
-                {/* View toggle */}
-                <div className="view-btns">
-                  {(["grid", "list"] as ViewMode[]).map((v) => (
-                    <button
-                      key={v}
-                      className={`view-btn ${viewMode === v ? "active" : ""}`}
-                      onClick={() => setViewMode(v)}
-                      title={v}
-                    >
-                      {v === "grid" ? (
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                          <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
-                          <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
-                        </svg>
-                      ) : (
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                          <rect x="1" y="2" width="14" height="3" rx="1"/><rect x="1" y="7" width="14" height="3" rx="1"/>
-                          <rect x="1" y="12" width="14" height="3" rx="1"/>
-                        </svg>
-                      )}
-                    </button>
-                  ))}
+                  {/* View toggle */}
+                  <div className="flex gap-1">
+                    {(["grid", "list"] as ViewMode[]).map((v) => (
+                      <button
+                        key={v}
+                        onClick={() => setViewMode(v)}
+                        title={v}
+                        className={`w-8 h-8 rounded-md border flex items-center justify-center transition-colors ${
+                          viewMode === v
+                            ? "bg-black text-white border-black"
+                            : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                        }`}
+                      >
+                        {v === "grid" ? (
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1" y="1" width="6" height="6" rx="1" />
+                            <rect x="9" y="1" width="6" height="6" rx="1" />
+                            <rect x="1" y="9" width="6" height="6" rx="1" />
+                            <rect x="9" y="9" width="6" height="6" rx="1" />
+                          </svg>
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1" y="2" width="14" height="3" rx="1" />
+                            <rect x="1" y="7" width="14" height="3" rx="1" />
+                            <rect x="1" y="12" width="14" height="3" rx="1" />
+                          </svg>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+
+                  <span className="text-xs text-gray-400">
+                    Showing {results.length} of {ALL_BRANDS.length} results
+                  </span>
                 </div>
 
-                <span className="result-count">Showing {results.length} of {ALL_BRANDS.length} results</span>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortKey)}
+                    className="text-xs px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-700 cursor-pointer focus:outline-none focus:border-black"
+                  >
+                    <option value="latest">Sort by latest</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="name">Brand: A–Z</option>
+                  </select>
+                  <select
+                    value={perPage}
+                    onChange={(e) => setPerPage(+e.target.value)}
+                    className="text-xs px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-700 cursor-pointer focus:outline-none focus:border-black"
+                  >
+                    <option value={8}>Show 8</option>
+                    <option value={16}>Show 16</option>
+                    <option value={ALL_BRANDS.length}>Show All</option>
+                  </select>
+                </div>
               </div>
 
-              <div className="toolbar-right">
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortKey)} className="sel">
-                  <option value="latest">Sort by latest</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                  <option value="name">Brand: A–Z</option>
-                </select>
-                <select value={perPage} onChange={(e) => setPerPage(+e.target.value)} className="sel">
-                  <option value={8}>Show 8</option>
-                  <option value={16}>Show 16</option>
-                  <option value={ALL_BRANDS.length}>Show All</option>
-                </select>
-              </div>
-            </div>
+              {/* Cards */}
+              {results.length === 0 ? (
+                <div className="text-center py-16 text-gray-400">
+                  <p className="mb-3">No results match your filters.</p>
+                  <button
+                    onClick={resetFilters}
+                    className="text-sm px-5 py-2 rounded-lg border border-gray-300 hover:bg-black hover:text-white hover:border-black transition-colors"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              ) : viewMode === "grid" ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {results.map((item) => (
+                    <CementCard key={item.id} item={item} viewMode="grid" />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {results.map((item) => (
+                    <CementCard key={item.id} item={item} viewMode="list" />
+                  ))}
+                </div>
+              )}
 
-            {/* Cards */}
-            {results.length === 0 ? (
-              <div className="empty-state">
-                <p>No results match your filters.</p>
-                <button onClick={resetFilters} className="filter-apply-btn">Reset Filters</button>
+              {/* SEO block */}
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <h2 className="text-lg font-bold text-gray-900 mb-3">
+                  Today Cement Rate in Pakistan — April 2026
+                </h2>
+                <p className="text-sm text-gray-500 leading-relaxed mb-4">
+                  PropertyDealer.pk provides daily updated cement prices across all major brands
+                  including Lucky Cement, Bestway Cement, Maple Leaf, DG Khan, Fauji, and more.
+                  Prices are updated every morning to reflect the latest market rates from Lahore,
+                  Karachi, Islamabad, Rawalpindi, Peshawar, and other cities across Pakistan.
+                </p>
+                <h3 className="text-sm font-bold text-gray-800 mb-2">
+                  Why Do Cement Prices Change?
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Cement prices in Pakistan fluctuate due to coal prices, fuel costs, government
+                  taxes (FED), and seasonal demand. The construction season from February to June
+                  typically sees higher demand which pushes prices up.
+                </p>
               </div>
-            ) : viewMode === "grid" ? (
-              <div className="cement-grid">
-                {results.map((item) => (
-                  <CementCard key={item.id} item={item} viewMode="grid" />
-                ))}
-              </div>
-            ) : (
-              <div className="cement-list">
-                {results.map((item) => (
-                  <CementCard key={item.id} item={item} viewMode="list" />
-                ))}
-              </div>
-            )}
-
-            {/* SEO block */}
-            <div className="seo-block">
-              <h2>Today Cement Rate in Pakistan — April 2026</h2>
-              <p>
-                PropertyDealer.pk provides daily updated cement prices across all major brands including
-                Lucky Cement, Bestway Cement, Maple Leaf, DG Khan, Fauji, and more. Prices are
-                updated every morning to reflect the latest market rates from Lahore, Karachi,
-                Islamabad, Rawalpindi, Peshawar, and other cities across Pakistan.
-              </p>
-              <h3>Why Do Cement Prices Change?</h3>
-              <p>
-                Cement prices in Pakistan fluctuate due to coal prices, fuel costs, government taxes (FED),
-                and seasonal demand. The construction season from February to June typically sees higher
-                demand which pushes prices up.
-              </p>
-            </div>
-          </main>
+            </main>
+          </div>
         </div>
-
-        {/* ── Global styles ──────────────────────────────────────────────── */}
-        <style jsx global>{`
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fafafa; color: #1a1a1a; }
-        `}</style>
-
-        <style jsx>{`
-          .outer { max-width: 1200px; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
-          .breadcrumb { display: flex; gap: 6px; align-items: center; font-size: 13px; color: #999; margin-bottom: 1.2rem; flex-wrap: wrap; }
-          .breadcrumb a { color: #999; text-decoration: none; }
-          .breadcrumb a:hover { color: #1D9E75; text-decoration: underline; }
-          .bc-active { color: #444; }
-
-          /* Layout */
-          .layout { display: flex; gap: 24px; align-items: flex-start; }
-          .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; }
-
-          /* Sidebar */
-          .sidebar {
-            width: 240px;
-            flex-shrink: 0;
-            background: #fff;
-            border: 1px solid #e8e8e8;
-            border-radius: 10px;
-            padding: 1rem;
-            position: sticky;
-            top: 1rem;
-          }
-          .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-          .sidebar-header h3 { font-size: 15px; font-weight: 600; }
-          .close-sb { display: none; background: none; border: none; font-size: 18px; cursor: pointer; color: #888; }
-          .filter-section { border-top: 1px solid #f0f0f0; padding: 14px 0; }
-          .filter-section h4 { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #222; text-decoration: underline; text-underline-offset: 3px; }
-          .range-wrap { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
-          .range-slider { width: 100%; accent-color: #1D6FA5; }
-          .price-label { font-size: 12px; color: #555; margin-bottom: 10px; }
-          .filter-apply-btn {
-            font-size: 12px;
-            padding: 6px 18px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            background: #fff;
-            cursor: pointer;
-            color: #333;
-          }
-          .filter-apply-btn:hover { background: #f5f5f5; }
-          .radio-label { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #444; margin-bottom: 7px; cursor: pointer; }
-          .radio-label input { accent-color: #1D6FA5; }
-          .count-badge { font-size: 11px; color: #999; margin-left: 3px; }
-
-          /* Main */
-          .main-content { flex: 1; min-width: 0; }
-          .page-title { font-size: 22px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-
-          /* Toolbar */
-          .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f5f5f5;
-            border: 1px solid #e8e8e8;
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin: 12px 0 16px;
-            flex-wrap: wrap;
-            gap: 8px;
-          }
-          .toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-          .toolbar-right { display: flex; align-items: center; gap: 8px; }
-          .mobile-filter-btn {
-            display: none;
-            font-size: 13px;
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            background: #fff;
-            cursor: pointer;
-          }
-          .view-btns { display: flex; gap: 4px; }
-          .view-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #777;
-          }
-          .view-btn.active { background: #1D6FA5; border-color: #1D6FA5; color: #fff; }
-          .result-count { font-size: 13px; color: #888; }
-          .sel {
-            font-size: 13px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            background: #fff;
-            color: #333;
-            cursor: pointer;
-          }
-
-          /* Grid / List */
-          .cement-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-            gap: 16px;
-          }
-          .cement-list { display: flex; flex-direction: column; gap: 12px; }
-          .empty-state { text-align: center; padding: 3rem; color: #888; }
-          .empty-state p { margin-bottom: 12px; }
-
-          /* SEO */
-          .seo-block { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee; }
-          .seo-block h2 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
-          .seo-block h3 { font-size: 15px; font-weight: 600; margin: 16px 0 8px; }
-          .seo-block p { font-size: 14px; color: #555; line-height: 1.7; }
-
-          /* Responsive */
-          @media (max-width: 768px) {
-            .sidebar {
-              position: fixed;
-              top: 0; left: -260px;
-              height: 100vh;
-              overflow-y: auto;
-              z-index: 100;
-              width: 260px;
-              border-radius: 0;
-              transition: left 0.25s ease;
-            }
-            .sidebar.sidebar-open { left: 0; }
-            .close-sb { display: block; }
-            .mobile-filter-btn { display: block; }
-            .cement-grid { grid-template-columns: repeat(2, 1fr); }
-          }
-          @media (max-width: 480px) {
-            .cement-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-          }
-        `}</style>
       </div>
     </>
+  );
+}
+
+// ── Small reusable sub-components ──────────────────────────────────────────
+
+function FilterSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border-t border-gray-100 pt-4 mt-1">
+      <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3 underline underline-offset-2">
+        {title}
+      </h4>
+      {children}
+    </div>
+  );
+}
+
+function RadioOption({
+  name,
+  label,
+  checked,
+  onChange,
+  count,
+}: {
+  name: string;
+  label: string;
+  checked: boolean;
+  onChange: () => void;
+  count?: number;
+}) {
+  return (
+    <label className="flex items-center gap-2 text-xs text-gray-600 mb-2 cursor-pointer hover:text-black">
+      <input
+        type="radio"
+        name={name}
+        checked={checked}
+        onChange={onChange}
+        className="accent-black"
+      />
+      {label}
+      {count !== undefined && (
+        <span className="text-[10px] text-gray-400">({count})</span>
+      )}
+    </label>
   );
 }
