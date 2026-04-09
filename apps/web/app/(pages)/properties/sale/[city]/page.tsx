@@ -7,17 +7,24 @@ import { buildCollectionPageSchema } from '@/lib/schema/listing-schema';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://propertydealer.pk';
 
+// ✅ FIX: Fallback types
+const FALLBACK_TYPES = [
+  'house', 'apartment', 'flat', 'plot', 'commercial',
+  'office', 'shop', 'land', 'factory', 'hotel', 'restaurant', 'other',
+];
+
 interface PageProps {
   params: Promise<{
     city: string;
-    segments: string[];
+    segments?: string[]; // ✅ FIX: optional kiya — [city] page mein segments nahi hote
   }>;
 }
 
 const isMarlaSegment = (s: string) => /^\d+marla$/i.test(s);
 const parseMarlaValue = (s: string) => parseInt(s.replace(/marla/i, ''), 10);
 
-async function resolveSegments(citySlug: string, segments: string[]) {
+// ✅ FIX: segments ka default value [] rakha
+async function resolveSegments(citySlug: string, segments: string[] = []) {
   try {
     const cityData = await serverApi.getCityByName(citySlug);
     if (!cityData) return { cityData: null, areaData: null, propertyType: null, areaSlug: null, marla: null };
@@ -25,10 +32,14 @@ async function resolveSegments(citySlug: string, segments: string[]) {
     let propertyTypes: string[] = [];
     try {
       propertyTypes = await serverApi.getTypes();
+      if (!propertyTypes || propertyTypes.length === 0) {
+        propertyTypes = FALLBACK_TYPES;
+      }
     } catch {
-      propertyTypes = [];
+      propertyTypes = FALLBACK_TYPES;
     }
 
+    // ✅ FIX: segments guaranteed array hai ab
     const marlaSegment = segments.find(isMarlaSegment);
     const marla        = marlaSegment ? parseMarlaValue(marlaSegment) : null;
     const nonMarlaSegs = segments.filter(s => !isMarlaSegment(s));
@@ -78,7 +89,9 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { city: citySlug, segments } = await props.params;
-  const { cityData, areaData, propertyType } = await resolveSegments(citySlug, segments);
+  // ✅ FIX: segments undefined ho toh empty array use karo
+  const safeSegments = segments ?? [];
+  const { cityData, areaData, propertyType } = await resolveSegments(citySlug, safeSegments);
 
   const purpose  = 'Sale';
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(citySlug);
@@ -95,7 +108,7 @@ export async function generateMetadata(
     return {
       title: areaData.saleMetaTitle?.trim() || areaData.metaTitle || `${typeName} for ${purpose} in ${areaName}, ${cityName}`,
       description: areaData.saleMetaDescription?.trim() || areaData.metaDescription || `Find ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. Browse verified listings on Property Dealer.`,
-      alternates: { canonical: `/properties/sale/${citySlug}/${segments.filter(s => !isMarlaSegment(s)).join('/')}` },
+      alternates: { canonical: `/properties/sale/${citySlug}/${safeSegments.filter(s => !isMarlaSegment(s)).join('/')}` },
     };
   }
 
@@ -104,7 +117,7 @@ export async function generateMetadata(
     return {
       title: areaData.saleMetaTitle?.trim() || areaData.metaTitle || `Properties for ${purpose} in ${areaName}, ${cityName}`,
       description: areaData.saleMetaDescription?.trim() || areaData.metaDescription || `Discover properties for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. View photos, prices, and details on Property Dealer.`,
-      alternates: { canonical: areaData.canonicalUrl || `/properties/sale/${citySlug}/${segments[0]}` },
+      alternates: { canonical: areaData.canonicalUrl || `/properties/sale/${citySlug}/${safeSegments[0]}` },
     };
   }
 
@@ -114,7 +127,7 @@ export async function generateMetadata(
     return {
       title: tc?.metaTitle?.trim() || `${typeName} for ${purpose} in ${cityName}`,
       description: tc?.metaDescription?.trim() || `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse verified listings on Property Dealer.`,
-      alternates: { canonical: `/properties/sale/${citySlug}/${segments.filter(s => !isMarlaSegment(s)).join('/')}` },
+      alternates: { canonical: `/properties/sale/${citySlug}/${safeSegments.filter(s => !isMarlaSegment(s)).join('/')}` },
     };
   }
 
@@ -123,7 +136,9 @@ export async function generateMetadata(
 
 export default async function SaleCitySegmentsPage(props: PageProps) {
   const { city, segments } = await props.params;
-  const { cityData, areaData, propertyType, areaSlug, marla } = await resolveSegments(city, segments);
+  // ✅ FIX: segments undefined ho toh empty array use karo
+  const safeSegments = segments ?? [];
+  const { cityData, areaData, propertyType, areaSlug, marla } = await resolveSegments(city, safeSegments);
 
   if (!cityData) console.error(`City ${city} not found`);
 
@@ -148,7 +163,7 @@ export default async function SaleCitySegmentsPage(props: PageProps) {
   const typeName = propertyType
     ? (propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType))
     : null;
-  const pageUrl   = `${BASE_URL}/properties/sale/${city}/${segments.join('/')}`;
+  const pageUrl   = `${BASE_URL}/properties/sale/${city}${safeSegments.length ? `/${safeSegments.join('/')}` : ''}`;
   const pageTitle = [
     typeName ? (typeName === 'Property' ? 'Property' : `${typeName}s`) : 'Properties',
     'for Sale',
@@ -167,7 +182,7 @@ export default async function SaleCitySegmentsPage(props: PageProps) {
     schemaProperties = rawProps.map((p: any) => ({ id: p._id, slug: p.slug, name: p.title }));
   } catch { /* non-critical */ }
 
-  const nonMarlaSegs = segments.filter(s => !isMarlaSegment(s));
+  const nonMarlaSegs = safeSegments.filter(s => !isMarlaSegment(s));
   const breadcrumbs = [
     { name: 'Home',                url: `${BASE_URL}/` },
     { name: 'Properties for Sale', url: `${BASE_URL}/properties/sale` },

@@ -7,6 +7,12 @@ import { buildCollectionPageSchema } from '@/lib/schema/listing-schema';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://propertydealer.pk';
 
+// ✅ FIX 1: Fallback property types taake API fail ho toh bhi segments match ho
+const FALLBACK_TYPES = [
+  'house', 'apartment', 'flat', 'plot', 'commercial',
+  'office', 'shop', 'land', 'factory', 'hotel', 'restaurant', 'other',
+];
+
 interface PageProps {
   params: Promise<{
     city: string;
@@ -25,8 +31,13 @@ async function resolveSegments(citySlug: string, segments: string[]) {
     let propertyTypes: string[] = [];
     try {
       propertyTypes = await serverApi.getTypes();
+      // ✅ FIX 1: Agar API empty return kare toh fallback use karo
+      if (!propertyTypes || propertyTypes.length === 0) {
+        propertyTypes = FALLBACK_TYPES;
+      }
     } catch {
-      propertyTypes = [];
+      // ✅ FIX 1: API fail ho toh bhi fallback types se kaam chalao
+      propertyTypes = FALLBACK_TYPES;
     }
 
     const marlaSegment   = segments.find(isMarlaSegment);

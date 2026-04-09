@@ -1,4 +1,4 @@
-import PropertiesListing from '@/components/PropertiesListing';
+ import PropertiesListing from '@/components/PropertiesListing';
 import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { serverApi } from '@/lib/server-api';
@@ -7,53 +7,80 @@ import { buildCollectionPageSchema } from '@/lib/schema/listing-schema';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://propertydealer.pk';
 
+// ✅ FIX: Fallback types taake API fail ho toh bhi segments match ho
+const FALLBACK_TYPES = [
+  'house', 'apartment', 'flat', 'plot', 'commercial',
+  'office', 'shop', 'land', 'factory', 'hotel', 'restaurant', 'other',
+];
+
 interface PageProps {
   params: Promise<{
     city: string;
-    segments: string[]; // catch-all: ['type'] | ['area'] | ['area', 'type']
+    segments: string[];
   }>;
 }
+
+const isMarlaSegment = (s: string) => /^\d+marla$/i.test(s);
+const parseMarlaValue = (s: string) => parseInt(s.replace(/marla/i, ''), 10);
 
 async function resolveSegments(citySlug: string, segments: string[]) {
   try {
     const cityData = await serverApi.getCityByName(citySlug);
-    if (!cityData) return { cityData: null, areaData: null, propertyType: null, areaSlug: null };
+    if (!cityData) return { cityData: null, areaData: null, propertyType: null, areaSlug: null, marla: null };
 
-    const propertyTypes = await serverApi.getTypes();
+    let propertyTypes: string[] = [];
+    try {
+      propertyTypes = await serverApi.getTypes();
+      // ✅ FIX: Agar API empty return kare toh fallback use karo
+      if (!propertyTypes || propertyTypes.length === 0) {
+        propertyTypes = FALLBACK_TYPES;
+      }
+    } catch {
+      // ✅ FIX: API fail ho toh bhi fallback types se kaam chalao
+      propertyTypes = FALLBACK_TYPES;
+    }
 
-    if (segments.length === 1) {
-      const seg = segments[0] as string;
+    const marlaSegment = segments.find(isMarlaSegment);
+    const marla        = marlaSegment ? parseMarlaValue(marlaSegment) : null;
+    const nonMarlaSegs = segments.filter(s => !isMarlaSegment(s));
+
+    if (nonMarlaSegs.length === 0) {
+      return { cityData, areaData: null, propertyType: null, areaSlug: null, marla };
+    }
+
+    if (nonMarlaSegs.length === 1) {
+      const seg         = nonMarlaSegs[0] as string;
       const matchedType = propertyTypes.find(t => t.toLowerCase() === seg.toLowerCase());
 
       if (matchedType) {
-        return { cityData, areaData: null, propertyType: matchedType, areaSlug: null };
+        return { cityData, areaData: null, propertyType: matchedType, areaSlug: null, marla };
       }
 
       try {
         const areaData = await serverApi.getAreaBySlug(seg, cityData._id);
-        return { cityData, areaData, propertyType: null, areaSlug: seg };
+        return { cityData, areaData, propertyType: null, areaSlug: seg, marla };
       } catch {
-        return { cityData, areaData: null, propertyType: null, areaSlug: null };
+        return { cityData, areaData: null, propertyType: null, areaSlug: null, marla };
       }
     }
 
-    if (segments.length >= 2) {
-      const areaSeg = segments[0] as string;
-      const typeSeg = segments[1] as string;
+    if (nonMarlaSegs.length >= 2) {
+      const areaSeg     = nonMarlaSegs[0] as string;
+      const typeSeg     = nonMarlaSegs[1] as string;
       const matchedType = propertyTypes.find(t => t.toLowerCase() === typeSeg.toLowerCase()) || null;
 
       try {
         const areaData = await serverApi.getAreaBySlug(areaSeg, cityData._id);
-        return { cityData, areaData, propertyType: matchedType, areaSlug: areaSeg };
+        return { cityData, areaData, propertyType: matchedType, areaSlug: areaSeg, marla };
       } catch {
-        return { cityData, areaData: null, propertyType: matchedType, areaSlug: areaSeg };
+        return { cityData, areaData: null, propertyType: matchedType, areaSlug: areaSeg, marla };
       }
     }
 
-    return { cityData, areaData: null, propertyType: null, areaSlug: null };
+    return { cityData, areaData: null, propertyType: null, areaSlug: null, marla };
   } catch (error) {
     console.error('Error resolving segments:', error);
-    return { cityData: null, areaData: null, propertyType: null, areaSlug: null };
+    return { cityData: null, areaData: null, propertyType: null, areaSlug: null, marla: null };
   }
 }
 
@@ -64,25 +91,22 @@ export async function generateMetadata(
   const { city: citySlug, segments } = await props.params;
   const { cityData, areaData, propertyType } = await resolveSegments(citySlug, segments);
 
-  const purpose = 'Sale';
+  const purpose  = 'Sale';
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(citySlug);
 
-  // Find typeContent matching this type for sale (accepts 'sale' or 'all' purpose)
   const findTypeContent = (type: string) =>
     cityData?.typeContents?.find(
-      (tc: any) =>
-        tc.propertyType.toLowerCase() === type.toLowerCase() &&
+      (tc: any) => tc.propertyType.toLowerCase() === type.toLowerCase() &&
         (tc.purpose === 'sale' || tc.purpose === 'all')
     ) || null;
 
   if (areaData && propertyType) {
     const areaName = toTitleCase(areaData.name);
     const typeName = propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType);
-    // area+type: prefer sale-specific meta, then general area meta
     return {
       title: areaData.saleMetaTitle?.trim() || areaData.metaTitle || `${typeName} for ${purpose} in ${areaName}, ${cityName}`,
       description: areaData.saleMetaDescription?.trim() || areaData.metaDescription || `Find ${typeName.toLowerCase()} for ${purpose.toLowerCase()} in ${areaName}, ${cityName}. Browse verified listings on Property Dealer.`,
-      alternates: { canonical: `/properties/sale/${citySlug}/${segments.join('/')}` },
+      alternates: { canonical: `/properties/sale/${citySlug}/${segments.filter(s => !isMarlaSegment(s)).join('/')}` },
     };
   }
 
@@ -98,12 +122,10 @@ export async function generateMetadata(
   if (propertyType) {
     const typeName = propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType);
     const tc = findTypeContent(propertyType);
-    const titleText = tc?.metaTitle?.trim() || `${typeName} for ${purpose} in ${cityName}`;
-    const descText = tc?.metaDescription?.trim() || `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse verified listings on Property Dealer.`;
     return {
-      title: titleText,
-      description: descText,
-      alternates: { canonical: `/properties/sale/${citySlug}/${segments[0]}` },
+      title: tc?.metaTitle?.trim() || `${typeName} for ${purpose} in ${cityName}`,
+      description: tc?.metaDescription?.trim() || `Find the best ${propertyType.toLowerCase()} for ${purpose.toLowerCase()} in ${cityName}. Browse verified listings on Property Dealer.`,
+      alternates: { canonical: `/properties/sale/${citySlug}/${segments.filter(s => !isMarlaSegment(s)).join('/')}` },
     };
   }
 
@@ -112,37 +134,32 @@ export async function generateMetadata(
 
 export default async function SaleCitySegmentsPage(props: PageProps) {
   const { city, segments } = await props.params;
-  const { cityData, areaData, propertyType, areaSlug } = await resolveSegments(city, segments);
+  const { cityData, areaData, propertyType, areaSlug, marla } = await resolveSegments(city, segments);
 
   if (!cityData) console.error(`City ${city} not found`);
 
   const listingType = propertyType || 'all';
-  const areaId = areaData?._id;
+  const areaId      = areaData?._id;
 
-  // Find typeContent: sale page matches 'sale' or 'all' purpose
   const specificContent = propertyType && !areaData
     ? cityData?.typeContents?.find(
-      (tc: any) =>
-        tc.propertyType.toLowerCase() === propertyType.toLowerCase() &&
-        (tc.purpose === 'sale' || tc.purpose === 'all')
-    ) || null
+        (tc: any) => tc.propertyType.toLowerCase() === propertyType.toLowerCase() &&
+          (tc.purpose === 'sale' || tc.purpose === 'all')
+      ) || null
     : null;
 
-  // richDescription rules:
-  // - area+type → nothing
-  // - area-only → areaData.saleContent (sale-specific) or areaData.description
-  // - type-only → specificContent.content ONLY if admin explicitly set it (no fallback)
   const richDescription = areaData && propertyType
     ? undefined
     : areaData
       ? (areaData.saleContent?.trim() || areaData.description || undefined)
       : (specificContent?.content?.trim() ? specificContent.content : undefined);
 
-  // --- Schema.org ---
   const cityName = cityData ? toTitleCase(cityData.name) : toTitleCase(city);
   const areaName = areaData ? toTitleCase(areaData.name) : null;
-  const typeName = propertyType ? (propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType)) : null;
-  const pageUrl = `${BASE_URL}/properties/sale/${city}/${segments.join('/')}`;
+  const typeName = propertyType
+    ? (propertyType.toLowerCase() === 'house' ? 'Property' : toTitleCase(propertyType))
+    : null;
+  const pageUrl   = `${BASE_URL}/properties/sale/${city}/${segments.join('/')}`;
   const pageTitle = [
     typeName ? (typeName === 'Property' ? 'Property' : `${typeName}s`) : 'Properties',
     'for Sale',
@@ -152,38 +169,33 @@ export default async function SaleCitySegmentsPage(props: PageProps) {
   let schemaProperties: any[] = [];
   try {
     const params: Record<string, string> = { city, limit: '20', page: '1', purpose: 'sale' };
-    if (areaId) params.areaId = areaId;
-    if (listingType !== 'all') params.type = listingType;
-    const qs = new URLSearchParams(params).toString();
+    if (areaId)                  params.areaId   = areaId;
+    if (listingType !== 'all')   params.type     = listingType;
+    if (marla)                 { params.marlaMin = String(marla); params.marlaMax = String(marla); }
+    const qs  = new URLSearchParams(params).toString();
     const res = await serverApi.getProperties(qs);
     const rawProps: any[] = Array.isArray(res) ? res : (res as any).properties || [];
-    schemaProperties = rawProps.map((p: any) => ({
-      id: p._id, slug: p.slug, name: p.title
-    }));
+    schemaProperties = rawProps.map((p: any) => ({ id: p._id, slug: p.slug, name: p.title }));
   } catch { /* non-critical */ }
 
+  const nonMarlaSegs = segments.filter(s => !isMarlaSegment(s));
   const breadcrumbs = [
-    { name: 'Home', url: `${BASE_URL}/` },
+    { name: 'Home',                url: `${BASE_URL}/` },
     { name: 'Properties for Sale', url: `${BASE_URL}/properties/sale` },
-    { name: cityName, url: `${BASE_URL}/properties/sale/${city}` },
+    { name: cityName,              url: `${BASE_URL}/properties/sale/${city}` },
     ...(areaName ? [{ name: areaName, url: `${BASE_URL}/properties/sale/${city}/${areaSlug}` }] : []),
     ...(typeName && areaName
-      ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/sale/${city}/${areaSlug}/${segments[1]}` }]
+      ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/sale/${city}/${areaSlug}/${nonMarlaSegs[1]}` }]
       : typeName
-        ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/sale/${city}/${segments[0]}` }]
+        ? [{ name: typeName === 'Property' ? 'Property' : `${typeName}s`, url: `${BASE_URL}/properties/sale/${city}/${nonMarlaSegs[0]}` }]
         : []),
   ];
 
   const collectionSchema = buildCollectionPageSchema({
-    url: pageUrl,
-    title: pageTitle,
-    cityName,
-    properties: schemaProperties.map(p => ({
-      title: p.name,
-      url: `${BASE_URL}/p/${p.slug || p.id}`
-    })),
+    url: pageUrl, title: pageTitle, cityName,
+    properties: schemaProperties.map(p => ({ title: p.name, url: `${BASE_URL}/p/${p.slug || p.id}` })),
     totalItems: schemaProperties.length,
-    crumbs: breadcrumbs
+    crumbs: breadcrumbs,
   });
 
   return (
@@ -202,6 +214,7 @@ export default async function SaleCitySegmentsPage(props: PageProps) {
           areaSlug={areaSlug || undefined}
           useCleanUrls={true}
           richDescription={richDescription}
+          initialMarla={marla ?? undefined}
         />
       </Suspense>
     </>

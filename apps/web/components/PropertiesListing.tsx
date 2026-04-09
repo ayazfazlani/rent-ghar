@@ -174,9 +174,11 @@ export default function PropertiesListing({
     return `/properties/${pp}/${cs}${areaPath}${tSlug}${marlaSlug}`;
   };
 
+  // ✅ FIX 2: navigateType ab URL bhi update karta hai — mobile pe 404 band hoga
   const navigateType = (t: string) => {
     setIsLocationPanelOpen(false);
     const supportsMarla = t === 'house' || t === 'plot';
+    const newMarla = supportsMarla ? selectedMarla : null;
 
     if (!supportsMarla && selectedMarla !== null) {
       setSelectedMarla(null);
@@ -190,6 +192,16 @@ export default function PropertiesListing({
     }
 
     setType(t);
+
+    // ✅ URL bhi update karo taake mobile pe direct URL open ho
+    if (useCleanUrls) {
+      const url = buildCleanUrl({
+        typeOverride: t,
+        marlaOverride: supportsMarla ? selectedMarla : null,
+        areaSlugOverride: initialAreaSlug || null,
+      });
+      router.push(url);
+    }
   };
 
   const handleMarlaClick = (marla: number) => {
@@ -202,6 +214,15 @@ export default function PropertiesListing({
       marlaMin: newMarla ?? undefined,
       marlaMax: newMarla ?? undefined,
     });
+
+    // ✅ Marla change hone par bhi URL update karo
+    if (useCleanUrls) {
+      const url = buildCleanUrl({
+        marlaOverride: newMarla,
+        areaSlugOverride: initialAreaSlug || null,
+      });
+      router.push(url);
+    }
   };
 
   useEffect(() => {
@@ -638,11 +659,7 @@ export default function PropertiesListing({
                 in {matchedCity || 'Pakistan'}
               </h1>
 
-              {/* ══════════════════════════════════════════════
-                  DESKTOP ONLY — Area chips (zameen.com style)
-                  Sirf tab show hon jab city ya area filter laga ho
-                  Mobile pr: bilkul koi change nahi
-              ══════════════════════════════════════════════ */}
+              {/* Desktop Only — Area chips */}
               {locationPanelAreas.length > 0 && (matchedCity || currentAreaId) && (
                 <div className="hidden lg:block">
                   <div className="border border-border rounded-xl p-4 bg-card">
