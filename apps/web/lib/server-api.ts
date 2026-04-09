@@ -100,4 +100,13 @@ export const serverApi = {
   async getPageBySlug(slug: string): Promise<any> {
     return this.get(`/page/slug/${slug}`, { next: { revalidate: 1800 } });
   },
+
+  // Cement Rate API
+  async getCementRates(): Promise<any[]> {
+    try {
+      return this.get('/cement-rate', { next: { revalidate: 60, tags: ['cement-rates'] } });
+    } catch {
+      return [];
+    }
+  },
 };

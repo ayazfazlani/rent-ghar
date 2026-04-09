@@ -34,7 +34,7 @@ const BAG_COLORS = [
 ];
 
 function CementBagSVG({ brand, weightKg, colorIdx }: { brand: string; weightKg: number; colorIdx: number }) {
-  const c = BAG_COLORS[colorIdx % BAG_COLORS.length];
+  const c = BAG_COLORS[colorIdx % BAG_COLORS.length] ?? BAG_COLORS[0]!;
   const shortName = brand.replace(" Cement", "").toUpperCase();
   const fontSize = shortName.length > 8 ? 10 : shortName.length > 5 ? 12 : 15;
 

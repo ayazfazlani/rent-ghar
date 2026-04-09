@@ -16,6 +16,7 @@ import { UserModule } from './user/user.module';
 import { StorageModule } from '../../../packages/storage/storage.module';
 import { ImportModule } from './import/import.module';
 import { IndexNowModule } from './indexnow/indexnow.module';
+import { CementRateModule } from './cement-rate/cement-rate.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { IndexNowModule } from './indexnow/indexnow.module';
     UserModule,
     ImportModule,
     IndexNowModule,
+    CementRateModule,
   ],
   controllers: [AppController],
   providers: [AppService],
