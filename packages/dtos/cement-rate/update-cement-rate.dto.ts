@@ -30,6 +30,14 @@ export class UpdateCementRateDto {
   @IsOptional()
   title?: string;
 
+  @IsString()
+  @IsOptional()
+  image?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;

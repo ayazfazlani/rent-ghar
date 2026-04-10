@@ -2,8 +2,6 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
 import { CementRate, CementRateDocument } from '@rent-ghar/db/schemas/cement-rate.schema';
-import { CreateCementRateDto } from '@rent-ghar/dtos/cement-rate/create-cement-rate.dto';
-import { UpdateCementRateDto } from '@rent-ghar/dtos/cement-rate/update-cement-rate.dto';
 
 @Injectable()
 export class CementRateService {
@@ -30,12 +28,18 @@ export class CementRateService {
     return rate;
   }
 
-  async create(dto: CreateCementRateDto): Promise<CementRateDocument> {
+  async findBySlug(slug: string): Promise<CementRateDocument> {
+    const rate = await this.cementRateModel.findOne({ slug }).exec();
+    if (!rate) throw new NotFoundException(`Cement rate not found: ${slug}`);
+    return rate;
+  }
+
+  async create(dto: any): Promise<CementRateDocument> {
     const rate = new this.cementRateModel(dto);
     return rate.save();
   }
 
-  async update(id: string, dto: UpdateCementRateDto): Promise<CementRateDocument> {
+  async update(id: string, dto: any): Promise<CementRateDocument> {
     if (!isValidObjectId(id)) throw new BadRequestException('Invalid ID');
     const rate = await this.cementRateModel
       .findByIdAndUpdate(id, dto, { new: true, runValidators: true })

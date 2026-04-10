@@ -48,7 +48,7 @@ export default function TodayCementRatePage() {
         if (sortBy === "price-asc")  return a.price - b.price;
         if (sortBy === "price-desc") return b.price - a.price;
         if (sortBy === "name")       return a.brand.localeCompare(b.brand);
-        return a.id - b.id;
+        return String(a.id).localeCompare(String(b.id));
       })
       .slice(0, perPage);
   }, [priceRange, selectedCity, selectedBrand, selectedCat, sortBy, perPage]);

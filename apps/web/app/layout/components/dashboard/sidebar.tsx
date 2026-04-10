@@ -91,6 +91,7 @@ export default function DashboardSidebar() {
     items: [
       { title: "All Cement Rates", href: "/dashboard/cement-rate" },
       { title: "Add Cement Rate", href: "/dashboard/cement-rate/add" },
+      { title: "Cement Orders", href: "/dashboard/cement-order" },
     ],
   };
 

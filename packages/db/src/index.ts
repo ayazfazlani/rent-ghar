@@ -8,3 +8,4 @@ export * from './schemas/page.schema';
 export * from './schemas/package.schema';
 export * from './schemas/subscription.schema';
 export * from './schemas/cement-rate.schema';
+export * from './schemas/cement-order.schema';

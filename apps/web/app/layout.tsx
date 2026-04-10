@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Providers } from "./providers";
 import { AuthProvider } from "@/context/auth-context";
 import StructuredData from "@/components/StructuredData";
+import { CartProvider } from "@/contexts/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,11 +72,13 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
           <AuthProvider>
-            <TooltipProvider>
-              <StructuredData />
-              {children}
-              <Sonner />
-            </TooltipProvider>
+            <CartProvider>
+              <TooltipProvider>
+                <StructuredData />
+                {children}
+                <Sonner />
+              </TooltipProvider>
+            </CartProvider>
           </AuthProvider>
         </Providers>
       </body>

@@ -32,6 +32,12 @@ export class CementRate {
   @Prop({ enum: ['OPC Cement', 'SRC Cement', 'White Cement', 'Sulphate Resistant'], default: 'OPC Cement' })
   category: string;
 
+  @Prop({ trim: true })
+  image?: string;        // main product image URL
+
+  @Prop({ type: String })
+  description?: string;  // rich HTML content
+
   @Prop({ default: true })
   isActive: boolean;
 }
@@ -46,7 +52,6 @@ CementRateSchema.pre('save', function () {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
-  // Auto-generate title if not provided
   if (!this.title) {
     this.title = `${this.brand} — ${this.weightKg} Kg Bag`;
   }

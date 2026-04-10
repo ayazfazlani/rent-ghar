@@ -109,4 +109,8 @@ export const serverApi = {
       return [];
     }
   },
+
+  async getCementRateBySlug(slug: string): Promise<any> {
+    return this.get(`/cement-rate/slug/${slug}`, { next: { revalidate: 60 } });
+  },
 };

@@ -2,6 +2,9 @@
 
 import { useState, useMemo } from "react";
 import CementCard, { CementBrand } from "@/components/Cementcard";
+import dynamic from "next/dynamic";
+
+const CartDrawer = dynamic(() => import("@/components/CartDrawer"), { ssr: false });
 
 // ── Fallback static data (used when DB is empty) ──────────────────────────────
 const STATIC_BRANDS: CementBrand[] = [
@@ -29,6 +32,7 @@ function normaliseBrands(raw: any[]): CementBrand[] {
     city:     r.city,
     weightKg: r.weightKg ?? 50,
     category: r.category ?? "OPC Cement",
+    image:    r.image,
   }));
 }
 
@@ -90,6 +94,7 @@ export default function CementPageClient({
 
   return (
     <div className="pt-[72px] bg-gray-50 min-h-screen">
+      <CartDrawer />
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (

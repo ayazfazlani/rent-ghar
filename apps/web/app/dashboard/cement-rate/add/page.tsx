@@ -1,8 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Image as ImageIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,12 +10,19 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import cementRateApi from '@/lib/api/cement-rate/cement-rate.api';
+import dynamic from 'next/dynamic';
+
+const RichEditor = dynamic(() => import('@/components/RichEditor'), {
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-lg flex items-center justify-center text-gray-400">Loading Editor...</div>,
+});
 
 const CITIES = ['Lahore', 'Karachi', 'Islamabad', 'Rawalpindi', 'Peshawar', 'Multan', 'Quetta', 'Faisalabad'];
 const CATEGORIES = ['OPC Cement', 'SRC Cement', 'White Cement', 'Sulphate Resistant'];
 
 export default function AddCementRatePage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     brand: '',
@@ -24,9 +31,27 @@ export default function AddCementRatePage() {
     city: '',
     weightKg: '50',
     category: 'OPC Cement',
+    description: '',
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const set = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,14 +61,17 @@ export default function AddCementRatePage() {
 
     try {
       setSubmitting(true);
-      await cementRateApi.createRate({
-        brand: form.brand.trim(),
-        price: Number(form.price),
-        change: Number(form.change),
-        city: form.city,
-        weightKg: Number(form.weightKg),
-        category: form.category,
-      });
+      const fd = new FormData();
+      fd.append('brand', form.brand.trim());
+      fd.append('price', form.price);
+      fd.append('change', form.change);
+      fd.append('city', form.city);
+      fd.append('weightKg', form.weightKg);
+      fd.append('category', form.category);
+      fd.append('description', form.description);
+      if (imageFile) fd.append('image', imageFile);
+
+      await cementRateApi.createRate(fd);
       toast.success('Cement rate added successfully!');
       router.push('/dashboard/cement-rate');
     } catch (err: any) {
@@ -54,7 +82,7 @@ export default function AddCementRatePage() {
   };
 
   return (
-    <div className="w-full max-w-2xl space-y-6">
+    <div className="w-full max-w-3xl space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={() => router.back()} className="flex items-center gap-1">
@@ -66,7 +94,56 @@ export default function AddCementRatePage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Add Cement Rate</h1>
         <p className="text-gray-500 text-sm mb-8">This will appear as a card on the public Cement Rate page.</p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* Main Image Upload */}
+          <div className="space-y-2">
+            <Label>Product Image</Label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelect}
+              className="hidden"
+              ref={fileInputRef}
+              id="cement-image"
+            />
+            <div
+              onClick={() => !imagePreview && fileInputRef.current?.click()}
+              className={`relative border-2 border-dashed rounded-xl transition-colors ${
+                imagePreview ? 'border-gray-300' : 'border-gray-300 hover:border-gray-500 cursor-pointer'
+              } overflow-hidden`}
+              style={{ aspectRatio: '1/1', maxWidth: 220 }}
+            >
+              {imagePreview ? (
+                <>
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); removeImage(); }}
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-4 text-center">
+                  <ImageIcon className="w-10 h-10 text-gray-300" />
+                  <span className="text-sm font-medium text-gray-500">Upload</span>
+                  <span className="text-xs text-gray-400">Click to select image</span>
+                </div>
+              )}
+            </div>
+            {imagePreview && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-xs text-blue-600 hover:underline"
+              >
+                Change image
+              </button>
+            )}
+          </div>
+
           {/* Brand */}
           <div className="space-y-1.5">
             <Label htmlFor="brand">Brand Name *</Label>
@@ -79,7 +156,7 @@ export default function AddCementRatePage() {
             />
           </div>
 
-          {/* Price + Change in a row */}
+          {/* Price + Change */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="price">Price (Rs per bag) *</Label>
@@ -102,8 +179,20 @@ export default function AddCementRatePage() {
                 value={form.change}
                 onChange={e => set('change', e.target.value)}
               />
-              <p className="text-xs text-gray-400">Positive = price went up, Negative = price went down</p>
+              <p className="text-xs text-gray-400">Positive = up, Negative = down</p>
             </div>
+          </div>
+
+          {/* Weight */}
+          <div className="space-y-1.5">
+            <Label htmlFor="weight">Bag Weight (Kg)</Label>
+            <Input
+              id="weight"
+              type="number"
+              min={1}
+              value={form.weightKg}
+              onChange={e => set('weightKg', e.target.value)}
+            />
           </div>
 
           {/* City */}
@@ -119,29 +208,23 @@ export default function AddCementRatePage() {
             </Select>
           </div>
 
-          {/* Category + Weight */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Cement Type</Label>
-              <Select value={form.category} onValueChange={v => set('category', v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="weight">Bag Weight (Kg)</Label>
-              <Input
-                id="weight"
-                type="number"
-                min={1}
-                value={form.weightKg}
-                onChange={e => set('weightKg', e.target.value)}
-              />
-            </div>
+          {/* Category */}
+          <div className="space-y-1.5">
+            <Label>Cement Type</Label>
+            <Select value={form.category} onValueChange={v => set('category', v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Description — Rich Editor */}
+          <div className="space-y-1.5">
+            <Label>Description</Label>
+            <RichEditor value={form.description} onChange={v => set('description', v)} />
           </div>
 
           {/* Submit */}
