@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 export type CementRateDocument = CementRate & Document;
@@ -33,10 +33,13 @@ export class CementRate {
   category: string;
 
   @Prop({ trim: true })
-  image?: string;        // main product image URL
+  image?: string;         // main/first image
+
+  @Prop({ type: [String], default: [] })
+  images: string[];       // ✅ additional images array
 
   @Prop({ type: String })
-  description?: string;  // rich HTML content
+  description?: string;
 
   @Prop({ default: true })
   isActive: boolean;
@@ -44,7 +47,6 @@ export class CementRate {
 
 export const CementRateSchema = SchemaFactory.createForClass(CementRate);
 
-// Auto-generate slug from brand name
 CementRateSchema.pre('save', function () {
   if (this.isModified('brand') || !this.slug) {
     this.slug = this.brand

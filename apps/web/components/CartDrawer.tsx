@@ -20,7 +20,7 @@ export default function CartDrawer() {
 
   const handleCheckout = () => {
     setOpen(false);
-    router.push('/checkout');
+    router.push('/today-cement-rate-in-pakistan/checkout');
   };
 
   return (
