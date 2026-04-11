@@ -1,4 +1,4 @@
-'use client';
+ 'use client';
 
 import React, { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
@@ -31,6 +31,7 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!customerName || !customerPhone || !address) {
       toast.error('Please fill in all required customer details.');
       return;
@@ -41,8 +42,8 @@ export default function CheckoutPage() {
       
       const payload = {
         customerName: customerName.trim(),
-        customerEmail: user?.email,
-        userId: user?._id,
+        customerEmail: user?.email ?? '',
+        userId: (user as any)?.userId,  // ✅ Fix: user object mein "userId" field hai
         customerPhone,
         address,
         deliveryInstruction,
