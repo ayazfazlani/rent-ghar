@@ -1,8 +1,8 @@
-'use client';
+ 'use client';
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Image as ImageIcon, X } from 'lucide-react';
+import { Loader2, ArrowLeft, Image as ImageIcon, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,25 +20,33 @@ const RichEditor = dynamic(() => import('@/components/RichEditor'), {
 const CITIES = ['Lahore', 'Karachi', 'Islamabad', 'Rawalpindi', 'Peshawar', 'Multan', 'Quetta', 'Faisalabad'];
 const CATEGORIES = ['OPC Cement', 'SRC Cement', 'White Cement', 'Sulphate Resistant'];
 
+interface ExtraImage {
+  file: File;
+  preview: string;
+}
+
 export default function AddCementRatePage() {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mainFileRef  = useRef<HTMLInputElement>(null);
+  const extraFileRef = useRef<HTMLInputElement>(null);
+
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    brand: '',
-    price: '',
-    change: '0',
-    city: '',
-    weightKg: '50',
-    category: 'OPC Cement',
-    description: '',
+    brand: '', price: '', change: '0', city: '',
+    weightKg: '50', category: 'OPC Cement', description: '',
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // Main image
+  const [imageFile, setImageFile]       = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Extra images
+  const [extraImages, setExtraImages] = useState<ExtraImage[]>([]);
 
   const set = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ── Main image handlers ──────────────────────────────────────────────────
+  const handleMainSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setImageFile(file);
@@ -47,12 +55,33 @@ export default function AddCementRatePage() {
     reader.readAsDataURL(file);
   };
 
-  const removeImage = () => {
+  const removeMain = () => {
     setImageFile(null);
     setImagePreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (mainFileRef.current) mainFileRef.current.value = '';
   };
 
+  // ── Extra images handlers ────────────────────────────────────────────────
+  const handleExtraSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setExtraImages(prev => [...prev, { file, preview: reader.result as string }]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    if (extraFileRef.current) extraFileRef.current.value = '';
+  };
+
+  const removeExtra = (index: number) => {
+    setExtraImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // ── Submit ───────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.brand.trim()) return toast.error('Brand name is required');
@@ -62,14 +91,18 @@ export default function AddCementRatePage() {
     try {
       setSubmitting(true);
       const fd = new FormData();
-      fd.append('brand', form.brand.trim());
-      fd.append('price', form.price);
-      fd.append('change', form.change);
-      fd.append('city', form.city);
-      fd.append('weightKg', form.weightKg);
-      fd.append('category', form.category);
+      fd.append('brand',       form.brand.trim());
+      fd.append('price',       form.price);
+      fd.append('change',      form.change);
+      fd.append('city',        form.city);
+      fd.append('weightKg',    form.weightKg);
+      fd.append('category',    form.category);
       fd.append('description', form.description);
+
       if (imageFile) fd.append('image', imageFile);
+
+      // Append all extra images
+      extraImages.forEach(({ file }) => fd.append('images', file));
 
       await cementRateApi.createRate(fd);
       toast.success('Cement rate added successfully!');
@@ -83,7 +116,6 @@ export default function AddCementRatePage() {
 
   return (
     <div className="w-full max-w-3xl space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={() => router.back()} className="flex items-center gap-1">
           <ArrowLeft className="w-4 h-4" /> Back
@@ -96,19 +128,13 @@ export default function AddCementRatePage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* Main Image Upload */}
+          {/* ── Main Image ─────────────────────────────────────────────── */}
           <div className="space-y-2">
-            <Label>Product Image</Label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageSelect}
-              className="hidden"
-              ref={fileInputRef}
-              id="cement-image"
-            />
+            <Label>Main Product Image</Label>
+            <input type="file" accept="image/*" onChange={handleMainSelect}
+              className="hidden" ref={mainFileRef} />
             <div
-              onClick={() => !imagePreview && fileInputRef.current?.click()}
+              onClick={() => !imagePreview && mainFileRef.current?.click()}
               className={`relative border-2 border-dashed rounded-xl transition-colors ${
                 imagePreview ? 'border-gray-300' : 'border-gray-300 hover:border-gray-500 cursor-pointer'
               } overflow-hidden`}
@@ -117,68 +143,70 @@ export default function AddCementRatePage() {
               {imagePreview ? (
                 <>
                   <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); removeImage(); }}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                  >
+                  <button type="button" onClick={(e) => { e.stopPropagation(); removeMain(); }}
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
                     <X className="w-4 h-4" />
                   </button>
                 </>
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-4 text-center">
                   <ImageIcon className="w-10 h-10 text-gray-300" />
-                  <span className="text-sm font-medium text-gray-500">Upload</span>
-                  <span className="text-xs text-gray-400">Click to select image</span>
+                  <span className="text-sm font-medium text-gray-500">Upload Main Image</span>
+                  <span className="text-xs text-gray-400">Click to select</span>
                 </div>
               )}
             </div>
             {imagePreview && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="text-xs text-blue-600 hover:underline"
-              >
-                Change image
-              </button>
+              <button type="button" onClick={() => mainFileRef.current?.click()}
+                className="text-xs text-blue-600 hover:underline">Change image</button>
             )}
+          </div>
+
+          {/* ── Extra Images (carousel) ─────────────────────────────────── */}
+          <div className="space-y-2">
+            <Label>Additional Images <span className="text-gray-400 font-normal">(optional — shown in carousel)</span></Label>
+            <input type="file" accept="image/*" multiple onChange={handleExtraSelect}
+              className="hidden" ref={extraFileRef} />
+
+            <div className="flex flex-wrap gap-3">
+              {extraImages.map((img, i) => (
+                <div key={i} className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
+                  <img src={img.preview} alt="" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => removeExtra(i)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+
+              {/* Add more button */}
+              <button type="button" onClick={() => extraFileRef.current?.click()}
+                className="w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-500 flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-gray-600 transition-colors">
+                <Plus className="w-5 h-5" />
+                <span className="text-xs">Add</span>
+              </button>
+            </div>
+            <p className="text-xs text-gray-400">You can select multiple images at once</p>
           </div>
 
           {/* Brand */}
           <div className="space-y-1.5">
             <Label htmlFor="brand">Brand Name *</Label>
-            <Input
-              id="brand"
-              placeholder="e.g. Lucky Cement"
-              value={form.brand}
-              onChange={e => set('brand', e.target.value)}
-              required
-            />
+            <Input id="brand" placeholder="e.g. Lucky Cement"
+              value={form.brand} onChange={e => set('brand', e.target.value)} required />
           </div>
 
           {/* Price + Change */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="price">Price (Rs per bag) *</Label>
-              <Input
-                id="price"
-                type="number"
-                min={0}
-                placeholder="e.g. 1300"
-                value={form.price}
-                onChange={e => set('price', e.target.value)}
-                required
-              />
+              <Input id="price" type="number" min={0} placeholder="e.g. 1300"
+                value={form.price} onChange={e => set('price', e.target.value)} required />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="change">Price Change Today</Label>
-              <Input
-                id="change"
-                type="number"
-                placeholder="e.g. +20 or -10"
-                value={form.change}
-                onChange={e => set('change', e.target.value)}
-              />
+              <Input id="change" type="number" placeholder="e.g. +20 or -10"
+                value={form.change} onChange={e => set('change', e.target.value)} />
               <p className="text-xs text-gray-400">Positive = up, Negative = down</p>
             </div>
           </div>
@@ -186,22 +214,15 @@ export default function AddCementRatePage() {
           {/* Weight */}
           <div className="space-y-1.5">
             <Label htmlFor="weight">Bag Weight (Kg)</Label>
-            <Input
-              id="weight"
-              type="number"
-              min={1}
-              value={form.weightKg}
-              onChange={e => set('weightKg', e.target.value)}
-            />
+            <Input id="weight" type="number" min={1}
+              value={form.weightKg} onChange={e => set('weightKg', e.target.value)} />
           </div>
 
           {/* City */}
           <div className="space-y-1.5">
             <Label>City *</Label>
             <Select value={form.city} onValueChange={v => set('city', v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select city" />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Select city" /></SelectTrigger>
               <SelectContent>
                 {CITIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
@@ -212,16 +233,14 @@ export default function AddCementRatePage() {
           <div className="space-y-1.5">
             <Label>Cement Type</Label>
             <Select value={form.category} onValueChange={v => set('category', v)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Description — Rich Editor */}
+          {/* Description */}
           <div className="space-y-1.5">
             <Label>Description</Label>
             <RichEditor value={form.description} onChange={v => set('description', v)} />
